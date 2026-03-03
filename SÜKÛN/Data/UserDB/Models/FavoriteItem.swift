@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class FavoriteItem {
-    var type: FavoriteType = .verse
+    var type: FavoriteType = FavoriteType.verse
     var refId: String = ""
     var createdAt: Date = Date()
 

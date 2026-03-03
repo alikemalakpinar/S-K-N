@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A99837452F572E0000C9933B /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B9A0B1C22F570D0100C9933B /* GRDB */; };
+		A99837462F572E0000C9933B /* Adhan in Frameworks */ = {isa = PBXBuildFile; productRef = B3D4E5F62F570D0100C9933B /* Adhan */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		A99834F22F570D0100C9933B /* SÜKÛN.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SÜKÛN.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A99837462F572E0000C9933B /* Adhan in Frameworks */,
+				A99837452F572E0000C9933B /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,16 +103,16 @@
 			);
 			mainGroup = A99834E92F570D0100C9933B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				B5D6E7F82F570D0100C9933B /* XCRemoteSwiftPackageReference "adhan-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A99834F32F570D0100C9933B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				A99834F12F570D0100C9933B /* SÜKÛN */,
-			);
-			packageReferences = (
-				B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */,
-				B5D6E7F82F570D0100C9933B /* XCRemoteSwiftPackageReference "adhan-swift" */,
 			);
 		};
 /* End PBXProject section */
@@ -378,15 +385,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B9A0B1C22F570D0100C9933B /* GRDB */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */;
-			productName = GRDB;
-		};
 		B3D4E5F62F570D0100C9933B /* Adhan */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B5D6E7F82F570D0100C9933B /* XCRemoteSwiftPackageReference "adhan-swift" */;
 			productName = Adhan;
+		};
+		B9A0B1C22F570D0100C9933B /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

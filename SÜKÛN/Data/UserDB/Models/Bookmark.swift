@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class Bookmark {
-    var type: BookmarkType = .verse
+    var type: BookmarkType = BookmarkType.verse
     var refId: String = ""
     var note: String = ""
     var createdAt: Date = Date()

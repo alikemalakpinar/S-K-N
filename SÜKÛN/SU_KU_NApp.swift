@@ -8,6 +8,8 @@ struct SU_KU_NApp: App {
     var body: some Scene {
         WindowGroup {
             RootView(container: container)
+                .background(DS.Color.backgroundPrimary)
+                .preferredColorScheme(.dark)
         }
         .modelContainer(container.modelContainer)
     }
