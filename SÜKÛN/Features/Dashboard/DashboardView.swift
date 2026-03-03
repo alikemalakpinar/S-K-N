@@ -41,20 +41,31 @@ struct DashboardView: View {
             .task {
                 await viewModel.loadTodayData(context: modelContext)
 
-                // Load next prayer countdown from location
-                await container.locationService.requestPermission()
+                let descriptor = FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" })
+                let settings = (try? modelContext.fetch(descriptor))?.first
+                let method = settings?.calculationMethod ?? "Turkey"
+                let asr = settings?.asrMethod ?? "hanafi"
+
+                // Try cached prayer times first (no location needed)
+                if let cached = await container.prayerTimeService.loadCached(),
+                   let today = cached.first {
+                    if let next = container.prayerTimeService.nextPrayer(from: today, after: Date()) {
+                        viewModel.nextPrayerName = next.name
+                        viewModel.nextPrayerTime = next.time
+                    }
+                }
+
+                // Then try fresh location in background (non-blocking)
                 do {
                     let coords = try await container.locationService.currentCoordinates()
-                    let descriptor = FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" })
-                    let settings = (try? modelContext.fetch(descriptor))?.first
                     await viewModel.loadNextPrayer(
                         latitude: coords.latitude,
                         longitude: coords.longitude,
-                        method: settings?.calculationMethod ?? "Turkey",
-                        asrMethod: settings?.asrMethod ?? "hanafi"
+                        method: method,
+                        asrMethod: asr
                     )
                 } catch {
-                    // Location unavailable — countdown stays in placeholder state
+                    // Location unavailable — keep cached data or placeholder
                 }
             }
         }

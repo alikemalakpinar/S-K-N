@@ -3,9 +3,9 @@ import SwiftUI
 struct MushafReaderView: View {
     @Bindable var viewModel: QuranViewModel
     let container: DependencyContainer
+    @Binding var isImmersive: Bool
 
     @State private var showPagePicker = false
-    @State private var showControls = true
 
     var body: some View {
         ZStack {
@@ -17,14 +17,22 @@ struct MushafReaderView: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            .onTapGesture {
+                withAnimation(DS.Motion.standard) {
+                    isImmersive.toggle()
+                }
+            }
 
-            // Floating bottom bar
-            VStack {
-                Spacer()
-                bottomBar
+            // Floating bottom bar — hides in immersive mode
+            if !isImmersive {
+                VStack {
+                    Spacer()
+                    bottomBar
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
-        .background(DS.Color.backgroundPrimary)
+        .background(DS.Color.quranCard)
         .sheet(isPresented: $showPagePicker) {
             PagePickerSheet(
                 viewModel: viewModel,
@@ -102,14 +110,12 @@ private struct PagePickerSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Page slider section
                 pageSliderSection
                     .padding(.top, DS.Space.lg)
 
                 Hairline()
                     .padding(.vertical, DS.Space.sm)
 
-                // Surah list
                 surahListSection
             }
             .background(DS.Color.backgroundPrimary)
@@ -131,7 +137,6 @@ private struct PagePickerSheet: View {
 
     private var pageSliderSection: some View {
         VStack(spacing: DS.Space.md) {
-            // Large page number
             HStack(alignment: .firstTextBaseline, spacing: DS.Space.xs) {
                 Text("\(viewModel.currentPage)")
                     .font(.system(size: 36, weight: .medium, design: .rounded))
@@ -141,12 +146,10 @@ private struct PagePickerSheet: View {
                     .foregroundStyle(DS.Color.textSecondary)
             }
 
-            // Juz info
             Text("Cüz \(viewModel.currentJuzNumber)")
                 .font(DS.Typography.caption)
                 .foregroundStyle(DS.Color.textSecondary)
 
-            // Slider
             Slider(
                 value: Binding(
                     get: { Double(viewModel.currentPage) },
@@ -172,7 +175,6 @@ private struct PagePickerSheet: View {
                 }
             } label: {
                 HStack(spacing: DS.Space.md) {
-                    // Surah number in ornament
                     ZStack {
                         RotatedStarSmall()
                             .fill(DS.Color.accentSoft)
@@ -185,7 +187,6 @@ private struct PagePickerSheet: View {
                             .foregroundStyle(DS.Color.accent)
                     }
 
-                    // Turkish name + info
                     VStack(alignment: .leading, spacing: 2) {
                         Text(surah.nameTurkish)
                             .font(.system(size: 16, weight: .medium))
@@ -197,7 +198,6 @@ private struct PagePickerSheet: View {
 
                     Spacer()
 
-                    // Arabic name
                     Text(surah.nameArabic)
                         .font(.system(size: 20, weight: .regular))
                         .foregroundStyle(DS.Color.textPrimary)

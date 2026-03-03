@@ -23,7 +23,7 @@ final class DashboardViewModel {
         do {
             todayLog = try container.userActivityRepository.getOrCreatePrayerLog(for: Date(), context: context)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = UserFriendlyError.message(from: error)
         }
     }
 
@@ -46,7 +46,7 @@ final class DashboardViewModel {
                 nextPrayerTime = today.isha
             }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = UserFriendlyError.message(from: error)
         }
     }
 }

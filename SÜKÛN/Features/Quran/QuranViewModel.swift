@@ -53,7 +53,7 @@ final class QuranViewModel {
             surahs = try await container.quranRepository.allSurahs()
             totalPages = try await container.quranRepository.pageCount()
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = UserFriendlyError.message(from: error)
         }
     }
 
@@ -63,7 +63,7 @@ final class QuranViewModel {
             let verses = try await container.quranRepository.versesForPage(page: page)
             pageVerses = verses
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = UserFriendlyError.message(from: error)
         }
     }
 
@@ -74,7 +74,7 @@ final class QuranViewModel {
             currentPage = page
             return page
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = UserFriendlyError.message(from: error)
             return 1
         }
     }
@@ -99,7 +99,7 @@ final class QuranViewModel {
                 searchResults = try await container.quranRepository.searchVerses(query: query, limit: 30)
             } catch {
                 if !Task.isCancelled {
-                    errorMessage = error.localizedDescription
+                    errorMessage = UserFriendlyError.message(from: error)
                 }
             }
         }

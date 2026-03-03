@@ -12,31 +12,37 @@ struct MushafPageView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
-                Spacer(minLength: DS.Space.md)
+                Spacer(minLength: DS.Space.lg)
 
                 // Build page content with interleaved surah headers
                 ForEach(pageContent, id: \.id) { item in
                     switch item {
                     case .surahHeader(let surah):
                         SurahOrnamentHeader(surah: surah)
-                            .padding(.horizontal, DS.Space.lg)
-                            .padding(.bottom, DS.Space.md)
+                            .padding(.horizontal, DS.Space.md)
+                            .padding(.bottom, DS.Space.lg)
                             .padding(.top, DS.Space.sm)
 
                     case .bismillah:
                         bismillahView
-                            .padding(.bottom, DS.Space.md)
+                            .padding(.bottom, DS.Space.lg)
 
                     case .verse(let verse):
                         verseRow(verse)
                     }
                 }
 
-                Spacer(minLength: DS.Space.x3)
+                // Page number at bottom
+                Text(pageNumber.arabicNumeral)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(DS.Color.textSecondary.opacity(0.5))
+                    .padding(.top, DS.Space.xl)
+
+                Spacer(minLength: DS.Space.x4)
             }
-            .padding(.horizontal, DS.Space.sm)
+            .padding(.horizontal, DS.Space.lg)
         }
-        .background(DS.Color.backgroundPrimary)
+        .background(DS.Color.quranCard)
         .opacity(isLoaded ? 1 : 0)
         .animation(.easeIn(duration: 0.2), value: isLoaded)
         .task {
@@ -71,11 +77,9 @@ struct MushafPageView: View {
         var lastSurahId: Int?
 
         for verse in verses {
-            // If this is verse 1, insert surah header
             if verse.verseNumber == 1 && verse.surahId != lastSurahId {
                 if let surah = surahs[verse.surahId] {
                     items.append(.surahHeader(surah))
-                    // Bismillah for all surahs except Al-Fatiha (1) and At-Tawbah (9)
                     if surah.id != 1 && surah.id != 9 {
                         items.append(.bismillah)
                     }
@@ -91,11 +95,15 @@ struct MushafPageView: View {
     // MARK: - Bismillah
 
     private var bismillahView: some View {
-        Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
-            .font(DS.Typography.arabicBismillah)
-            .foregroundStyle(DS.Color.textPrimary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, DS.Space.sm)
+        VStack(spacing: DS.Space.sm) {
+            OrnamentalDivider()
+            Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
+                .font(DS.Typography.arabicLarge)
+                .foregroundStyle(DS.Color.textPrimary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, DS.Space.xs)
+            OrnamentalDivider()
+        }
     }
 
     // MARK: - Verse Row
@@ -104,22 +112,21 @@ struct MushafPageView: View {
         Button {
             selectedVerse = verse
         } label: {
-            HStack(alignment: .firstTextBaseline, spacing: DS.Space.xs) {
+            HStack(alignment: .firstTextBaseline, spacing: DS.Space.sm) {
                 Spacer(minLength: 0)
 
-                // Arabic text
+                // Arabic text — large, readable
                 Text(verse.textArabic)
-                    .font(DS.Typography.arabicVerse)
+                    .font(DS.Typography.arabicHero)
                     .foregroundStyle(DS.Color.textPrimary)
                     .multilineTextAlignment(.trailing)
-                    .lineSpacing(14)
+                    .lineSpacing(20)
                     .fixedSize(horizontal: false, vertical: true)
 
                 // Verse number ornament
                 VerseNumberOrnament(number: verse.verseNumber)
             }
-            .padding(.horizontal, DS.Space.md)
-            .padding(.vertical, DS.Space.xs)
+            .padding(.vertical, DS.Space.sm)
         }
         .buttonStyle(VerseButtonStyle())
     }
@@ -150,7 +157,7 @@ private struct VerseButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .background(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 10)
                     .fill(configuration.isPressed ? DS.Color.accentSoft : .clear)
             )
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
@@ -167,18 +174,18 @@ private struct VerseNumberOrnament: View {
         ZStack {
             // Octagonal star ornament
             Image(systemName: "seal.fill")
-                .font(.system(size: 28))
-                .foregroundStyle(DS.Color.accent.opacity(0.15))
+                .font(.system(size: 30))
+                .foregroundStyle(DS.Color.accent.opacity(0.12))
 
             Image(systemName: "seal")
-                .font(.system(size: 28))
-                .foregroundStyle(DS.Color.accent.opacity(0.5))
+                .font(.system(size: 30))
+                .foregroundStyle(DS.Color.accent.opacity(0.45))
 
             Text(number.arabicNumeral)
-                .font(DS.Typography.verseNumber)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundStyle(DS.Color.accent)
         }
-        .frame(width: 32, height: 32)
+        .frame(width: 34, height: 34)
     }
 }
 
@@ -194,45 +201,48 @@ private struct SurahOrnamentHeader: View {
                 .padding(.bottom, DS.Space.sm)
 
             // Header card
-            HStack(spacing: DS.Space.md) {
-                // Left: Turkish name + info
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(surah.nameTurkish)
-                        .font(DS.Typography.surahTitle)
-                        .foregroundStyle(DS.Color.textPrimary)
-                    Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
+            VStack(spacing: DS.Space.sm) {
+                // Arabic name prominent
+                Text(surah.nameArabic)
+                    .font(.system(size: 28, weight: .regular))
+                    .foregroundStyle(DS.Color.textPrimary)
+
+                // Turkish name + info
+                Text(surah.nameTurkish)
+                    .font(DS.Typography.surahTitle)
+                    .foregroundStyle(DS.Color.textPrimary)
+
+                HStack(spacing: DS.Space.sm) {
+                    Text("\(surah.verseCount) ayet")
+                        .font(DS.Typography.captionSm)
+                        .foregroundStyle(DS.Color.textSecondary)
+
+                    Circle()
+                        .fill(DS.Color.textSecondary.opacity(0.4))
+                        .frame(width: 3, height: 3)
+
+                    Text(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")
+                        .font(DS.Typography.captionSm)
+                        .foregroundStyle(DS.Color.textSecondary)
+
+                    Circle()
+                        .fill(DS.Color.textSecondary.opacity(0.4))
+                        .frame(width: 3, height: 3)
+
+                    Text("Sıra: \(surah.id)")
                         .font(DS.Typography.captionSm)
                         .foregroundStyle(DS.Color.textSecondary)
                 }
-
-                Spacer()
-
-                // Surah number badge
-                ZStack {
-                    RotatedStar()
-                        .fill(DS.Color.accent.opacity(0.12))
-                        .frame(width: 36, height: 36)
-                    RotatedStar()
-                        .stroke(DS.Color.accent.opacity(0.4), lineWidth: 0.8)
-                        .frame(width: 36, height: 36)
-                    Text("\(surah.id)")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(DS.Color.accent)
-                }
-
-                // Right: Arabic name
-                Text(surah.nameArabic)
-                    .font(.system(size: 24, weight: .regular))
-                    .foregroundStyle(DS.Color.textPrimary)
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, DS.Space.lg)
-            .padding(.vertical, DS.Space.md)
+            .padding(.vertical, DS.Space.lg)
             .background(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 14)
                     .fill(DS.Color.surahHeader)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 14)
                     .stroke(DS.Color.ornamentLine, lineWidth: 0.5)
             )
 
