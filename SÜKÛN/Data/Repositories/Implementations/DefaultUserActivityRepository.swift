@@ -14,6 +14,17 @@ final class DefaultUserActivityRepository: UserActivityRepository {
         return try context.fetch(descriptor).first
     }
 
+    func getOrCreatePrayerLog(for date: Date, context: ModelContext) throws -> PrayerLog {
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        if let existing = try prayerLog(for: startOfDay, context: context) {
+            return existing
+        }
+        let newLog = PrayerLog(date: startOfDay)
+        context.insert(newLog)
+        try context.save()
+        return newLog
+    }
+
     func upsertPrayerLog(_ log: PrayerLog, context: ModelContext) throws {
         context.insert(log)
         try context.save()

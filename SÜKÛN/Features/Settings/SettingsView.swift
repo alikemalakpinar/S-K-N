@@ -17,6 +17,12 @@ struct SettingsView: View {
                     offsetSection(settings)
                     notificationSection(settings)
                     appearanceSection(settings)
+
+                    Section {
+                        NavigationLink("About") {
+                            AboutView()
+                        }
+                    }
                 } else {
                     ProgressView()
                 }
