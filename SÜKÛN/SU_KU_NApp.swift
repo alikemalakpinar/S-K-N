@@ -1,17 +1,14 @@
-//
-//  SU_KU_NApp.swift
-//  SÜKÛN
-//
-//  Created by Ali kemal Akpinar on 3.03.2026.
-//
-
 import SwiftUI
+import SwiftData
 
 @main
 struct SU_KU_NApp: App {
+    @State private var container = DependencyContainer()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView(container: container)
         }
+        .modelContainer(container.modelContainer)
     }
 }
