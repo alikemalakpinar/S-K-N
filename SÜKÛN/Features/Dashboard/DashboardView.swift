@@ -6,12 +6,14 @@ struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel: DashboardViewModel
     var onOpenRehber: (() -> Void)?
+    var onResumeReading: ((Int) -> Void)?
     private let container: DependencyContainer
 
-    init(container: DependencyContainer, onOpenRehber: (() -> Void)? = nil) {
+    init(container: DependencyContainer, onOpenRehber: (() -> Void)? = nil, onResumeReading: ((Int) -> Void)? = nil) {
         self.container = container
         _viewModel = State(initialValue: DashboardViewModel(container: container))
         self.onOpenRehber = onOpenRehber
+        self.onResumeReading = onResumeReading
     }
 
     var body: some View {
@@ -27,10 +29,35 @@ struct DashboardView: View {
                         .padding(.top, DS.Space.x3)
                         .padding(.horizontal, DS.Space.lg)
 
+                    // Last read position
+                    if viewModel.lastReadPosition != nil {
+                        lastReadCard
+                            .padding(.top, DS.Space.xl)
+                            .padding(.horizontal, DS.Space.lg)
+                            .staggerIn(index: 0, loaded: viewModel.isDashboardLoaded)
+                    }
+
+                    // Verse of the day
+                    if viewModel.verseOfTheDay != nil {
+                        verseOfTheDayCard
+                            .padding(.top, DS.Space.xl)
+                            .padding(.horizontal, DS.Space.lg)
+                            .staggerIn(index: 1, loaded: viewModel.isDashboardLoaded)
+                    }
+
+                    // Quran progress
+                    if viewModel.totalUniquePages > 0 || viewModel.readingStreakDays > 0 {
+                        progressSection
+                            .padding(.top, DS.Space.xl)
+                            .padding(.horizontal, DS.Space.lg)
+                            .staggerIn(index: 2, loaded: viewModel.isDashboardLoaded)
+                    }
+
                     // Quick action
                     rehberCard
                         .padding(.top, DS.Space.xl)
                         .padding(.horizontal, DS.Space.lg)
+                        .staggerIn(index: 3, loaded: viewModel.isDashboardLoaded)
 
                     Spacer(minLength: DS.Space.x4)
                 }
@@ -186,6 +213,183 @@ struct DashboardView: View {
         }
     }
 
+    // MARK: - Last Read Card
+
+    @ViewBuilder
+    private var lastReadCard: some View {
+        if let position = viewModel.lastReadPosition {
+            Button {
+                onResumeReading?(position.mushafPage)
+            } label: {
+                HStack(spacing: DS.Space.md) {
+                    ZStack {
+                        Circle()
+                            .fill(DS.Color.accentSoft)
+                            .frame(width: 44, height: 44)
+                        Image(systemName: "book.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(DS.Color.accent)
+                    }
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("KALDIĞIN YER")
+                            .font(DS.Typography.sectionHead)
+                            .foregroundStyle(DS.Color.textSecondary)
+                            .tracking(2)
+                        Text(position.surahNameTurkish)
+                            .font(DS.Typography.headline)
+                            .foregroundStyle(DS.Color.textPrimary)
+                        Text("Sayfa \(position.mushafPage)")
+                            .font(DS.Typography.captionSm)
+                            .foregroundStyle(DS.Color.textSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(DS.Color.accent)
+                }
+                .padding(DS.Space.lg)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(DS.Color.cardElevated)
+                        .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Verse of the Day
+
+    @ViewBuilder
+    private var verseOfTheDayCard: some View {
+        if let verse = viewModel.verseOfTheDay {
+            VStack(alignment: .leading, spacing: DS.Space.md) {
+                // Header
+                HStack {
+                    Label {
+                        Text("GÜNÜN AYETİ")
+                            .font(DS.Typography.sectionHead)
+                            .tracking(2)
+                    } icon: {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 10))
+                    }
+                    .foregroundStyle(DS.Color.accent)
+
+                    Spacer()
+
+                    Text("\(verse.surahId):\(verse.verseNumber)")
+                        .font(DS.Typography.captionSm)
+                        .foregroundStyle(DS.Color.textSecondary)
+                }
+
+                // Arabic text
+                Text(verse.textArabic)
+                    .font(DS.Typography.arabicLarge)
+                    .multilineTextAlignment(.trailing)
+                    .lineSpacing(12)
+                    .foregroundStyle(DS.Color.textPrimary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+
+                // Translation
+                Text(verse.textTranslation)
+                    .font(DS.Typography.caption)
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .lineSpacing(4)
+
+                // Surah name
+                Text("— \(viewModel.verseOfTheDaySurahName)")
+                    .font(DS.Typography.captionSm)
+                    .italic()
+                    .foregroundStyle(DS.Color.accent.opacity(0.7))
+            }
+            .padding(DS.Space.lg)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(DS.Color.quranCard)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(DS.Color.ornamentLine, lineWidth: 0.5)
+            )
+        }
+    }
+
+    // MARK: - Progress Section
+
+    private var progressSection: some View {
+        HStack(spacing: DS.Space.lg) {
+            // Progress ring
+            ZStack {
+                Circle()
+                    .stroke(DS.Color.hairline, lineWidth: 6)
+                    .frame(width: 72, height: 72)
+                Circle()
+                    .trim(from: 0, to: min(1.0, viewModel.quranProgressPercent))
+                    .stroke(DS.Color.accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                    .frame(width: 72, height: 72)
+                    .rotationEffect(.degrees(-90))
+                VStack(spacing: 0) {
+                    Text("\(Int(viewModel.quranProgressPercent * 100))")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(DS.Color.textPrimary)
+                    Text("%")
+                        .font(DS.Typography.micro)
+                        .foregroundStyle(DS.Color.textSecondary)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: DS.Space.sm) {
+                // Daily progress bar
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Bugün")
+                            .font(DS.Typography.captionSm)
+                            .foregroundStyle(DS.Color.textSecondary)
+                        Spacer()
+                        Text("\(viewModel.pagesReadToday)/\(viewModel.dailyPageGoal) sayfa")
+                            .font(DS.Typography.captionSm)
+                            .foregroundStyle(DS.Color.accent)
+                    }
+
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(DS.Color.hairline)
+                                .frame(height: 5)
+                            Capsule()
+                                .fill(DS.Color.accent)
+                                .frame(
+                                    width: geo.size.width * min(1.0, Double(viewModel.pagesReadToday) / Double(max(1, viewModel.dailyPageGoal))),
+                                    height: 5
+                                )
+                        }
+                    }
+                    .frame(height: 5)
+                }
+
+                // Streak
+                HStack(spacing: DS.Space.xs) {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.orange)
+                    Text("\(viewModel.readingStreakDays) gün seri")
+                        .font(DS.Typography.caption)
+                        .foregroundStyle(DS.Color.textPrimary)
+                }
+            }
+        }
+        .padding(DS.Space.lg)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(DS.Color.cardElevated)
+                .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+        )
+    }
+
     // MARK: - Rehber Card
 
     private var rehberCard: some View {
@@ -259,5 +463,28 @@ private struct PrayerPill: View {
                 .font(DS.Typography.captionSm)
                 .foregroundStyle(isPrayed ? DS.Color.accent : DS.Color.textSecondary)
         }
+    }
+}
+
+// MARK: - Stagger Animation
+
+private struct StaggerModifier: ViewModifier {
+    let index: Int
+    let loaded: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(loaded ? 1 : 0)
+            .offset(y: loaded ? 0 : 16)
+            .animation(
+                DS.Motion.standard.delay(Double(index) * 0.1),
+                value: loaded
+            )
+    }
+}
+
+extension View {
+    fileprivate func staggerIn(index: Int, loaded: Bool) -> some View {
+        modifier(StaggerModifier(index: index, loaded: loaded))
     }
 }

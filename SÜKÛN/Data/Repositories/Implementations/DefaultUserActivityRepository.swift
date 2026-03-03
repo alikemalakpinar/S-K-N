@@ -56,4 +56,76 @@ final class DefaultUserActivityRepository: UserActivityRepository {
         )
         return try context.fetch(descriptor)
     }
+
+    // MARK: - Last Read Position
+
+    func getLastReadPosition(context: ModelContext) throws -> LastReadPosition? {
+        let predicate = #Predicate<LastReadPosition> { $0.id == "current" }
+        let descriptor = FetchDescriptor<LastReadPosition>(predicate: predicate)
+        return try context.fetch(descriptor).first
+    }
+
+    func saveLastReadPosition(page: Int, surahId: Int, verseNumber: Int, surahName: String, context: ModelContext) throws {
+        let predicate = #Predicate<LastReadPosition> { $0.id == "current" }
+        let descriptor = FetchDescriptor<LastReadPosition>(predicate: predicate)
+        let position: LastReadPosition
+        if let existing = try context.fetch(descriptor).first {
+            position = existing
+        } else {
+            position = LastReadPosition()
+            context.insert(position)
+        }
+        position.mushafPage = page
+        position.surahId = surahId
+        position.verseNumber = verseNumber
+        position.surahNameTurkish = surahName
+        position.updatedAt = Date()
+        try context.save()
+    }
+
+    // MARK: - Page Read Tracking
+
+    func logPageRead(page: Int, context: ModelContext) throws {
+        let log = PageReadLog(pageNumber: page)
+        context.insert(log)
+        try context.save()
+    }
+
+    func pagesReadToday(context: ModelContext) throws -> Int {
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let predicate = #Predicate<PageReadLog> { $0.date >= startOfDay && $0.date < endOfDay }
+        let descriptor = FetchDescriptor<PageReadLog>(predicate: predicate)
+        let logs = try context.fetch(descriptor)
+        let uniquePages = Set(logs.map { $0.pageNumber })
+        return uniquePages.count
+    }
+
+    func totalUniquePagesRead(context: ModelContext) throws -> Int {
+        let descriptor = FetchDescriptor<PageReadLog>()
+        let logs = try context.fetch(descriptor)
+        let uniquePages = Set(logs.map { $0.pageNumber })
+        return uniquePages.count
+    }
+
+    func readingStreakDays(context: ModelContext) throws -> Int {
+        let calendar = Calendar.current
+        var streak = 0
+        var checkDate = calendar.startOfDay(for: Date())
+
+        while true {
+            let nextDay = calendar.date(byAdding: .day, value: 1, to: checkDate)!
+            let predicate = #Predicate<PageReadLog> { $0.date >= checkDate && $0.date < nextDay }
+            let descriptor = FetchDescriptor<PageReadLog>(predicate: predicate)
+            let logs = try context.fetch(descriptor)
+            if logs.isEmpty {
+                break
+            }
+            streak += 1
+            guard let prevDay = calendar.date(byAdding: .day, value: -1, to: checkDate) else { break }
+            checkDate = prevDay
+        }
+
+        return streak
+    }
 }

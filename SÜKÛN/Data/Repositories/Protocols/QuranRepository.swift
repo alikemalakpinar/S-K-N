@@ -7,4 +7,5 @@ protocol QuranRepository: Sendable {
     func versesForPage(page: Int) async throws -> [VerseDTO]
     func pageCount() async throws -> Int
     func pageForSurah(surahId: Int) async throws -> Int
+    func randomVerse() async throws -> VerseDTO
 }

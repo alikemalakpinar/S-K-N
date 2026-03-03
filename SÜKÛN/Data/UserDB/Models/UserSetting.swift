@@ -32,5 +32,11 @@ final class UserSetting {
     var ishaNotification: Bool = true
     var notificationMinutesBefore: Int = 0
 
+    // Quran reading preferences
+    var showTransliteration: Bool = false
+    var showTranslation: Bool = true
+    var dailyPageGoal: Int = 5
+    var quranReadingMode: String = "arabic"
+
     init() {}
 }

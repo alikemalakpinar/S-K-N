@@ -23,6 +23,7 @@ protocol StaticDBClientProtocol: Sendable {
     func versesForPage(page: Int) async throws -> [VerseDTO]
     func pageCount() async throws -> Int
     func pageForSurah(surahId: Int) async throws -> Int
+    func randomVerse() async throws -> VerseDTO
 }
 
 /// Lightweight fallback when the static database is missing or corrupted.
@@ -47,6 +48,9 @@ final class NoopStaticDBClient: StaticDBClientProtocol, Sendable {
         throw StaticDBError.databaseNotFound
     }
     func pageForSurah(surahId: Int) async throws -> Int {
+        throw StaticDBError.databaseNotFound
+    }
+    func randomVerse() async throws -> VerseDTO {
         throw StaticDBError.databaseNotFound
     }
 }
@@ -179,6 +183,25 @@ final class StaticDBClient: StaticDBClientProtocol, Sendable {
             let sql = "SELECT MIN(page_number) as start_page FROM verses WHERE surah_id = ?"
             let row = try Row.fetchOne(db, sql: sql, arguments: [surahId])
             return row?["start_page"] as? Int ?? 1
+        }
+    }
+
+    // MARK: - Random Verse
+
+    func randomVerse() async throws -> VerseDTO {
+        try await dbQueue.read { db in
+            let sql = """
+                SELECT surah_id, verse_number, text_arabic, text_translation,
+                       text_transliteration, text_tefsir, page_number
+                FROM verses
+                WHERE length(text_translation) > 30
+                ORDER BY RANDOM()
+                LIMIT 1
+                """
+            guard let row = try Row.fetchOne(db, sql: sql) else {
+                throw StaticDBError.databaseNotFound
+            }
+            return Self.verseFromRow(row)
         }
     }
 

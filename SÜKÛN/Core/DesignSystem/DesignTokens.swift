@@ -93,6 +93,10 @@ extension DS {
         static let surahTitle    = Font.system(size: 15, weight: .semibold, design: .default)
         static let verseNumber   = Font.system(size: 11, weight: .medium, design: .rounded)
         static let pageNumber    = Font.system(size: 12, weight: .medium, design: .rounded)
+
+        // Transliteration typography
+        static let transliteration   = Font.system(size: 15, weight: .regular, design: .serif)
+        static let transliterationSm = Font.system(size: 13, weight: .regular, design: .serif)
     }
 }
 

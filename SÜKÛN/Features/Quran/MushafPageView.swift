@@ -1,9 +1,23 @@
 import SwiftUI
 
+// MARK: - Transliteration Environment Key
+
+private struct ShowTransliterationKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var showTransliteration: Bool {
+        get { self[ShowTransliterationKey.self] }
+        set { self[ShowTransliterationKey.self] = newValue }
+    }
+}
+
 struct MushafPageView: View {
     let pageNumber: Int
     let container: DependencyContainer
 
+    @Environment(\.showTransliteration) private var showTransliteration
     @State private var verses: [VerseDTO] = []
     @State private var selectedVerse: VerseDTO?
     @State private var surahs: [Int: SurahDTO] = [:]
@@ -12,39 +26,40 @@ struct MushafPageView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
-                Spacer(minLength: DS.Space.lg)
+                Spacer(minLength: DS.Space.xl)
 
                 // Build page content with interleaved surah headers
-                ForEach(pageContent, id: \.id) { item in
+                ForEach(Array(pageContent.enumerated()), id: \.element.id) { index, item in
                     switch item {
                     case .surahHeader(let surah):
                         SurahOrnamentHeader(surah: surah)
-                            .padding(.horizontal, DS.Space.md)
-                            .padding(.bottom, DS.Space.lg)
-                            .padding(.top, DS.Space.sm)
+                            .padding(.horizontal, DS.Space.sm)
+                            .padding(.bottom, DS.Space.md)
+                            .padding(.top, index == 0 ? 0 : DS.Space.xl)
 
                     case .bismillah:
                         bismillahView
-                            .padding(.bottom, DS.Space.lg)
+                            .padding(.horizontal, DS.Space.md)
+                            .padding(.bottom, DS.Space.md)
 
-                    case .verse(let verse):
-                        verseRow(verse)
+                    case .verse(let verse, let isLast):
+                        verseRow(verse, isLast: isLast)
                     }
                 }
 
-                // Page number at bottom
-                Text(pageNumber.arabicNumeral)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(DS.Color.textSecondary.opacity(0.5))
-                    .padding(.top, DS.Space.xl)
+                // Page number ornament at bottom
+                pageNumberFooter
+                    .padding(.top, DS.Space.x2)
 
                 Spacer(minLength: DS.Space.x4)
             }
-            .padding(.horizontal, DS.Space.lg)
+            .padding(.horizontal, DS.Space.md)
         }
+        // Page frame
+        .overlay(pageFrame)
         .background(DS.Color.quranCard)
         .opacity(isLoaded ? 1 : 0)
-        .animation(.easeIn(duration: 0.2), value: isLoaded)
+        .animation(.easeIn(duration: 0.3), value: isLoaded)
         .task {
             await loadPage()
         }
@@ -56,18 +71,77 @@ struct MushafPageView: View {
         }
     }
 
+    // MARK: - Page Frame (mushaf border)
+
+    private var pageFrame: some View {
+        GeometryReader { geo in
+            let inset: CGFloat = 6
+            RoundedRectangle(cornerRadius: 2)
+                .stroke(DS.Color.ornamentLine.opacity(0.35), lineWidth: 0.5)
+                .padding(inset)
+                .overlay {
+                    // Double-line frame effect
+                    RoundedRectangle(cornerRadius: 1)
+                        .stroke(DS.Color.ornamentLine.opacity(0.15), lineWidth: 0.5)
+                        .padding(inset + 4)
+                }
+                .allowsHitTesting(false)
+        }
+    }
+
+    // MARK: - Page Number Footer
+
+    private var pageNumberFooter: some View {
+        HStack(spacing: DS.Space.sm) {
+            // Left decorative line
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [DS.Color.ornamentLine.opacity(0), DS.Color.ornamentLine.opacity(0.5)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: 40, height: 0.5)
+
+            // Page number in ornamental frame
+            ZStack {
+                RotatedStar()
+                    .fill(DS.Color.accentSoft)
+                    .frame(width: 28, height: 28)
+                RotatedStar()
+                    .stroke(DS.Color.ornamentLine, lineWidth: 0.5)
+                    .frame(width: 28, height: 28)
+                Text(pageNumber.arabicNumeral)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundStyle(DS.Color.accent)
+            }
+
+            // Right decorative line
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [DS.Color.ornamentLine.opacity(0.5), DS.Color.ornamentLine.opacity(0)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: 40, height: 0.5)
+        }
+    }
+
     // MARK: - Page Content Model
 
     private enum PageItem: Identifiable {
         case surahHeader(SurahDTO)
         case bismillah
-        case verse(VerseDTO)
+        case verse(VerseDTO, isLast: Bool)
 
         var id: String {
             switch self {
             case .surahHeader(let s): return "header-\(s.id)"
             case .bismillah: return "bismillah-\(UUID().uuidString)"
-            case .verse(let v): return "\(v.surahId):\(v.verseNumber)"
+            case .verse(let v, _): return "\(v.surahId):\(v.verseNumber)"
             }
         }
     }
@@ -76,7 +150,7 @@ struct MushafPageView: View {
         var items: [PageItem] = []
         var lastSurahId: Int?
 
-        for verse in verses {
+        for (index, verse) in verses.enumerated() {
             if verse.verseNumber == 1 && verse.surahId != lastSurahId {
                 if let surah = surahs[verse.surahId] {
                     items.append(.surahHeader(surah))
@@ -85,7 +159,9 @@ struct MushafPageView: View {
                     }
                 }
             }
-            items.append(.verse(verse))
+            let isLast = index == verses.count - 1 ||
+                (index + 1 < verses.count && verses[index + 1].verseNumber == 1 && verses[index + 1].surahId != verse.surahId)
+            items.append(.verse(verse, isLast: isLast))
             lastSurahId = verse.surahId
         }
 
@@ -95,40 +171,125 @@ struct MushafPageView: View {
     // MARK: - Bismillah
 
     private var bismillahView: some View {
-        VStack(spacing: DS.Space.sm) {
-            OrnamentalDivider()
+        VStack(spacing: DS.Space.xs) {
+            // Top ornamental band
+            HStack(spacing: 0) {
+                cornerOrnament
+                Spacer()
+                cornerOrnament
+                    .scaleEffect(x: -1, y: 1)
+            }
+            .frame(height: 6)
+
             Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
-                .font(DS.Typography.arabicLarge)
+                .font(.system(size: 24, weight: .regular))
                 .foregroundStyle(DS.Color.textPrimary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, DS.Space.xs)
-            OrnamentalDivider()
+                .padding(.vertical, DS.Space.sm)
+
+            // Bottom ornamental band
+            HStack(spacing: 0) {
+                cornerOrnament
+                    .scaleEffect(x: 1, y: -1)
+                Spacer()
+                cornerOrnament
+                    .scaleEffect(x: -1, y: -1)
+            }
+            .frame(height: 6)
+        }
+        .padding(.horizontal, DS.Space.md)
+        .padding(.vertical, DS.Space.xs)
+    }
+
+    private var cornerOrnament: some View {
+        HStack(spacing: 2) {
+            Rectangle()
+                .fill(DS.Color.ornamentLine)
+                .frame(width: 30, height: 0.5)
+            Circle()
+                .fill(DS.Color.accent.opacity(0.5))
+                .frame(width: 3, height: 3)
         }
     }
 
     // MARK: - Verse Row
 
-    private func verseRow(_ verse: VerseDTO) -> some View {
+    private func verseRow(_ verse: VerseDTO, isLast: Bool) -> some View {
         Button {
             selectedVerse = verse
         } label: {
-            HStack(alignment: .firstTextBaseline, spacing: DS.Space.sm) {
-                Spacer(minLength: 0)
+            VStack(spacing: 0) {
+                // Verse content
+                VStack(alignment: .trailing, spacing: DS.Space.sm) {
+                    // Arabic text with inline verse number
+                    HStack(alignment: .firstTextBaseline, spacing: 0) {
+                        Spacer(minLength: 0)
 
-                // Arabic text — large, readable
-                Text(verse.textArabic)
-                    .font(DS.Typography.arabicHero)
-                    .foregroundStyle(DS.Color.textPrimary)
-                    .multilineTextAlignment(.trailing)
-                    .lineSpacing(20)
-                    .fixedSize(horizontal: false, vertical: true)
+                        Text(verse.textArabic)
+                            .font(showTransliteration ? DS.Typography.arabicLarge : DS.Typography.arabicHero)
+                            .foregroundStyle(DS.Color.textPrimary)
+                            .multilineTextAlignment(.trailing)
+                            .lineSpacing(showTransliteration ? 16 : 22)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                // Verse number ornament
-                VerseNumberOrnament(number: verse.verseNumber)
+                        // Verse number ornament
+                        VerseNumberOrnament(number: verse.verseNumber)
+                            .padding(.leading, DS.Space.xs)
+                    }
+
+                    // Transliteration (when enabled)
+                    if showTransliteration && !verse.textTransliteration.isEmpty {
+                        Text(verse.textTransliteration)
+                            .font(DS.Typography.transliterationSm)
+                            .italic()
+                            .foregroundStyle(DS.Color.accent.opacity(0.55))
+                            .multilineTextAlignment(.leading)
+                            .lineSpacing(4)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, DS.Space.xs)
+                    }
+                }
+                .padding(.vertical, DS.Space.md)
+                .padding(.horizontal, DS.Space.xs)
+
+                // Verse separator — ornamental dots
+                if !isLast {
+                    verseSeparator
+                }
             }
-            .padding(.vertical, DS.Space.sm)
         }
         .buttonStyle(VerseButtonStyle())
+    }
+
+    // MARK: - Verse Separator
+
+    private var verseSeparator: some View {
+        HStack(spacing: DS.Space.sm) {
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [.clear, DS.Color.ornamentLine.opacity(0.3)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(height: 0.5)
+
+            Circle()
+                .fill(DS.Color.accent.opacity(0.25))
+                .frame(width: 3, height: 3)
+
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [DS.Color.ornamentLine.opacity(0.3), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(height: 0.5)
+        }
+        .padding(.horizontal, DS.Space.x3)
     }
 
     // MARK: - Helpers
@@ -157,7 +318,7 @@ private struct VerseButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 12)
                     .fill(configuration.isPressed ? DS.Color.accentSoft : .clear)
             )
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
@@ -172,20 +333,25 @@ private struct VerseNumberOrnament: View {
 
     var body: some View {
         ZStack {
-            // Octagonal star ornament
-            Image(systemName: "seal.fill")
-                .font(.system(size: 30))
-                .foregroundStyle(DS.Color.accent.opacity(0.12))
+            // Multi-layered ornament
+            RotatedStar()
+                .fill(DS.Color.accentSoft)
+                .frame(width: 34, height: 34)
 
-            Image(systemName: "seal")
-                .font(.system(size: 30))
-                .foregroundStyle(DS.Color.accent.opacity(0.45))
+            RotatedStar()
+                .stroke(DS.Color.accent.opacity(0.4), lineWidth: 0.5)
+                .frame(width: 34, height: 34)
+
+            // Inner ring
+            Circle()
+                .stroke(DS.Color.accent.opacity(0.15), lineWidth: 0.5)
+                .frame(width: 20, height: 20)
 
             Text(number.arabicNumeral)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(DS.Color.accent)
         }
-        .frame(width: 34, height: 34)
+        .frame(width: 36, height: 36)
     }
 }
 
@@ -196,60 +362,150 @@ private struct SurahOrnamentHeader: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Ornamental top line
-            OrnamentalDivider()
-                .padding(.bottom, DS.Space.sm)
+            // Decorative top border
+            headerBorder
 
-            // Header card
+            // Header card with gradient
             VStack(spacing: DS.Space.sm) {
-                // Arabic name prominent
+                // Surah number in ornament
+                ZStack {
+                    RotatedStar()
+                        .fill(DS.Color.accent.opacity(0.08))
+                        .frame(width: 38, height: 38)
+                    RotatedStar()
+                        .stroke(DS.Color.accent.opacity(0.3), lineWidth: 0.5)
+                        .frame(width: 38, height: 38)
+                    Text("\(surah.id)")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(DS.Color.accent)
+                }
+
+                // Arabic name — large, elegant
                 Text(surah.nameArabic)
-                    .font(.system(size: 28, weight: .regular))
+                    .font(.system(size: 30, weight: .regular))
                     .foregroundStyle(DS.Color.textPrimary)
 
-                // Turkish name + info
+                // Turkish name
                 Text(surah.nameTurkish)
-                    .font(DS.Typography.surahTitle)
-                    .foregroundStyle(DS.Color.textPrimary)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(DS.Color.accent.opacity(0.8))
+                    .tracking(1)
 
+                // Info line
                 HStack(spacing: DS.Space.sm) {
-                    Text("\(surah.verseCount) ayet")
-                        .font(DS.Typography.captionSm)
-                        .foregroundStyle(DS.Color.textSecondary)
-
-                    Circle()
-                        .fill(DS.Color.textSecondary.opacity(0.4))
-                        .frame(width: 3, height: 3)
-
-                    Text(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")
-                        .font(DS.Typography.captionSm)
-                        .foregroundStyle(DS.Color.textSecondary)
-
-                    Circle()
-                        .fill(DS.Color.textSecondary.opacity(0.4))
-                        .frame(width: 3, height: 3)
-
-                    Text("Sıra: \(surah.id)")
-                        .font(DS.Typography.captionSm)
-                        .foregroundStyle(DS.Color.textSecondary)
+                    infoChip(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")
+                    infoDot
+                    infoChip("\(surah.verseCount) ayet")
                 }
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, DS.Space.lg)
-            .padding(.vertical, DS.Space.lg)
+            .padding(.vertical, DS.Space.xl)
             .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(DS.Color.surahHeader)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(DS.Color.ornamentLine, lineWidth: 0.5)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    DS.Color.surahHeader,
+                                    DS.Color.surahHeader.opacity(0.6)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+
+                    // Subtle inner glow
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    DS.Color.accent.opacity(0.15),
+                                    DS.Color.ornamentLine.opacity(0.1),
+                                    DS.Color.accent.opacity(0.15)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                }
             )
 
-            // Ornamental bottom line
-            OrnamentalDivider()
-                .padding(.top, DS.Space.sm)
+            // Decorative bottom border
+            headerBorder
+                .scaleEffect(x: 1, y: -1)
         }
+    }
+
+    private var headerBorder: some View {
+        HStack(spacing: DS.Space.xs) {
+            // Left corner piece
+            HStack(spacing: 2) {
+                Image(systemName: "diamond.fill")
+                    .font(.system(size: 4))
+                    .foregroundStyle(DS.Color.accent.opacity(0.4))
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [DS.Color.ornamentLine, DS.Color.ornamentLine.opacity(0)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(height: 0.5)
+            }
+
+            // Center ornament cluster
+            HStack(spacing: 3) {
+                Image(systemName: "diamond.fill")
+                    .font(.system(size: 4))
+                    .foregroundStyle(DS.Color.accent.opacity(0.35))
+                Image(systemName: "diamond.fill")
+                    .font(.system(size: 6))
+                    .foregroundStyle(DS.Color.accent.opacity(0.6))
+                Image(systemName: "star.fill")
+                    .font(.system(size: 7))
+                    .foregroundStyle(DS.Color.accent.opacity(0.7))
+                Image(systemName: "diamond.fill")
+                    .font(.system(size: 6))
+                    .foregroundStyle(DS.Color.accent.opacity(0.6))
+                Image(systemName: "diamond.fill")
+                    .font(.system(size: 4))
+                    .foregroundStyle(DS.Color.accent.opacity(0.35))
+            }
+
+            // Right corner piece
+            HStack(spacing: 2) {
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [DS.Color.ornamentLine.opacity(0), DS.Color.ornamentLine],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(height: 0.5)
+                Image(systemName: "diamond.fill")
+                    .font(.system(size: 4))
+                    .foregroundStyle(DS.Color.accent.opacity(0.4))
+            }
+        }
+        .frame(height: 10)
+        .padding(.horizontal, DS.Space.sm)
+    }
+
+    private func infoChip(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 10, weight: .medium))
+            .foregroundStyle(DS.Color.textSecondary)
+            .tracking(0.5)
+    }
+
+    private var infoDot: some View {
+        Circle()
+            .fill(DS.Color.accent.opacity(0.3))
+            .frame(width: 3, height: 3)
     }
 }
 
@@ -287,7 +543,7 @@ private struct OrnamentalDivider: View {
     }
 }
 
-// MARK: - Rotated Star Shape (for surah number badge)
+// MARK: - Rotated Star Shape
 
 private struct RotatedStar: Shape {
     func path(in rect: CGRect) -> Path {

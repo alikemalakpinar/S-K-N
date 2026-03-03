@@ -1,11 +1,16 @@
 import SwiftUI
+import SwiftData
 
 struct MushafReaderView: View {
     @Bindable var viewModel: QuranViewModel
     let container: DependencyContainer
     @Binding var isImmersive: Bool
+    @Environment(\.modelContext) private var modelContext
 
     @State private var showPagePicker = false
+    @State private var showTransliteration = false
+    @State private var saveTask: Task<Void, Never>?
+    @State private var pageLogTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
@@ -17,6 +22,7 @@ struct MushafReaderView: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            .environment(\.showTransliteration, showTransliteration)
             .onTapGesture {
                 withAnimation(DS.Motion.standard) {
                     isImmersive.toggle()
@@ -39,52 +45,106 @@ struct MushafReaderView: View {
                 isPresented: $showPagePicker
             )
         }
+        .onChange(of: viewModel.currentPage) { _, newPage in
+            // Debounce 2s — save last read position
+            saveTask?.cancel()
+            saveTask = Task {
+                try? await Task.sleep(for: .seconds(2))
+                guard !Task.isCancelled else { return }
+                await MainActor.run { saveCurrentPosition(page: newPage) }
+            }
+
+            // Log page read after 3s viewing
+            pageLogTask?.cancel()
+            pageLogTask = Task {
+                try? await Task.sleep(for: .seconds(3))
+                guard !Task.isCancelled else { return }
+                await MainActor.run { logPageRead(page: newPage) }
+            }
+        }
+    }
+
+    // MARK: - Auto-Save Helpers
+
+    private func saveCurrentPosition(page: Int) {
+        let surahInfo = viewModel.surahInfoForCurrentPage()
+        let firstVerse = viewModel.pageVerses.first
+        try? container.userActivityRepository.saveLastReadPosition(
+            page: page,
+            surahId: surahInfo?.id ?? firstVerse?.surahId ?? 1,
+            verseNumber: firstVerse?.verseNumber ?? 1,
+            surahName: surahInfo?.name ?? "",
+            context: modelContext
+        )
+    }
+
+    private func logPageRead(page: Int) {
+        try? container.userActivityRepository.logPageRead(page: page, context: modelContext)
     }
 
     // MARK: - Bottom Bar
 
     private var bottomBar: some View {
-        Button {
-            showPagePicker = true
-        } label: {
-            HStack(spacing: DS.Space.md) {
-                // Juz indicator
-                Text("Cüz \(viewModel.currentJuzNumber)")
-                    .font(DS.Typography.captionSm)
-                    .foregroundStyle(DS.Color.accent)
-                    .padding(.horizontal, DS.Space.sm)
-                    .padding(.vertical, 3)
-                    .background(
-                        Capsule().fill(DS.Color.accentSoft)
-                    )
-
-                // Page number
-                HStack(spacing: 4) {
-                    Image(systemName: "book.pages")
-                        .font(.system(size: 10, weight: .medium))
-                    Text("\(viewModel.currentPage)")
-                        .font(DS.Typography.pageNumber)
+        HStack(spacing: DS.Space.md) {
+            // Transliteration toggle
+            Button {
+                withAnimation(DS.Motion.tap) {
+                    showTransliteration.toggle()
                 }
-                .foregroundStyle(DS.Color.textSecondary)
-
-                // Divider dot
-                Circle()
-                    .fill(DS.Color.textSecondary.opacity(0.3))
-                    .frame(width: 3, height: 3)
-
-                // Total pages
-                Text("/ \(viewModel.totalPages)")
-                    .font(DS.Typography.captionSm)
-                    .foregroundStyle(DS.Color.textSecondary.opacity(0.6))
+            } label: {
+                Image(systemName: showTransliteration ? "text.word.spacing" : "textformat.alt")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(showTransliteration ? DS.Color.accent : DS.Color.textSecondary)
+                    .frame(width: 32, height: 32)
+                    .background(
+                        Circle()
+                            .fill(showTransliteration ? DS.Color.accentSoft : .clear)
+                    )
             }
-            .padding(.horizontal, DS.Space.lg)
-            .padding(.vertical, DS.Space.sm)
-            .background(
-                Capsule()
-                    .fill(.ultraThinMaterial)
-                    .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
-            )
+
+            // Page info button
+            Button {
+                showPagePicker = true
+            } label: {
+                HStack(spacing: DS.Space.md) {
+                    // Juz indicator
+                    Text("Cüz \(viewModel.currentJuzNumber)")
+                        .font(DS.Typography.captionSm)
+                        .foregroundStyle(DS.Color.accent)
+                        .padding(.horizontal, DS.Space.sm)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule().fill(DS.Color.accentSoft)
+                        )
+
+                    // Page number
+                    HStack(spacing: 4) {
+                        Image(systemName: "book.pages")
+                            .font(.system(size: 10, weight: .medium))
+                        Text("\(viewModel.currentPage)")
+                            .font(DS.Typography.pageNumber)
+                    }
+                    .foregroundStyle(DS.Color.textSecondary)
+
+                    // Divider dot
+                    Circle()
+                        .fill(DS.Color.textSecondary.opacity(0.3))
+                        .frame(width: 3, height: 3)
+
+                    // Total pages
+                    Text("/ \(viewModel.totalPages)")
+                        .font(DS.Typography.captionSm)
+                        .foregroundStyle(DS.Color.textSecondary.opacity(0.6))
+                }
+            }
         }
+        .padding(.horizontal, DS.Space.lg)
+        .padding(.vertical, DS.Space.sm)
+        .background(
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+        )
         .padding(.bottom, DS.Space.sm)
     }
 }

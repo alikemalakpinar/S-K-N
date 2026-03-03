@@ -16,14 +16,11 @@ final class QuranViewModel {
     var isLoadingPage = false
     var currentJuzNumber: Int { juzForPage(currentPage) }
 
-    /// Returns the surah name for the currently displayed page
-    func surahNameForPage(_ page: Int) -> String {
-        // Find the surah whose page range includes this page
-        guard !surahs.isEmpty else { return "" }
-        // We can check which surah starts on or before this page
-        // by finding the last surah whose starting page <= page
-        // For simplicity, we rely on pageVerses or iterate surahs
-        return ""
+    /// Returns the surah info for the first verse on the given page
+    func surahInfoForCurrentPage() -> (id: Int, name: String)? {
+        guard let firstVerse = pageVerses.first else { return nil }
+        let name = surahs.first(where: { $0.id == firstVerse.surahId })?.nameTurkish ?? ""
+        return (firstVerse.surahId, name)
     }
 
     private func juzForPage(_ page: Int) -> Int {

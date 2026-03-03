@@ -9,7 +9,19 @@ final class DashboardViewModel {
     var isLoading = false
     var errorMessage: String?
 
+    // Reading progress
+    var lastReadPosition: LastReadPosition?
+    var verseOfTheDay: VerseDTO?
+    var verseOfTheDaySurahName: String = ""
+    var pagesReadToday: Int = 0
+    var dailyPageGoal: Int = 5
+    var totalUniquePages: Int = 0
+    var readingStreakDays: Int = 0
+    var quranProgressPercent: Double = 0.0
+    var isDashboardLoaded = false
+
     private let container: DependencyContainer
+    private static var cachedVerseOfDay: (date: Date, verse: VerseDTO, surahName: String)?
 
     init(container: DependencyContainer) {
         self.container = container
@@ -25,6 +37,39 @@ final class DashboardViewModel {
         } catch {
             errorMessage = UserFriendlyError.message(from: error)
         }
+
+        // Load reading progress
+        do {
+            lastReadPosition = try container.userActivityRepository.getLastReadPosition(context: context)
+            pagesReadToday = try container.userActivityRepository.pagesReadToday(context: context)
+            totalUniquePages = try container.userActivityRepository.totalUniquePagesRead(context: context)
+            readingStreakDays = try container.userActivityRepository.readingStreakDays(context: context)
+            quranProgressPercent = Double(totalUniquePages) / 604.0
+
+            // Load daily goal from settings
+            let descriptor = FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" })
+            if let settings = try? context.fetch(descriptor).first {
+                dailyPageGoal = settings.dailyPageGoal
+            }
+        } catch {}
+
+        // Load verse of the day (cached per day)
+        let today = Calendar.current.startOfDay(for: Date())
+        if let cached = Self.cachedVerseOfDay, Calendar.current.isDate(cached.date, inSameDayAs: today) {
+            verseOfTheDay = cached.verse
+            verseOfTheDaySurahName = cached.surahName
+        } else {
+            do {
+                let verse = try await container.quranRepository.randomVerse()
+                let surahs = try await container.quranRepository.allSurahs()
+                let surahName = surahs.first(where: { $0.id == verse.surahId })?.nameTurkish ?? ""
+                verseOfTheDay = verse
+                verseOfTheDaySurahName = surahName
+                Self.cachedVerseOfDay = (date: today, verse: verse, surahName: surahName)
+            } catch {}
+        }
+
+        isDashboardLoaded = true
     }
 
     func loadNextPrayer(latitude: Double, longitude: Double, method: String, asrMethod: String) async {
