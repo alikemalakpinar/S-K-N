@@ -20,32 +20,42 @@ struct DuasView: View {
                     ContentUnavailableView("Search Duas", systemImage: "text.magnifyingglass", description: Text("Type a keyword to search duas."))
                 } else if viewModel.isSearching {
                     ProgressView()
+                        .tint(DS.Color.accent)
                 } else if viewModel.searchResults.isEmpty {
                     ContentUnavailableView.search(text: viewModel.searchQuery)
                 } else {
                     List(viewModel.searchResults) { dua in
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: DS.Space.sm) {
                             Text(dua.title)
-                                .font(.headline)
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundStyle(DS.Color.textPrimary)
                             Text(dua.textArabic)
-                                .font(.title3)
+                                .font(.system(size: 20, weight: .regular))
                                 .multilineTextAlignment(.trailing)
                                 .frame(maxWidth: .infinity, alignment: .trailing)
+                                .foregroundStyle(DS.Color.textPrimary)
                             Text(dua.textTranslation)
-                                .font(.body)
-                                .foregroundStyle(.secondary)
+                                .font(DS.Typography.body)
+                                .foregroundStyle(DS.Color.textSecondary)
+                            Hairline()
                             HStack {
                                 Text(dua.category)
                                 Spacer()
                                 Text(dua.source)
                             }
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
+                            .font(DS.Typography.captionSm)
+                            .foregroundStyle(DS.Color.textSecondary)
                         }
-                        .padding(.vertical, 4)
+                        .padding(.vertical, DS.Space.xs)
+                        .listRowBackground(DS.Color.backgroundPrimary)
+                        .listRowSeparator(.hidden)
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .background(DS.Color.backgroundPrimary)
                 }
             }
+            .background(DS.Color.backgroundPrimary)
             .navigationTitle("Duas")
             .searchable(text: $viewModel.searchQuery, prompt: "Search duas...")
             .onChange(of: viewModel.searchQuery) {

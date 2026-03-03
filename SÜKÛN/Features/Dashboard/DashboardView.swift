@@ -12,12 +12,13 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: DS.Space.xl) {
                     nextPrayerCard
                     todayChecklistCard
                 }
-                .padding()
+                .padding(DS.Space.lg)
             }
+            .background(DS.Color.backgroundPrimary)
             .navigationTitle("Sukun")
             .task {
                 await viewModel.loadTodayData(context: modelContext)
@@ -28,61 +29,74 @@ struct DashboardView: View {
     // MARK: - Next Prayer Card
 
     private var nextPrayerCard: some View {
-        VStack(spacing: 12) {
-            Text("Next Prayer")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        DSCard {
+            VStack(spacing: DS.Space.md) {
+                Text("NEXT PRAYER")
+                    .font(DS.Typography.sectionHead)
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .tracking(1)
 
-            Text(viewModel.nextPrayerName)
-                .font(.title.bold())
+                Text(viewModel.nextPrayerName)
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundStyle(DS.Color.textPrimary)
 
-            if let time = viewModel.nextPrayerTime {
-                Text(time, style: .relative)
-                    .font(.title2)
-                    .monospacedDigit()
-            } else {
-                Text("--:--")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
+                if let time = viewModel.nextPrayerTime {
+                    Text(time, style: .relative)
+                        .font(DS.Typography.hero)
+                        .monospacedDigit()
+                        .foregroundStyle(DS.Color.textPrimary)
+                } else {
+                    Text("--:--")
+                        .font(DS.Typography.hero)
+                        .foregroundStyle(DS.Color.textSecondary)
+                }
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, DS.Space.lg)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - Today Checklist
 
     private var todayChecklistCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Today's Prayers")
-                .font(.headline)
+        DSCard {
+            VStack(alignment: .leading, spacing: DS.Space.md) {
+                Text("TODAY'S PRAYERS")
+                    .font(DS.Typography.sectionHead)
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .tracking(1)
 
-            if let log = viewModel.todayLog {
-                prayerRow("Fajr", status: log.fajr)
-                prayerRow("Dhuhr", status: log.dhuhr)
-                prayerRow("Asr", status: log.asr)
-                prayerRow("Maghrib", status: log.maghrib)
-                prayerRow("Isha", status: log.isha)
-            } else {
-                Text("No data yet")
-                    .foregroundStyle(.secondary)
+                if let log = viewModel.todayLog {
+                    prayerRow("Fajr", status: log.fajr)
+                    Hairline()
+                    prayerRow("Dhuhr", status: log.dhuhr)
+                    Hairline()
+                    prayerRow("Asr", status: log.asr)
+                    Hairline()
+                    prayerRow("Maghrib", status: log.maghrib)
+                    Hairline()
+                    prayerRow("Isha", status: log.isha)
+                } else {
+                    Text("No data yet")
+                        .font(DS.Typography.body)
+                        .foregroundStyle(DS.Color.textSecondary)
+                }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private func prayerRow(_ name: String, status: PrayerStatus) -> some View {
         HStack {
             Image(systemName: status == .prayed ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(status == .prayed ? .green : .secondary)
+                .foregroundStyle(status == .prayed ? DS.Color.accent : DS.Color.textSecondary)
             Text(name)
+                .font(DS.Typography.body)
+                .foregroundStyle(DS.Color.textPrimary)
             Spacer()
             Text(status.rawValue.capitalized)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(DS.Typography.caption)
+                .foregroundStyle(DS.Color.textSecondary)
         }
+        .padding(.vertical, DS.Space.xs)
     }
 }

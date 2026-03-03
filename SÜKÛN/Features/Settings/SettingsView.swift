@@ -22,12 +22,17 @@ struct SettingsView: View {
                         NavigationLink("About") {
                             AboutView()
                         }
+                        .foregroundStyle(DS.Color.textPrimary)
                     }
                 } else {
                     ProgressView()
+                        .tint(DS.Color.accent)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(DS.Color.backgroundPrimary)
             .navigationTitle("Settings")
+            .tint(DS.Color.accent)
             .task {
                 viewModel.loadSettings(context: modelContext)
             }
@@ -37,7 +42,7 @@ struct SettingsView: View {
     // MARK: - Sections
 
     private func calculationSection(_ settings: UserSetting) -> some View {
-        Section("Calculation Method") {
+        Section {
             Picker("Method", selection: Binding(
                 get: { settings.calculationMethod },
                 set: { settings.calculationMethod = $0; viewModel.saveSettings(context: modelContext) }
@@ -46,6 +51,7 @@ struct SettingsView: View {
                     Text(method).tag(method)
                 }
             }
+            .foregroundStyle(DS.Color.textPrimary)
 
             Picker("Asr Juristic", selection: Binding(
                 get: { settings.asrMethod },
@@ -54,11 +60,17 @@ struct SettingsView: View {
                 Text("Standard (Shafi'i)").tag("standard")
                 Text("Hanafi").tag("hanafi")
             }
+            .foregroundStyle(DS.Color.textPrimary)
+        } header: {
+            Text("Calculation Method")
+                .font(DS.Typography.sectionHead)
+                .foregroundStyle(DS.Color.textSecondary)
         }
+        .listRowBackground(DS.Color.backgroundSecondary)
     }
 
     private func offsetSection(_ settings: UserSetting) -> some View {
-        Section("Manual Offsets (minutes)") {
+        Section {
             Stepper("Fajr: \(settings.fajrOffset)", value: Binding(
                 get: { settings.fajrOffset },
                 set: { settings.fajrOffset = $0; viewModel.saveSettings(context: modelContext) }
@@ -79,11 +91,17 @@ struct SettingsView: View {
                 get: { settings.ishaOffset },
                 set: { settings.ishaOffset = $0; viewModel.saveSettings(context: modelContext) }
             ), in: -30...30)
+        } header: {
+            Text("Manual Offsets (minutes)")
+                .font(DS.Typography.sectionHead)
+                .foregroundStyle(DS.Color.textSecondary)
         }
+        .listRowBackground(DS.Color.backgroundSecondary)
+        .foregroundStyle(DS.Color.textPrimary)
     }
 
     private func notificationSection(_ settings: UserSetting) -> some View {
-        Section("Notifications") {
+        Section {
             Toggle("Fajr", isOn: Binding(
                 get: { settings.fajrNotification },
                 set: { settings.fajrNotification = $0; viewModel.saveSettings(context: modelContext) }
@@ -113,11 +131,18 @@ struct SettingsView: View {
             Button("Request Notification Permission") {
                 Task { await viewModel.requestNotifications() }
             }
+            .foregroundStyle(DS.Color.accent)
+        } header: {
+            Text("Notifications")
+                .font(DS.Typography.sectionHead)
+                .foregroundStyle(DS.Color.textSecondary)
         }
+        .listRowBackground(DS.Color.backgroundSecondary)
+        .foregroundStyle(DS.Color.textPrimary)
     }
 
     private func appearanceSection(_ settings: UserSetting) -> some View {
-        Section("Appearance") {
+        Section {
             Picker("Theme", selection: Binding(
                 get: { settings.theme },
                 set: { settings.theme = $0; viewModel.saveSettings(context: modelContext) }
@@ -126,16 +151,25 @@ struct SettingsView: View {
                 Text("Light").tag("light")
                 Text("Dark").tag("dark")
             }
+            .foregroundStyle(DS.Color.textPrimary)
 
             HStack {
                 Text("Font Scale")
+                    .foregroundStyle(DS.Color.textPrimary)
                 Slider(value: Binding(
                     get: { settings.fontScale },
                     set: { settings.fontScale = $0; viewModel.saveSettings(context: modelContext) }
                 ), in: 0.8...1.5, step: 0.1)
+                .tint(DS.Color.accent)
                 Text(String(format: "%.1f", settings.fontScale))
                     .monospacedDigit()
+                    .foregroundStyle(DS.Color.textSecondary)
             }
+        } header: {
+            Text("Appearance")
+                .font(DS.Typography.sectionHead)
+                .foregroundStyle(DS.Color.textSecondary)
         }
+        .listRowBackground(DS.Color.backgroundSecondary)
     }
 }

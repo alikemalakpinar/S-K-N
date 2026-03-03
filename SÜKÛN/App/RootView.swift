@@ -25,5 +25,6 @@ struct RootView: View {
                 SettingsView(container: container)
             }
         }
+        .tint(DS.Color.accent)
     }
 }
