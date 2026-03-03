@@ -46,12 +46,12 @@ final class PrayerTimeService: PrayerTimeServiceProtocol, Sendable {
 
     func nextPrayer(from times: PrayerDay, after now: Date) -> (name: String, time: Date)? {
         let prayers: [(String, Date)] = [
-            ("Fajr", times.fajr),
-            ("Sunrise", times.sunrise),
-            ("Dhuhr", times.dhuhr),
-            ("Asr", times.asr),
-            ("Maghrib", times.maghrib),
-            ("Isha", times.isha)
+            ("Sabah", times.fajr),
+            ("Güneş", times.sunrise),
+            ("Öğle", times.dhuhr),
+            ("İkindi", times.asr),
+            ("Akşam", times.maghrib),
+            ("Yatsı", times.isha)
         ]
         return prayers.first { $0.1 > now }
     }

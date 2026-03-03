@@ -4,22 +4,22 @@ struct AboutView: View {
     var body: some View {
         List {
             Section {
-                Text("Quran text is provided by the Tanzil project (tanzil.net). The original Arabic Uthmani text has not been modified. Redistribution complies with Tanzil's terms of use.")
+                Text("Kur'an-ı Kerim metni Al Quran Cloud API aracılığıyla sağlanmaktadır. Orijinal Arapça Osmanlı hattı metni değiştirilmemiştir.")
                     .font(DS.Typography.caption)
                     .foregroundStyle(DS.Color.textSecondary)
             } header: {
-                Text("Quran Text")
+                Text("Kur'an Metni")
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
             }
             .listRowBackground(DS.Color.backgroundSecondary)
 
             Section {
-                Text("Turkish translation source will be finalized; only public-domain or compatible-licensed sources will be used.")
+                Text("Türkçe meal: Diyanet İşleri Başkanlığı çevirisi kullanılmaktadır.")
                     .font(DS.Typography.caption)
                     .foregroundStyle(DS.Color.textSecondary)
             } header: {
-                Text("Translation")
+                Text("Meal")
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
             }
@@ -27,13 +27,13 @@ struct AboutView: View {
 
             Section {
                 Link(destination: URL(string: "https://github.com/groue/GRDB.swift")!) {
-                    row(name: "GRDB.swift", detail: "SQLite toolkit for Swift — MIT License")
+                    row(name: "GRDB.swift", detail: "Swift için SQLite araç seti — MIT Lisansı")
                 }
                 Link(destination: URL(string: "https://github.com/batoulapps/adhan-swift")!) {
-                    row(name: "Adhan-swift", detail: "Prayer time calculation — MIT License")
+                    row(name: "Adhan-swift", detail: "Namaz vakti hesaplama — MIT Lisansı")
                 }
             } header: {
-                Text("Open Source Libraries")
+                Text("Açık Kaynak Kütüphaneler")
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
             }
@@ -42,7 +42,7 @@ struct AboutView: View {
         .scrollContentBackground(.hidden)
         .background(DS.Color.backgroundPrimary)
         .tint(DS.Color.accent)
-        .navigationTitle("About")
+        .navigationTitle("Hakkında")
         .navigationBarTitleDisplayMode(.inline)
     }
 

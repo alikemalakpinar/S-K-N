@@ -33,3 +33,4 @@ tools/input/*.xml
 # If the file grows too large or has licensing restrictions, add it here and
 # distribute via Git LFS or a download script instead.
 # SÜKÛN/Resources/Data/sukun_static.sqlite
+tools/.cache/

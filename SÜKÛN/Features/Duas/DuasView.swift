@@ -12,12 +12,12 @@ struct DuasView: View {
             Group {
                 if viewModel.isStaticDBMissing {
                     ContentUnavailableView(
-                        "Database Not Found",
+                        "Veritabanı Bulunamadı",
                         systemImage: "externaldrive.badge.exclamationmark",
-                        description: Text("The duas database is not bundled. See README for setup.")
+                        description: Text("Dua veritabanı uygulamada bulunamadı.")
                     )
                 } else if viewModel.searchResults.isEmpty && viewModel.searchQuery.isEmpty {
-                    ContentUnavailableView("Search Duas", systemImage: "text.magnifyingglass", description: Text("Type a keyword to search duas."))
+                    ContentUnavailableView("Dua Ara", systemImage: "text.magnifyingglass", description: Text("Aramak için bir kelime yazın."))
                 } else if viewModel.isSearching {
                     ProgressView()
                         .tint(DS.Color.accent)
@@ -56,8 +56,8 @@ struct DuasView: View {
                 }
             }
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Duas")
-            .searchable(text: $viewModel.searchQuery, prompt: "Search duas...")
+            .navigationTitle("Dualar")
+            .searchable(text: $viewModel.searchQuery, prompt: "Dua ara...")
             .onChange(of: viewModel.searchQuery) {
                 viewModel.search()
             }

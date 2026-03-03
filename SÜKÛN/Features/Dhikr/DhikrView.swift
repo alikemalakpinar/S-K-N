@@ -108,13 +108,13 @@ struct DhikrView: View {
 
                 // Actions
                 HStack(spacing: DS.Space.x2) {
-                    Button("Reset") {
+                    Button("Sıfırla") {
                         viewModel.reset()
                     }
                     .font(DS.Typography.body)
                     .foregroundStyle(DS.Color.textSecondary)
 
-                    Button("Save") {
+                    Button("Kaydet") {
                         viewModel.saveSession(context: modelContext)
                     }
                     .font(DS.Typography.body)
@@ -124,7 +124,7 @@ struct DhikrView: View {
                 .padding(.bottom, DS.Space.lg)
             }
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Dhikr")
+            .navigationTitle("Zikir")
             .task {
                 viewModel.loadPresets(context: modelContext)
             }

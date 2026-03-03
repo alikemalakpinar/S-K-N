@@ -14,24 +14,24 @@ struct TrackerView: View {
             List {
                 Section {
                     if viewModel.recentReadingLogs.isEmpty {
-                        Text("No reading sessions yet.")
+                        Text("Henüz okuma kaydı yok.")
                             .font(DS.Typography.body)
                             .foregroundStyle(DS.Color.textSecondary)
                     } else {
                         ForEach(viewModel.recentReadingLogs, id: \.date) { log in
                             HStack {
-                                Text("Surah \(log.surahId): \(log.fromVerse)-\(log.toVerse)")
+                                Text("Sure \(log.surahId): \(log.fromVerse)-\(log.toVerse)")
                                     .font(DS.Typography.body)
                                     .foregroundStyle(DS.Color.textPrimary)
                                 Spacer()
-                                Text("\(log.durationSeconds / 60) min")
+                                Text("\(log.durationSeconds / 60) dk")
                                     .font(DS.Typography.caption)
                                     .foregroundStyle(DS.Color.textSecondary)
                             }
                         }
                     }
                 } header: {
-                    Text("Reading (Last 7 Days)")
+                    Text("Okuma (Son 7 Gün)")
                         .font(DS.Typography.sectionHead)
                         .foregroundStyle(DS.Color.textSecondary)
                 }
@@ -39,13 +39,13 @@ struct TrackerView: View {
 
                 Section {
                     if viewModel.recentSessions.isEmpty {
-                        Text("No dhikr sessions yet.")
+                        Text("Henüz zikir seansı yok.")
                             .font(DS.Typography.body)
                             .foregroundStyle(DS.Color.textSecondary)
                     } else {
                         ForEach(viewModel.recentSessions, id: \.date) { session in
                             HStack {
-                                Text("\(session.count) counts")
+                                Text("\(session.count) adet")
                                     .font(DS.Typography.body)
                                     .foregroundStyle(DS.Color.textPrimary)
                                 Spacer()
@@ -56,7 +56,7 @@ struct TrackerView: View {
                         }
                     }
                 } header: {
-                    Text("Dhikr Sessions (Last 7 Days)")
+                    Text("Zikir Seansları (Son 7 Gün)")
                         .font(DS.Typography.sectionHead)
                         .foregroundStyle(DS.Color.textSecondary)
                 }
@@ -64,7 +64,7 @@ struct TrackerView: View {
             }
             .scrollContentBackground(.hidden)
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Tracker")
+            .navigationTitle("Takip")
             .task {
                 viewModel.loadRecentActivity(context: modelContext)
             }

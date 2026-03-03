@@ -11,19 +11,19 @@ struct PrayerTimesView: View {
         NavigationStack {
             Group {
                 if viewModel.isLoading {
-                    ProgressView("Calculating prayer times...")
+                    ProgressView("Namaz vakitleri hesaplanıyor...")
                         .tint(DS.Color.accent)
                 } else if let today = viewModel.todayTimes {
                     List {
                         Section {
-                            prayerRow("Fajr", time: today.fajr)
-                            prayerRow("Sunrise", time: today.sunrise)
-                            prayerRow("Dhuhr", time: today.dhuhr)
-                            prayerRow("Asr", time: today.asr)
-                            prayerRow("Maghrib", time: today.maghrib)
-                            prayerRow("Isha", time: today.isha)
+                            prayerRow("Sabah", time: today.fajr)
+                            prayerRow("Güneş", time: today.sunrise)
+                            prayerRow("Öğle", time: today.dhuhr)
+                            prayerRow("İkindi", time: today.asr)
+                            prayerRow("Akşam", time: today.maghrib)
+                            prayerRow("Yatsı", time: today.isha)
                         } header: {
-                            Text("Today")
+                            Text("Bugün")
                                 .font(DS.Typography.sectionHead)
                                 .foregroundStyle(DS.Color.textSecondary)
                         }
@@ -35,7 +35,7 @@ struct PrayerTimesView: View {
                                     dayRow(day)
                                 }
                             } header: {
-                                Text("Upcoming")
+                                Text("Yaklaşan")
                                     .font(DS.Typography.sectionHead)
                                     .foregroundStyle(DS.Color.textSecondary)
                             }
@@ -45,13 +45,13 @@ struct PrayerTimesView: View {
                     .scrollContentBackground(.hidden)
                     .background(DS.Color.backgroundPrimary)
                 } else if let error = viewModel.errorMessage {
-                    ContentUnavailableView("Error", systemImage: "exclamationmark.triangle", description: Text(error))
+                    ContentUnavailableView("Hata", systemImage: "exclamationmark.triangle", description: Text(error))
                 } else {
-                    ContentUnavailableView("No Data", systemImage: "clock", description: Text("Prayer times will appear once location is available."))
+                    ContentUnavailableView("Veri Yok", systemImage: "clock", description: Text("Konum erişimi sağlandığında namaz vakitleri görünecektir."))
                 }
             }
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Prayer Times")
+            .navigationTitle("Namaz Vakitleri")
         }
     }
 
@@ -74,11 +74,11 @@ struct PrayerTimesView: View {
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(DS.Color.textPrimary)
             HStack(spacing: DS.Space.md) {
-                timeLabel("F", day.fajr)
-                timeLabel("D", day.dhuhr)
-                timeLabel("A", day.asr)
-                timeLabel("M", day.maghrib)
-                timeLabel("I", day.isha)
+                timeLabel("S", day.fajr)
+                timeLabel("Ö", day.dhuhr)
+                timeLabel("İ", day.asr)
+                timeLabel("A", day.maghrib)
+                timeLabel("Y", day.isha)
             }
             .font(DS.Typography.caption)
             .monospacedDigit()

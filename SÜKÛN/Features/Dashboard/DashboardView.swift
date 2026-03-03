@@ -22,7 +22,7 @@ struct DashboardView: View {
                 .padding(DS.Space.lg)
             }
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Sukun")
+            .navigationTitle("Sükûn")
             .task {
                 await viewModel.loadTodayData(context: modelContext)
             }
@@ -34,7 +34,7 @@ struct DashboardView: View {
     private var nextPrayerCard: some View {
         DSCard {
             VStack(spacing: DS.Space.md) {
-                Text("NEXT PRAYER")
+                Text("SONRAKİ VAKİT")
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1)
@@ -64,23 +64,23 @@ struct DashboardView: View {
     private var todayChecklistCard: some View {
         DSCard {
             VStack(alignment: .leading, spacing: DS.Space.md) {
-                Text("TODAY'S PRAYERS")
+                Text("GÜNÜN NAMAZLARI")
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1)
 
                 if let log = viewModel.todayLog {
-                    prayerRow("Fajr", status: log.fajr)
+                    prayerRow("Sabah", status: log.fajr)
                     Hairline()
-                    prayerRow("Dhuhr", status: log.dhuhr)
+                    prayerRow("Öğle", status: log.dhuhr)
                     Hairline()
-                    prayerRow("Asr", status: log.asr)
+                    prayerRow("İkindi", status: log.asr)
                     Hairline()
-                    prayerRow("Maghrib", status: log.maghrib)
+                    prayerRow("Akşam", status: log.maghrib)
                     Hairline()
-                    prayerRow("Isha", status: log.isha)
+                    prayerRow("Yatsı", status: log.isha)
                 } else {
-                    Text("No data yet")
+                    Text("Henüz veri yok")
                         .font(DS.Typography.body)
                         .foregroundStyle(DS.Color.textSecondary)
                 }

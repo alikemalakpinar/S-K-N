@@ -2,6 +2,7 @@ import SwiftUI
 
 enum QuranSegment: String, CaseIterable {
     case mushaf = "Mushaf"
+    case sureler = "Sureler"
     case rehber = "Rehber"
 }
 
@@ -33,6 +34,8 @@ struct QuranView: View {
                     switch selectedSegment {
                     case .mushaf:
                         mushafContent
+                    case .sureler:
+                        surelerContent
                     case .rehber:
                         RehberView(container: container)
                     }
@@ -40,10 +43,13 @@ struct QuranView: View {
                 .frame(maxHeight: .infinity)
             }
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Quran")
-            .searchable(text: $viewModel.searchQuery, prompt: "Search verses...")
+            .navigationTitle("Kur'an")
+            .searchable(
+                text: $viewModel.searchQuery,
+                prompt: "Ayet ara..."
+            )
             .onChange(of: selectedSegment) {
-                if selectedSegment == .rehber {
+                if selectedSegment != .sureler {
                     viewModel.searchQuery = ""
                 }
             }
@@ -61,11 +67,18 @@ struct QuranView: View {
     @ViewBuilder
     private var mushafContent: some View {
         if viewModel.isStaticDBMissing {
-            ContentUnavailableView(
-                "Database Not Found",
-                systemImage: "externaldrive.badge.exclamationmark",
-                description: Text("The Quran database (sukun_static.sqlite) is not bundled with the app. See README for setup instructions.")
-            )
+            dbMissingView
+        } else {
+            MushafReaderView(viewModel: viewModel, container: container)
+        }
+    }
+
+    // MARK: - Sureler Content
+
+    @ViewBuilder
+    private var surelerContent: some View {
+        if viewModel.isStaticDBMissing {
+            dbMissingView
         } else if !viewModel.searchQuery.isEmpty {
             searchResultsList
         } else {
@@ -73,25 +86,35 @@ struct QuranView: View {
         }
     }
 
+    private var dbMissingView: some View {
+        ContentUnavailableView(
+            "Veritabanı Bulunamadı",
+            systemImage: "externaldrive.badge.exclamationmark",
+            description: Text("Kur'an veritabanı (sukun_static.sqlite) uygulamada bulunamadı.")
+        )
+    }
+
     private var surahList: some View {
         List(viewModel.surahs) { surah in
-            HStack {
-                Text("\(surah.id)")
-                    .font(DS.Typography.caption)
-                    .foregroundStyle(DS.Color.textSecondary)
-                    .frame(width: 30)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(surah.nameEnglish)
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundStyle(DS.Color.textPrimary)
-                    Text(surah.nameTransliteration)
-                        .font(.system(size: 13, weight: .regular))
+            NavigationLink(value: surah.id) {
+                HStack {
+                    Text("\(surah.id)")
+                        .font(DS.Typography.caption)
                         .foregroundStyle(DS.Color.textSecondary)
+                        .frame(width: 30)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(surah.nameTurkish)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundStyle(DS.Color.textPrimary)
+                        Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
+                            .font(DS.Typography.captionSm)
+                            .foregroundStyle(DS.Color.textSecondary)
+                    }
+                    Spacer()
+                    Text(surah.nameArabic)
+                        .font(.system(size: 20, weight: .regular))
+                        .foregroundStyle(DS.Color.textPrimary)
                 }
-                Spacer()
-                Text(surah.nameArabic)
-                    .font(.system(size: 20, weight: .regular, design: .default))
-                    .foregroundStyle(DS.Color.textPrimary)
             }
             .listRowBackground(DS.Color.backgroundPrimary)
             .listRowSeparator(.hidden)
@@ -100,6 +123,9 @@ struct QuranView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(DS.Color.backgroundPrimary)
+        .navigationDestination(for: Int.self) { surahId in
+            SurahDetailView(surahId: surahId, container: container)
+        }
     }
 
     private var searchResultsList: some View {
@@ -115,9 +141,15 @@ struct QuranView: View {
                     let isActive = activeVerseID == verseID
 
                     VStack(alignment: .leading, spacing: DS.Space.sm) {
-                        Text(verseID)
-                            .font(DS.Typography.caption.bold())
-                            .foregroundStyle(DS.Color.accent)
+                        HStack {
+                            Text(verseID)
+                                .font(DS.Typography.caption.bold())
+                                .foregroundStyle(DS.Color.accent)
+                            Spacer()
+                            Text("Sayfa \(verse.pageNumber)")
+                                .font(DS.Typography.captionSm)
+                                .foregroundStyle(DS.Color.textSecondary)
+                        }
 
                         Text(verse.textArabic)
                             .font(.system(size: 20, weight: .regular))
@@ -150,3 +182,60 @@ struct QuranView: View {
     }
 }
 
+// MARK: - Surah Detail View
+
+struct SurahDetailView: View {
+    let surahId: Int
+    let container: DependencyContainer
+
+    @State private var verses: [VerseDTO] = []
+    @State private var surahName = ""
+    @State private var selectedVerse: VerseDTO?
+
+    var body: some View {
+        List(verses) { verse in
+            Button {
+                selectedVerse = verse
+            } label: {
+                VStack(alignment: .leading, spacing: DS.Space.sm) {
+                    HStack(alignment: .top) {
+                        Text("\(verse.verseNumber)")
+                            .font(DS.Typography.captionSm)
+                            .foregroundStyle(DS.Color.accent)
+                            .frame(width: 24)
+                        Spacer()
+                        Text(verse.textArabic)
+                            .font(.system(size: 20, weight: .regular))
+                            .multilineTextAlignment(.trailing)
+                            .foregroundStyle(DS.Color.textPrimary)
+                            .lineSpacing(8)
+                    }
+                    Text(verse.textTranslation)
+                        .font(DS.Typography.caption)
+                        .foregroundStyle(DS.Color.textSecondary)
+                        .lineSpacing(3)
+                }
+                .padding(.vertical, DS.Space.xs)
+            }
+            .buttonStyle(.plain)
+            .listRowBackground(DS.Color.backgroundPrimary)
+            .listRowSeparator(.hidden)
+            .overlay(alignment: .bottom) { Hairline() }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(DS.Color.backgroundPrimary)
+        .navigationTitle(surahName)
+        .navigationBarTitleDisplayMode(.large)
+        .task {
+            do {
+                verses = try await container.quranRepository.verses(forSurah: surahId)
+                let surahs = try await container.quranRepository.allSurahs()
+                surahName = surahs.first(where: { $0.id == surahId })?.nameTurkish ?? ""
+            } catch {}
+        }
+        .sheet(item: $selectedVerse) { verse in
+            VerseDetailSheet(verse: verse, surahName: surahName)
+        }
+    }
+}

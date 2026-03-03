@@ -7,23 +7,23 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Home", systemImage: "house.fill", value: 0) {
+            Tab("Ana Sayfa", systemImage: "house.fill", value: 0) {
                 DashboardView(container: container, onOpenRehber: openRehber)
             }
 
-            Tab("Prayer", systemImage: "clock.fill", value: 1) {
+            Tab("Namaz", systemImage: "clock.fill", value: 1) {
                 PrayerTimesView(container: container)
             }
 
-            Tab("Quran", systemImage: "book.fill", value: 2) {
+            Tab("Kur'an", systemImage: "book.fill", value: 2) {
                 QuranView(container: container, selectedSegment: $quranSegment)
             }
 
-            Tab("Dhikr", systemImage: "circle.circle.fill", value: 3) {
+            Tab("Zikir", systemImage: "circle.circle.fill", value: 3) {
                 DhikrView(container: container)
             }
 
-            Tab("Settings", systemImage: "gearshape.fill", value: 4) {
+            Tab("Ayarlar", systemImage: "gearshape.fill", value: 4) {
                 SettingsView(container: container)
             }
         }
