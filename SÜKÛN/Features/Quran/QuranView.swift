@@ -1,37 +1,75 @@
 import SwiftUI
 
+enum QuranSegment: String, CaseIterable {
+    case mushaf = "Mushaf"
+    case rehber = "Rehber"
+}
+
 struct QuranView: View {
     @State private var viewModel: QuranViewModel
     @State private var activeVerseID: String?
+    @Binding var selectedSegment: QuranSegment
+    let container: DependencyContainer
 
-    init(container: DependencyContainer) {
+    init(container: DependencyContainer, selectedSegment: Binding<QuranSegment>) {
         _viewModel = State(initialValue: QuranViewModel(container: container))
+        _selectedSegment = selectedSegment
+        self.container = container
     }
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isStaticDBMissing {
-                    ContentUnavailableView(
-                        "Database Not Found",
-                        systemImage: "externaldrive.badge.exclamationmark",
-                        description: Text("The Quran database (sukun_static.sqlite) is not bundled with the app. See README for setup instructions.")
-                    )
-                } else if !viewModel.searchQuery.isEmpty {
-                    searchResultsList
-                } else {
-                    surahList
+            VStack(spacing: 0) {
+                Picker("", selection: $selectedSegment) {
+                    ForEach(QuranSegment.allCases, id: \.self) { segment in
+                        Text(segment.rawValue).tag(segment)
+                    }
                 }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, DS.Space.lg)
+                .padding(.vertical, DS.Space.sm)
+
+                Group {
+                    switch selectedSegment {
+                    case .mushaf:
+                        mushafContent
+                    case .rehber:
+                        RehberView(container: container)
+                    }
+                }
+                .frame(maxHeight: .infinity)
             }
             .background(DS.Color.backgroundPrimary)
             .navigationTitle("Quran")
             .searchable(text: $viewModel.searchQuery, prompt: "Search verses...")
+            .onChange(of: selectedSegment) {
+                if selectedSegment == .rehber {
+                    viewModel.searchQuery = ""
+                }
+            }
             .onChange(of: viewModel.searchQuery) {
                 viewModel.search()
             }
             .task {
                 await viewModel.loadSurahs()
             }
+        }
+    }
+
+    // MARK: - Mushaf Content
+
+    @ViewBuilder
+    private var mushafContent: some View {
+        if viewModel.isStaticDBMissing {
+            ContentUnavailableView(
+                "Database Not Found",
+                systemImage: "externaldrive.badge.exclamationmark",
+                description: Text("The Quran database (sukun_static.sqlite) is not bundled with the app. See README for setup instructions.")
+            )
+        } else if !viewModel.searchQuery.isEmpty {
+            searchResultsList
+        } else {
+            surahList
         }
     }
 
@@ -111,3 +149,4 @@ struct QuranView: View {
         }
     }
 }
+

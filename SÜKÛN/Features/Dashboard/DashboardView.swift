@@ -4,9 +4,11 @@ import SwiftData
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel: DashboardViewModel
+    var onOpenRehber: (() -> Void)?
 
-    init(container: DependencyContainer) {
+    init(container: DependencyContainer, onOpenRehber: (() -> Void)? = nil) {
         _viewModel = State(initialValue: DashboardViewModel(container: container))
+        self.onOpenRehber = onOpenRehber
     }
 
     var body: some View {
@@ -15,6 +17,7 @@ struct DashboardView: View {
                 VStack(spacing: DS.Space.xl) {
                     nextPrayerCard
                     todayChecklistCard
+                    bilgiTazeleCard
                 }
                 .padding(DS.Space.lg)
             }
@@ -83,6 +86,39 @@ struct DashboardView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Bilgi Tazele
+
+    private var bilgiTazeleCard: some View {
+        Button {
+            onOpenRehber?()
+        } label: {
+            DSCard {
+                HStack(spacing: DS.Space.lg) {
+                    Image(systemName: "book.pages")
+                        .font(.system(size: 22, weight: .light))
+                        .foregroundStyle(DS.Color.accent)
+                        .frame(width: 32)
+
+                    VStack(alignment: .leading, spacing: DS.Space.xs) {
+                        Text("Bilgi Tazele")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundStyle(DS.Color.textPrimary)
+                        Text("Temel esaslar ve hatırlatmalar.")
+                            .font(DS.Typography.caption)
+                            .foregroundStyle(DS.Color.textSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(DS.Typography.captionSm)
+                        .foregroundStyle(DS.Color.textSecondary)
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private func prayerRow(_ name: String, status: PrayerStatus) -> some View {

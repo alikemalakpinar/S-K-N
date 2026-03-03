@@ -1,0 +1,67 @@
+{
+  "title": "Namazın Anatomisi",
+  "postures": [
+    {
+      "name": "İftitah Tekbiri",
+      "actionText": "Namaza \"Allahu Ekber\" diyerek başlanır. Eller kulak hizasına kaldırılır, ardından göbek altında bağlanır.",
+      "recitation": null,
+      "libraryRefId": "subhaneke"
+    },
+    {
+      "name": "Kıyam",
+      "actionText": "Ayakta durulur. Fatiha suresi ve ardından bir sure veya birkaç ayet okunur.",
+      "recitation": {
+        "arabic": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ۝ اَلْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+        "transliteration": "Bismillâhirrahmânirrahîm. Elhamdü lillâhi rabbil-âlemîn…",
+        "meaning": "Rahman ve Rahim olan Allah'ın adıyla. Hamd, âlemlerin Rabbi olan Allah'a mahsustur…"
+      },
+      "libraryRefId": null
+    },
+    {
+      "name": "Rükû",
+      "actionText": "\"Allahu Ekber\" denilerek eğilinir. Eller dizlere konur, sırt düz tutulur.",
+      "recitation": {
+        "arabic": "سُبْحَانَ رَبِّيَ الْعَظِيمِ",
+        "transliteration": "Sübhâne rabbiyel-azîm.",
+        "meaning": "Yüce Rabbimi tüm eksikliklerden tenzih ederim."
+      },
+      "libraryRefId": null
+    },
+    {
+      "name": "Kavme",
+      "actionText": "Rükûdan \"Semiallâhü limen hamideh\" denilerek doğrulunur. Ardından \"Rabbenâ lekel-hamd\" denir.",
+      "recitation": {
+        "arabic": "رَبَّنَا لَكَ الْحَمْدُ",
+        "transliteration": "Rabbenâ lekel-hamd.",
+        "meaning": "Rabbimiz, hamd Sana mahsustur."
+      },
+      "libraryRefId": null
+    },
+    {
+      "name": "Secde",
+      "actionText": "\"Allahu Ekber\" denilerek secdeye gidilir. Alın, burun, iki el, iki diz ve ayak parmakları yere değer.",
+      "recitation": {
+        "arabic": "سُبْحَانَ رَبِّيَ الْأَعْلَى",
+        "transliteration": "Sübhâne rabbiyel-a'lâ.",
+        "meaning": "En yüce Rabbimi tüm eksikliklerden tenzih ederim."
+      },
+      "libraryRefId": null
+    },
+    {
+      "name": "Oturuş (Ka'de)",
+      "actionText": "İki secde arasında ve son rekâtlarda oturulur. Eller dizlerin üzerine konur.",
+      "recitation": null,
+      "libraryRefId": "ettehiyyatu"
+    },
+    {
+      "name": "Selam",
+      "actionText": "Namaz \"Esselâmü aleyküm ve rahmetullâh\" diyerek önce sağa, sonra sola selam verilerek bitirilir.",
+      "recitation": {
+        "arabic": "اَلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ",
+        "transliteration": "Esselâmü aleyküm ve rahmetullâh.",
+        "meaning": "Allah'ın selâmı ve rahmeti üzerinize olsun."
+      },
+      "libraryRefId": null
+    }
+  ]
+}
