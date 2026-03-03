@@ -3,13 +3,13 @@ import SwiftData
 
 @Model
 final class CounterSession {
-    var presetId: PersistentIdentifier?
+    var presetTitle: String = ""
     var date: Date = Date()
     var count: Int = 0
     var durationSeconds: Int = 0
 
-    init(presetId: PersistentIdentifier?, date: Date, count: Int, durationSeconds: Int) {
-        self.presetId = presetId
+    init(presetTitle: String, date: Date, count: Int, durationSeconds: Int) {
+        self.presetTitle = presetTitle
         self.date = date
         self.count = count
         self.durationSeconds = durationSeconds

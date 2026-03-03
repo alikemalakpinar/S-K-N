@@ -59,7 +59,7 @@ final class DhikrViewModel {
         guard let start = sessionStart, currentCount > 0 else { return }
         let duration = Int(Date().timeIntervalSince(start))
         let session = CounterSession(
-            presetId: selectedPreset?.persistentModelID,
+            presetTitle: selectedPreset?.title ?? "",
             date: Date(),
             count: currentCount,
             durationSeconds: duration
