@@ -65,6 +65,8 @@
 			);
 			name = "SÜKÛN";
 			packageProductDependencies = (
+				B9A0B1C22F570D0100C9933B /* GRDB */,
+				B3D4E5F62F570D0100C9933B /* Adhan */,
 			);
 			productName = "SÜKÛN";
 			productReference = A99834F22F570D0100C9933B /* SÜKÛN.app */;
@@ -100,6 +102,10 @@
 			projectRoot = "";
 			targets = (
 				A99834F12F570D0100C9933B /* SÜKÛN */,
+			);
+			packageReferences = (
+				B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				B5D6E7F82F570D0100C9933B /* XCRemoteSwiftPackageReference "adhan-swift" */,
 			);
 		};
 /* End PBXProject section */
@@ -351,6 +357,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
+		B5D6E7F82F570D0100C9933B /* XCRemoteSwiftPackageReference "adhan-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/batoulapps/adhan-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B9A0B1C22F570D0100C9933B /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+		B3D4E5F62F570D0100C9933B /* Adhan */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5D6E7F82F570D0100C9933B /* XCRemoteSwiftPackageReference "adhan-swift" */;
+			productName = Adhan;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A99834EA2F570D0100C9933B /* Project object */;
 }
