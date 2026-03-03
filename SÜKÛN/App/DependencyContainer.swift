@@ -5,13 +5,13 @@ import SwiftData
 final class DependencyContainer {
     // MARK: - Static DB
 
-    private(set) var staticDBClient: StaticDBClientProtocol?
+    let staticDBClient: StaticDBClientProtocol
     private(set) var staticDBError: StaticDBError?
 
     // MARK: - Repositories
 
-    private(set) var quranRepository: (any QuranRepository)?
-    private(set) var duaRepository: (any DuaRepository)?
+    let quranRepository: any QuranRepository
+    let duaRepository: any DuaRepository
     let prayerTimesRepository: any PrayerTimesRepository = DefaultPrayerTimesRepository()
     let userActivityRepository: any UserActivityRepository = DefaultUserActivityRepository()
 
@@ -47,22 +47,25 @@ final class DependencyContainer {
         // Prayer time service depends on repository
         prayerTimeService = PrayerTimeService(repository: prayerTimesRepository)
 
-        // Attempt to open static DB (graceful failure if missing)
+        // Attempt to open static DB; fall back to noop if missing
+        var client: StaticDBClientProtocol
         do {
-            let client = try StaticDBClient()
-            staticDBClient = client
-            quranRepository = DefaultQuranRepository(dbClient: client)
-            duaRepository = DefaultDuaRepository(dbClient: client)
+            client = try StaticDBClient()
         } catch let error as StaticDBError {
             staticDBError = error
+            client = NoopStaticDBClient()
         } catch {
             staticDBError = .databaseCorrupted(underlying: error)
+            client = NoopStaticDBClient()
         }
+        staticDBClient = client
+        quranRepository = DefaultQuranRepository(dbClient: client)
+        duaRepository = DefaultDuaRepository(dbClient: client)
     }
 
     // MARK: - Convenience
 
     var isStaticDBAvailable: Bool {
-        staticDBClient != nil
+        staticDBError == nil
     }
 }

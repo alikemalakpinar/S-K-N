@@ -93,13 +93,18 @@ CREATE VIRTUAL TABLE duas_fts USING fts5(
 );
 ```
 
-### Steps
+### Local DB Build
 
-1. Create and populate the SQLite database using the schema above
-2. Place the file at `SÜKÛN/Resources/Data/sukun_static.sqlite`
-3. Xcode will automatically include it in the bundle (PBXFileSystemSynchronizedRootGroup)
+```bash
+cd tools
+./download_sources.sh        # downloads Tanzil XMLs into tools/input/
+python3 build_static_db.py   # builds SÜKÛN/Resources/Data/sukun_static.sqlite
+python3 verify_db.py         # sanity-checks counts, sample verse, FTS
+```
 
-If the database is missing at runtime, the app will show a clear error state in the Quran and Duas tabs instead of crashing.
+Xcode will automatically include the sqlite file in the bundle (PBXFileSystemSynchronizedRootGroup).
+
+If the database is missing at runtime, the app will show a clear error state in the Quran and Duas tabs instead of crashing. Attribution details are available in Settings > About.
 
 ## Dependencies
 

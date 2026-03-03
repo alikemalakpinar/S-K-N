@@ -1,0 +1,35 @@
+# === Xcode ===
+*.xcuserdata/
+xcuserdata/
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# === macOS ===
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# === Swift Package Manager ===
+.build/
+.swiftpm/
+Package.resolved
+
+# === Tools: downloaded XML sources (large, not committed) ===
+tools/input/*.xml
+
+# === Database ===
+# sukun_static.sqlite is NOT ignored — we may commit it for reproducible builds.
+# If the file grows too large or has licensing restrictions, add it here and
+# distribute via Git LFS or a download script instead.
+# SÜKÛN/Resources/Data/sukun_static.sqlite
