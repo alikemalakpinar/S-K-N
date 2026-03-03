@@ -19,14 +19,9 @@ final class DashboardViewModel {
         isLoading = true
         defer { isLoading = false }
 
-        // Load today's prayer log
+        // Load today's prayer log (upsert prevents duplicates)
         do {
-            todayLog = try container.userActivityRepository.prayerLog(for: Date(), context: context)
-            if todayLog == nil {
-                let newLog = PrayerLog(date: Date())
-                try container.userActivityRepository.upsertPrayerLog(newLog, context: context)
-                todayLog = newLog
-            }
+            todayLog = try container.userActivityRepository.getOrCreatePrayerLog(for: Date(), context: context)
         } catch {
             errorMessage = error.localizedDescription
         }
