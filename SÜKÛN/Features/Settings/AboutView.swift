@@ -12,7 +12,7 @@ struct AboutView: View {
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
             }
-            .listRowBackground(DS.Color.backgroundSecondary)
+            .listRowBackground(DS.Color.cardElevated)
 
             Section {
                 Text("Türkçe meal: Diyanet İşleri Başkanlığı çevirisi kullanılmaktadır.")
@@ -23,7 +23,7 @@ struct AboutView: View {
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
             }
-            .listRowBackground(DS.Color.backgroundSecondary)
+            .listRowBackground(DS.Color.cardElevated)
 
             Section {
                 Link(destination: URL(string: "https://github.com/groue/GRDB.swift")!) {
@@ -37,7 +37,7 @@ struct AboutView: View {
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
             }
-            .listRowBackground(DS.Color.backgroundSecondary)
+            .listRowBackground(DS.Color.cardElevated)
         }
         .scrollContentBackground(.hidden)
         .background(DS.Color.backgroundPrimary)

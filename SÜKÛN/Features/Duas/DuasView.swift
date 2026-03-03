@@ -24,43 +24,67 @@ struct DuasView: View {
                 } else if viewModel.searchResults.isEmpty {
                     ContentUnavailableView.search(text: viewModel.searchQuery)
                 } else {
-                    List(viewModel.searchResults) { dua in
-                        VStack(alignment: .leading, spacing: DS.Space.sm) {
-                            Text(dua.title)
-                                .font(.system(size: 17, weight: .medium))
-                                .foregroundStyle(DS.Color.textPrimary)
-                            Text(dua.textArabic)
-                                .font(.system(size: 20, weight: .regular))
-                                .multilineTextAlignment(.trailing)
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .foregroundStyle(DS.Color.textPrimary)
-                            Text(dua.textTranslation)
-                                .font(DS.Typography.body)
-                                .foregroundStyle(DS.Color.textSecondary)
-                            Hairline()
-                            HStack {
-                                Text(dua.category)
-                                Spacer()
-                                Text(dua.source)
+                    ScrollView(showsIndicators: false) {
+                        LazyVStack(spacing: DS.Space.lg) {
+                            ForEach(viewModel.searchResults) { dua in
+                                duaCard(dua)
                             }
-                            .font(DS.Typography.captionSm)
-                            .foregroundStyle(DS.Color.textSecondary)
                         }
-                        .padding(.vertical, DS.Space.xs)
-                        .listRowBackground(DS.Color.backgroundPrimary)
-                        .listRowSeparator(.hidden)
+                        .padding(.horizontal, DS.Space.lg)
+                        .padding(.bottom, DS.Space.x4)
                     }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
-                    .background(DS.Color.backgroundPrimary)
                 }
             }
             .background(DS.Color.backgroundPrimary)
             .navigationTitle("Dualar")
+            .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $viewModel.searchQuery, prompt: "Dua ara...")
             .onChange(of: viewModel.searchQuery) {
                 viewModel.search()
             }
         }
+    }
+
+    private func duaCard(_ dua: DuaDTO) -> some View {
+        VStack(alignment: .leading, spacing: DS.Space.md) {
+            // Title
+            Text(dua.title)
+                .font(DS.Typography.headline)
+                .foregroundStyle(DS.Color.textPrimary)
+
+            // Arabic text
+            Text(dua.textArabic)
+                .font(DS.Typography.arabicVerse)
+                .multilineTextAlignment(.trailing)
+                .lineSpacing(12)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .foregroundStyle(DS.Color.textPrimary)
+                .padding(.vertical, DS.Space.sm)
+
+            // Translation
+            Text(dua.textTranslation)
+                .font(DS.Typography.caption)
+                .foregroundStyle(DS.Color.textSecondary)
+                .lineSpacing(4)
+
+            // Metadata
+            HStack {
+                Text(dua.category)
+                    .font(DS.Typography.micro)
+                    .textCase(.uppercase)
+                    .tracking(1)
+                Spacer()
+                Text(dua.source)
+                    .font(DS.Typography.captionSm)
+            }
+            .foregroundStyle(DS.Color.textTertiary)
+            .padding(.top, DS.Space.xs)
+        }
+        .padding(DS.Space.lg)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(DS.Color.cardElevated)
+                .shadow(color: .black.opacity(0.04), radius: 6, y: 2)
+        )
     }
 }

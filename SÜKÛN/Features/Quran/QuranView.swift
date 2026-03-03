@@ -97,24 +97,37 @@ struct QuranView: View {
     private var surahList: some View {
         List(viewModel.surahs) { surah in
             NavigationLink(value: surah.id) {
-                HStack {
-                    Text("\(surah.id)")
-                        .font(DS.Typography.caption)
-                        .foregroundStyle(DS.Color.textSecondary)
-                        .frame(width: 30)
-                    VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: DS.Space.md) {
+                    // Ornamental number badge
+                    ZStack {
+                        Image(systemName: "seal.fill")
+                            .font(.system(size: 34))
+                            .foregroundStyle(DS.Color.accentSoft)
+                        Image(systemName: "seal")
+                            .font(.system(size: 34))
+                            .foregroundStyle(DS.Color.accent.opacity(0.4))
+                        Text("\(surah.id)")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(DS.Color.accent)
+                    }
+                    .frame(width: 36, height: 36)
+
+                    VStack(alignment: .leading, spacing: 3) {
                         Text(surah.nameTurkish)
-                            .font(.system(size: 17, weight: .regular))
+                            .font(.system(size: 16, weight: .medium))
                             .foregroundStyle(DS.Color.textPrimary)
                         Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
                             .font(DS.Typography.captionSm)
                             .foregroundStyle(DS.Color.textSecondary)
                     }
+
                     Spacer()
+
                     Text(surah.nameArabic)
-                        .font(.system(size: 20, weight: .regular))
+                        .font(.system(size: 22, weight: .regular))
                         .foregroundStyle(DS.Color.textPrimary)
                 }
+                .padding(.vertical, DS.Space.xs)
             }
             .listRowBackground(DS.Color.backgroundPrimary)
             .listRowSeparator(.hidden)
@@ -140,30 +153,50 @@ struct QuranView: View {
                     let verseID = "\(verse.surahId):\(verse.verseNumber)"
                     let isActive = activeVerseID == verseID
 
-                    VStack(alignment: .leading, spacing: DS.Space.sm) {
+                    VStack(alignment: .leading, spacing: DS.Space.md) {
+                        // Header row with verse ref + page
                         HStack {
-                            Text(verseID)
-                                .font(DS.Typography.caption.bold())
-                                .foregroundStyle(DS.Color.accent)
+                            HStack(spacing: DS.Space.xs) {
+                                ZStack {
+                                    Image(systemName: "seal.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundStyle(DS.Color.accentSoft)
+                                    Text("\(verse.verseNumber)")
+                                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(DS.Color.accent)
+                                }
+                                Text(verseID)
+                                    .font(DS.Typography.caption.bold())
+                                    .foregroundStyle(DS.Color.accent)
+                            }
                             Spacer()
-                            Text("Sayfa \(verse.pageNumber)")
-                                .font(DS.Typography.captionSm)
-                                .foregroundStyle(DS.Color.textSecondary)
+                            Label {
+                                Text("Sayfa \(verse.pageNumber)")
+                                    .font(DS.Typography.captionSm)
+                            } icon: {
+                                Image(systemName: "book.pages")
+                                    .font(.system(size: 9))
+                            }
+                            .foregroundStyle(DS.Color.textSecondary)
                         }
 
+                        // Arabic text
                         Text(verse.textArabic)
-                            .font(.system(size: 20, weight: .regular))
+                            .font(DS.Typography.arabicVerse)
                             .multilineTextAlignment(.trailing)
+                            .lineSpacing(10)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                             .foregroundStyle(DS.Color.textPrimary)
 
+                        // Translation
                         Text(verse.textTranslation)
-                            .font(DS.Typography.body)
+                            .font(DS.Typography.caption)
                             .foregroundStyle(DS.Color.textSecondary)
+                            .lineSpacing(3)
 
                         AccentUnderline(active: isActive)
                     }
-                    .padding(.vertical, DS.Space.xs)
+                    .padding(.vertical, DS.Space.sm)
                     .opacity(activeVerseID == nil || isActive ? 1.0 : 0.6)
                     .animation(DS.Motion.verse, value: activeVerseID)
                     .listRowBackground(DS.Color.backgroundPrimary)
@@ -189,53 +222,127 @@ struct SurahDetailView: View {
     let container: DependencyContainer
 
     @State private var verses: [VerseDTO] = []
-    @State private var surahName = ""
+    @State private var surah: SurahDTO?
     @State private var selectedVerse: VerseDTO?
 
     var body: some View {
-        List(verses) { verse in
-            Button {
-                selectedVerse = verse
-            } label: {
-                VStack(alignment: .leading, spacing: DS.Space.sm) {
-                    HStack(alignment: .top) {
-                        Text("\(verse.verseNumber)")
-                            .font(DS.Typography.captionSm)
-                            .foregroundStyle(DS.Color.accent)
-                            .frame(width: 24)
-                        Spacer()
-                        Text(verse.textArabic)
-                            .font(.system(size: 20, weight: .regular))
-                            .multilineTextAlignment(.trailing)
-                            .foregroundStyle(DS.Color.textPrimary)
-                            .lineSpacing(8)
-                    }
-                    Text(verse.textTranslation)
-                        .font(DS.Typography.caption)
-                        .foregroundStyle(DS.Color.textSecondary)
-                        .lineSpacing(3)
+        ScrollView(showsIndicators: false) {
+            LazyVStack(spacing: 0) {
+                // Surah header
+                if let surah {
+                    surahHeader(surah)
+                        .padding(.bottom, DS.Space.lg)
                 }
-                .padding(.vertical, DS.Space.xs)
+
+                // Bismillah (except surah 1 and 9)
+                if let surah, surah.id != 1 && surah.id != 9 {
+                    Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
+                        .font(DS.Typography.arabicBismillah)
+                        .foregroundStyle(DS.Color.textPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, DS.Space.md)
+                        .padding(.bottom, DS.Space.sm)
+                }
+
+                // Verses
+                ForEach(verses) { verse in
+                    Button {
+                        selectedVerse = verse
+                    } label: {
+                        verseCard(verse)
+                    }
+                    .buttonStyle(VerseCardButtonStyle())
+                }
             }
-            .buttonStyle(.plain)
-            .listRowBackground(DS.Color.backgroundPrimary)
-            .listRowSeparator(.hidden)
-            .overlay(alignment: .bottom) { Hairline() }
+            .padding(.horizontal, DS.Space.lg)
+            .padding(.bottom, DS.Space.x4)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
         .background(DS.Color.backgroundPrimary)
-        .navigationTitle(surahName)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle(surah?.nameTurkish ?? "")
+        .navigationBarTitleDisplayMode(.inline)
         .task {
             do {
                 verses = try await container.quranRepository.verses(forSurah: surahId)
                 let surahs = try await container.quranRepository.allSurahs()
-                surahName = surahs.first(where: { $0.id == surahId })?.nameTurkish ?? ""
+                surah = surahs.first(where: { $0.id == surahId })
             } catch {}
         }
         .sheet(item: $selectedVerse) { verse in
-            VerseDetailSheet(verse: verse, surahName: surahName)
+            VerseDetailSheet(verse: verse, surahName: surah?.nameTurkish ?? "")
         }
+    }
+
+    private func surahHeader(_ surah: SurahDTO) -> some View {
+        VStack(spacing: DS.Space.md) {
+            Text(surah.nameArabic)
+                .font(.system(size: 32, weight: .regular))
+                .foregroundStyle(DS.Color.textPrimary)
+
+            Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
+                .font(DS.Typography.caption)
+                .foregroundStyle(DS.Color.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, DS.Space.xl)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(DS.Color.surahHeader)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(DS.Color.ornamentLine, lineWidth: 0.5)
+        )
+    }
+
+    private func verseCard(_ verse: VerseDTO) -> some View {
+        VStack(alignment: .leading, spacing: DS.Space.md) {
+            // Verse number + Arabic text
+            HStack(alignment: .top, spacing: DS.Space.sm) {
+                // Number badge
+                ZStack {
+                    Image(systemName: "seal.fill")
+                        .font(.system(size: 26))
+                        .foregroundStyle(DS.Color.accentSoft)
+                    Text(verse.verseNumber.arabicNumeral)
+                        .font(DS.Typography.verseNumber)
+                        .foregroundStyle(DS.Color.accent)
+                }
+                .frame(width: 28, height: 28)
+
+                Spacer()
+
+                Text(verse.textArabic)
+                    .font(DS.Typography.arabicVerse)
+                    .multilineTextAlignment(.trailing)
+                    .foregroundStyle(DS.Color.textPrimary)
+                    .lineSpacing(12)
+            }
+
+            // Translation
+            if !verse.textTranslation.isEmpty {
+                Text(verse.textTranslation)
+                    .font(DS.Typography.caption)
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .lineSpacing(4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(.vertical, DS.Space.lg)
+        .overlay(alignment: .bottom) { Hairline() }
+    }
+}
+
+// MARK: - Verse Card Button Style
+
+private struct VerseCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(configuration.isPressed ? DS.Color.accentSoft : .clear)
+                    .padding(.horizontal, -DS.Space.sm)
+            )
+            .scaleEffect(configuration.isPressed ? 0.99 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }

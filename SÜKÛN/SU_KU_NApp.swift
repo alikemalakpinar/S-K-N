@@ -9,7 +9,7 @@ struct SU_KU_NApp: App {
         WindowGroup {
             RootView(container: container)
                 .background(DS.Color.backgroundPrimary)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(.light)
         }
         .modelContainer(container.modelContainer)
     }

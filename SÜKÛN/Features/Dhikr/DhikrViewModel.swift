@@ -24,9 +24,9 @@ final class DhikrViewModel {
         // Create default presets if empty
         if presets.isEmpty {
             let defaults = [
-                CounterPreset(title: "SubhanAllah", target: 33),
-                CounterPreset(title: "Alhamdulillah", target: 33),
-                CounterPreset(title: "Allahu Akbar", target: 33),
+                CounterPreset(title: "Sübhânallâh", target: 33),
+                CounterPreset(title: "Elhamdülillâh", target: 33),
+                CounterPreset(title: "Allâhü Ekber", target: 33),
             ]
             defaults.forEach { context.insert($0) }
             try? context.save()

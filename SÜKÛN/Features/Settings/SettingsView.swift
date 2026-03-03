@@ -32,6 +32,7 @@ struct SettingsView: View {
             .scrollContentBackground(.hidden)
             .background(DS.Color.backgroundPrimary)
             .navigationTitle("Ayarlar")
+            .navigationBarTitleDisplayMode(.inline)
             .tint(DS.Color.accent)
             .task {
                 viewModel.loadSettings(context: modelContext)
@@ -66,7 +67,7 @@ struct SettingsView: View {
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
         }
-        .listRowBackground(DS.Color.backgroundSecondary)
+        .listRowBackground(DS.Color.cardElevated)
     }
 
     private func offsetSection(_ settings: UserSetting) -> some View {
@@ -96,7 +97,7 @@ struct SettingsView: View {
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
         }
-        .listRowBackground(DS.Color.backgroundSecondary)
+        .listRowBackground(DS.Color.cardElevated)
         .foregroundStyle(DS.Color.textPrimary)
     }
 
@@ -137,7 +138,7 @@ struct SettingsView: View {
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
         }
-        .listRowBackground(DS.Color.backgroundSecondary)
+        .listRowBackground(DS.Color.cardElevated)
         .foregroundStyle(DS.Color.textPrimary)
     }
 
@@ -170,6 +171,6 @@ struct SettingsView: View {
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
         }
-        .listRowBackground(DS.Color.backgroundSecondary)
+        .listRowBackground(DS.Color.cardElevated)
     }
 }

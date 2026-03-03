@@ -5,11 +5,11 @@ import SwiftData
 final class UserSetting {
     @Attribute(.unique) var id: String = "default"
 
-    // Calculation method (e.g., "MuslimWorldLeague", "NorthAmerica", "Egyptian", etc.)
-    var calculationMethod: String = "MuslimWorldLeague"
+    // Calculation method (e.g., "Turkey", "MuslimWorldLeague", "Egyptian", etc.)
+    var calculationMethod: String = "Turkey"
 
     // Asr juristic method: "standard" (Shafi/Maliki/Hanbali) or "hanafi"
-    var asrMethod: String = "standard"
+    var asrMethod: String = "hanafi"
 
     // Manual offsets in minutes for each prayer
     var fajrOffset: Int = 0
