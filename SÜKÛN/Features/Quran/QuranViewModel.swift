@@ -9,6 +9,36 @@ final class QuranViewModel {
     var errorMessage: String?
     var isStaticDBMissing = false
 
+    // Mushaf page navigation
+    var currentPage = 1
+    var totalPages = 604
+    var pageVerses: [VerseDTO] = []
+    var isLoadingPage = false
+    var currentJuzNumber: Int { juzForPage(currentPage) }
+
+    /// Returns the surah name for the currently displayed page
+    func surahNameForPage(_ page: Int) -> String {
+        // Find the surah whose page range includes this page
+        guard !surahs.isEmpty else { return "" }
+        // We can check which surah starts on or before this page
+        // by finding the last surah whose starting page <= page
+        // For simplicity, we rely on pageVerses or iterate surahs
+        return ""
+    }
+
+    private func juzForPage(_ page: Int) -> Int {
+        // Standard Medina Mushaf juz boundaries (page numbers)
+        let juzStartPages = [1,22,42,62,82,102,121,142,162,182,
+                             201,222,242,262,282,302,322,342,362,382,
+                             402,422,442,462,482,502,522,542,562,582]
+        for i in stride(from: juzStartPages.count - 1, through: 0, by: -1) {
+            if page >= juzStartPages[i] {
+                return i + 1
+            }
+        }
+        return 1
+    }
+
     private let container: DependencyContainer
     private var searchTask: Task<Void, Never>?
 
@@ -21,8 +51,31 @@ final class QuranViewModel {
         guard !isStaticDBMissing else { return }
         do {
             surahs = try await container.quranRepository.allSurahs()
+            totalPages = try await container.quranRepository.pageCount()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    func loadPage(_ page: Int) async {
+        guard !isStaticDBMissing, page >= 1, page <= totalPages else { return }
+        do {
+            let verses = try await container.quranRepository.versesForPage(page: page)
+            pageVerses = verses
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func jumpToSurah(_ surahId: Int) async -> Int {
+        guard !isStaticDBMissing else { return 1 }
+        do {
+            let page = try await container.quranRepository.pageForSurah(surahId: surahId)
+            currentPage = page
+            return page
+        } catch {
+            errorMessage = error.localizedDescription
+            return 1
         }
     }
 

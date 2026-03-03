@@ -66,7 +66,7 @@ enum LocationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notAuthorized:
-            return "Location access not authorized. Please enable location services in Settings."
+            return "Konum erişimi sağlanamadı. Lütfen Ayarlar'dan konum iznini etkinleştirin."
         }
     }
 }

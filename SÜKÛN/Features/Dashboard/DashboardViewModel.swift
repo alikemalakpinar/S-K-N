@@ -42,7 +42,7 @@ final class DashboardViewModel {
                 // Update widget data
                 try? container.widgetDataService.writeNextPrayerData(name: next.name, time: next.time)
             } else {
-                nextPrayerName = "Isha"
+                nextPrayerName = "Yatsı"
                 nextPrayerTime = today.isha
             }
         } catch {

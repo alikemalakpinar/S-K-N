@@ -19,7 +19,7 @@ struct SettingsView: View {
                     appearanceSection(settings)
 
                     Section {
-                        NavigationLink("About") {
+                        NavigationLink("Hakkında") {
                             AboutView()
                         }
                         .foregroundStyle(DS.Color.textPrimary)
@@ -31,7 +31,8 @@ struct SettingsView: View {
             }
             .scrollContentBackground(.hidden)
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Settings")
+            .navigationTitle("Ayarlar")
+            .navigationBarTitleDisplayMode(.inline)
             .tint(DS.Color.accent)
             .task {
                 viewModel.loadSettings(context: modelContext)
@@ -43,7 +44,7 @@ struct SettingsView: View {
 
     private func calculationSection(_ settings: UserSetting) -> some View {
         Section {
-            Picker("Method", selection: Binding(
+            Picker("Yöntem", selection: Binding(
                 get: { settings.calculationMethod },
                 set: { settings.calculationMethod = $0; viewModel.saveSettings(context: modelContext) }
             )) {
@@ -53,108 +54,108 @@ struct SettingsView: View {
             }
             .foregroundStyle(DS.Color.textPrimary)
 
-            Picker("Asr Juristic", selection: Binding(
+            Picker("İkindi Mezhebi", selection: Binding(
                 get: { settings.asrMethod },
                 set: { settings.asrMethod = $0; viewModel.saveSettings(context: modelContext) }
             )) {
-                Text("Standard (Shafi'i)").tag("standard")
-                Text("Hanafi").tag("hanafi")
+                Text("Standart (Şâfiî)").tag("standard")
+                Text("Hanefî").tag("hanafi")
             }
             .foregroundStyle(DS.Color.textPrimary)
         } header: {
-            Text("Calculation Method")
+            Text("Hesaplama Yöntemi")
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
         }
-        .listRowBackground(DS.Color.backgroundSecondary)
+        .listRowBackground(DS.Color.cardElevated)
     }
 
     private func offsetSection(_ settings: UserSetting) -> some View {
         Section {
-            Stepper("Fajr: \(settings.fajrOffset)", value: Binding(
+            Stepper("Sabah: \(settings.fajrOffset)", value: Binding(
                 get: { settings.fajrOffset },
                 set: { settings.fajrOffset = $0; viewModel.saveSettings(context: modelContext) }
             ), in: -30...30)
-            Stepper("Dhuhr: \(settings.dhuhrOffset)", value: Binding(
+            Stepper("Öğle: \(settings.dhuhrOffset)", value: Binding(
                 get: { settings.dhuhrOffset },
                 set: { settings.dhuhrOffset = $0; viewModel.saveSettings(context: modelContext) }
             ), in: -30...30)
-            Stepper("Asr: \(settings.asrOffset)", value: Binding(
+            Stepper("İkindi: \(settings.asrOffset)", value: Binding(
                 get: { settings.asrOffset },
                 set: { settings.asrOffset = $0; viewModel.saveSettings(context: modelContext) }
             ), in: -30...30)
-            Stepper("Maghrib: \(settings.maghribOffset)", value: Binding(
+            Stepper("Akşam: \(settings.maghribOffset)", value: Binding(
                 get: { settings.maghribOffset },
                 set: { settings.maghribOffset = $0; viewModel.saveSettings(context: modelContext) }
             ), in: -30...30)
-            Stepper("Isha: \(settings.ishaOffset)", value: Binding(
+            Stepper("Yatsı: \(settings.ishaOffset)", value: Binding(
                 get: { settings.ishaOffset },
                 set: { settings.ishaOffset = $0; viewModel.saveSettings(context: modelContext) }
             ), in: -30...30)
         } header: {
-            Text("Manual Offsets (minutes)")
+            Text("Manuel Düzeltmeler (dakika)")
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
         }
-        .listRowBackground(DS.Color.backgroundSecondary)
+        .listRowBackground(DS.Color.cardElevated)
         .foregroundStyle(DS.Color.textPrimary)
     }
 
     private func notificationSection(_ settings: UserSetting) -> some View {
         Section {
-            Toggle("Fajr", isOn: Binding(
+            Toggle("Sabah", isOn: Binding(
                 get: { settings.fajrNotification },
                 set: { settings.fajrNotification = $0; viewModel.saveSettings(context: modelContext) }
             ))
-            Toggle("Dhuhr", isOn: Binding(
+            Toggle("Öğle", isOn: Binding(
                 get: { settings.dhuhrNotification },
                 set: { settings.dhuhrNotification = $0; viewModel.saveSettings(context: modelContext) }
             ))
-            Toggle("Asr", isOn: Binding(
+            Toggle("İkindi", isOn: Binding(
                 get: { settings.asrNotification },
                 set: { settings.asrNotification = $0; viewModel.saveSettings(context: modelContext) }
             ))
-            Toggle("Maghrib", isOn: Binding(
+            Toggle("Akşam", isOn: Binding(
                 get: { settings.maghribNotification },
                 set: { settings.maghribNotification = $0; viewModel.saveSettings(context: modelContext) }
             ))
-            Toggle("Isha", isOn: Binding(
+            Toggle("Yatsı", isOn: Binding(
                 get: { settings.ishaNotification },
                 set: { settings.ishaNotification = $0; viewModel.saveSettings(context: modelContext) }
             ))
 
-            Stepper("Alert \(settings.notificationMinutesBefore) min before", value: Binding(
+            Stepper("\(settings.notificationMinutesBefore) dk önce uyar", value: Binding(
                 get: { settings.notificationMinutesBefore },
                 set: { settings.notificationMinutesBefore = $0; viewModel.saveSettings(context: modelContext) }
             ), in: 0...30)
 
-            Button("Request Notification Permission") {
+            Button("Bildirim İzni İste") {
                 Task { await viewModel.requestNotifications() }
             }
             .foregroundStyle(DS.Color.accent)
         } header: {
-            Text("Notifications")
+            Text("Bildirimler")
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
         }
-        .listRowBackground(DS.Color.backgroundSecondary)
+        .listRowBackground(DS.Color.cardElevated)
         .foregroundStyle(DS.Color.textPrimary)
     }
 
     private func appearanceSection(_ settings: UserSetting) -> some View {
         Section {
-            Picker("Theme", selection: Binding(
+            Picker("Tema", selection: Binding(
                 get: { settings.theme },
                 set: { settings.theme = $0; viewModel.saveSettings(context: modelContext) }
             )) {
-                Text("System").tag("system")
-                Text("Light").tag("light")
-                Text("Dark").tag("dark")
+                Text("Sistem").tag("system")
+                Text("Açık").tag("light")
+                Text("Koyu").tag("dark")
             }
             .foregroundStyle(DS.Color.textPrimary)
 
             HStack {
-                Text("Font Scale")
+                Text("Yazı Boyutu")
                     .foregroundStyle(DS.Color.textPrimary)
                 Slider(value: Binding(
                     get: { settings.fontScale },
@@ -166,10 +167,10 @@ struct SettingsView: View {
                     .foregroundStyle(DS.Color.textSecondary)
             }
         } header: {
-            Text("Appearance")
+            Text("Görünüm")
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
         }
-        .listRowBackground(DS.Color.backgroundSecondary)
+        .listRowBackground(DS.Color.cardElevated)
     }
 }

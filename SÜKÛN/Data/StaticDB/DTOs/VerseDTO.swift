@@ -7,4 +7,6 @@ struct VerseDTO: Identifiable, Sendable {
     let textArabic: String
     let textTranslation: String
     let textTransliteration: String
+    let textTefsir: String
+    let pageNumber: Int
 }
