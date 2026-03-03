@@ -1,0 +1,32 @@
+{
+  "readings": [
+    {
+      "id": "subhaneke",
+      "title": "Sübhaneke",
+      "arabic": "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ وَتَبَارَكَ اسْمُكَ وَتَعَالَى جَدُّكَ وَلَا إِلَهَ غَيْرُكَ",
+      "transliteration": "Sübhânekellâhümme ve bihamdik ve tebârekesmük ve teâlâ ceddük ve lâ ilâhe ğayruk.",
+      "meaning": "Allah'ım! Sen eksik sıfatlardan pak ve uzaksın. Seni daima hamd ile anarım. Senin adın mübarektir. Varlığın her şeyden üstündür. Senden başka ilâh yoktur."
+    },
+    {
+      "id": "ettehiyyatu",
+      "title": "Ettehiyyatü",
+      "arabic": "اَلتَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ اَلسَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ اَلسَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ",
+      "transliteration": "Ettehiyyâtü lillâhi ves-salevâtü vet-tayyibât. Esselâmü aleyke eyyühen-nebiyyü ve rahmetullâhi ve berekâtüh. Esselâmü aleynâ ve alâ ibâdillâhis-sâlihîn. Eşhedü en lâ ilâhe illallâh ve eşhedü enne Muhammeden abdühû ve resûlüh.",
+      "meaning": "Dil ile, beden ile, mal ile yapılan bütün ibadetler Allah'a mahsustur. Ey Peygamber! Allah'ın selâmı, rahmeti ve bereketleri senin üzerine olsun. Selâm bizim üzerimize ve Allah'ın sâlih kulları üzerine olsun. Şahitlik ederim ki Allah'tan başka ilâh yoktur ve şahitlik ederim ki Muhammed O'nun kulu ve resûlüdür."
+    },
+    {
+      "id": "allahumme_salli",
+      "title": "Allahümme Salli",
+      "arabic": "اَللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ",
+      "transliteration": "Allâhümme salli alâ Muhammedin ve alâ âli Muhammed. Kemâ salleyte alâ İbrâhîme ve alâ âli İbrâhîm. İnneke hamîdün mecîd.",
+      "meaning": "Allah'ım! Muhammed'e ve Muhammed'in ümmetine rahmet eyle; İbrahim'e ve İbrahim'in ümmetine rahmet ettiğin gibi. Şüphesiz Sen övülmeye lâyıksın, yücesin."
+    },
+    {
+      "id": "allahumme_barik",
+      "title": "Allahümme Barik",
+      "arabic": "اَللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ",
+      "transliteration": "Allâhümme bârik alâ Muhammedin ve alâ âli Muhammed. Kemâ bârekte alâ İbrâhîme ve alâ âli İbrâhîm. İnneke hamîdün mecîd.",
+      "meaning": "Allah'ım! Muhammed'e ve Muhammed'in ümmetine bereket ver; İbrahim'e ve İbrahim'in ümmetine bereket verdiğin gibi. Şüphesiz Sen övülmeye lâyıksın, yücesin."
+    }
+  ]
+}

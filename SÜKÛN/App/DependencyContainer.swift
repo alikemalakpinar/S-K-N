@@ -15,6 +15,10 @@ final class DependencyContainer {
     let prayerTimesRepository: any PrayerTimesRepository = DefaultPrayerTimesRepository()
     let userActivityRepository: any UserActivityRepository = DefaultUserActivityRepository()
 
+    // MARK: - Static Content
+
+    let rehberLoader: any RehberLoaderProtocol = RehberLoader()
+
     // MARK: - Services
 
     let locationService: any LocationServiceProtocol = LocationService()

@@ -1,0 +1,71 @@
+{
+  "title": "Harfler ve Sesler",
+  "items": [
+    {
+      "id": "alif",
+      "symbol": "ا",
+      "name": "Elif",
+      "description": "Arap alfabesinin ilk harfidir. Uzun 'a' sesi verir. Hemze ile birlikte kullanıldığında farklı sesler alabilir.",
+      "forms": {
+        "initial": "ا",
+        "medial": "ـا",
+        "final": "ـا"
+      }
+    },
+    {
+      "id": "ba",
+      "symbol": "ب",
+      "name": "Be",
+      "description": "Türkçedeki 'b' sesine karşılık gelir. Altında tek nokta bulunur.",
+      "forms": {
+        "initial": "بـ",
+        "medial": "ـبـ",
+        "final": "ـب"
+      }
+    },
+    {
+      "id": "ta",
+      "symbol": "ت",
+      "name": "Te",
+      "description": "Türkçedeki 't' sesine karşılık gelir. Üstünde iki nokta bulunur.",
+      "forms": {
+        "initial": "تـ",
+        "medial": "ـتـ",
+        "final": "ـت"
+      }
+    },
+    {
+      "id": "tha",
+      "symbol": "ث",
+      "name": "Se",
+      "description": "Dilin ucu ön dişlerin arasına hafifçe değdirilerek çıkarılır. İngilizce 'th' sesine yakındır.",
+      "forms": {
+        "initial": "ثـ",
+        "medial": "ـثـ",
+        "final": "ـث"
+      }
+    },
+    {
+      "id": "jim",
+      "symbol": "ج",
+      "name": "Cim",
+      "description": "Türkçedeki 'c' sesine karşılık gelir. İçinde tek nokta bulunur.",
+      "forms": {
+        "initial": "جـ",
+        "medial": "ـجـ",
+        "final": "ـج"
+      }
+    },
+    {
+      "id": "ha",
+      "symbol": "ح",
+      "name": "Ha",
+      "description": "Boğazın derininden çıkarılan nefesli bir 'h' sesidir. Türkçede tam karşılığı yoktur.",
+      "forms": {
+        "initial": "حـ",
+        "medial": "ـحـ",
+        "final": "ـح"
+      }
+    }
+  ]
+}

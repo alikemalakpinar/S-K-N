@@ -1,0 +1,53 @@
+{
+  "title": "Arınma Adımları",
+  "steps": [
+    {
+      "order": 1,
+      "title": "Niyet",
+      "text": "Abdest almaya niyet edilir. Niyet kalben yapılır; dil ile söylenmesi tercih edilebilir.",
+      "iconName": "heart.fill"
+    },
+    {
+      "order": 2,
+      "title": "Eller",
+      "text": "Her iki el, bileklere kadar üç kez yıkanır. Parmak araları hilâllenir.",
+      "iconName": "hand.raised.fill"
+    },
+    {
+      "order": 3,
+      "title": "Ağız",
+      "text": "Sağ el ile ağıza üç kez su alınır ve çalkalanır.",
+      "iconName": "mouth.fill"
+    },
+    {
+      "order": 4,
+      "title": "Burun",
+      "text": "Sağ el ile burna üç kez su çekilir, sol el ile temizlenir.",
+      "iconName": "nose.fill"
+    },
+    {
+      "order": 5,
+      "title": "Yüz",
+      "text": "Alından çene altına, bir kulak yumuşağından diğerine kadar yüz üç kez yıkanır.",
+      "iconName": "face.smiling"
+    },
+    {
+      "order": 6,
+      "title": "Kollar",
+      "text": "Önce sağ, sonra sol kol, dirsekler dahil üç kez yıkanır.",
+      "iconName": "figure.arms.open"
+    },
+    {
+      "order": 7,
+      "title": "Baş Meshi",
+      "text": "Islak eller ile başın tamamı bir kez mesh edilir. Kulaklar da mesh edilir.",
+      "iconName": "head.profile.arrow.forward.and.visionpro"
+    },
+    {
+      "order": 8,
+      "title": "Ayaklar",
+      "text": "Önce sağ, sonra sol ayak, topuklar dahil üç kez yıkanır. Parmak araları hilâllenir.",
+      "iconName": "shoeprints.fill"
+    }
+  ]
+}
