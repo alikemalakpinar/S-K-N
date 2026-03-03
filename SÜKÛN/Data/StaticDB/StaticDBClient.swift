@@ -52,7 +52,7 @@ final class StaticDBClient: StaticDBClientProtocol, Sendable {
                 FROM verses_fts fts
                 JOIN verses v ON v.rowid = fts.rowid
                 WHERE verses_fts MATCH ?
-                ORDER BY rank
+                ORDER BY bm25(verses_fts)
                 LIMIT ?
                 """
             let rows = try Row.fetchAll(db, sql: sql, arguments: [sanitized + "*", limit])
@@ -78,7 +78,7 @@ final class StaticDBClient: StaticDBClientProtocol, Sendable {
                 FROM duas_fts fts
                 JOIN duas d ON d.rowid = fts.rowid
                 WHERE duas_fts MATCH ?
-                ORDER BY rank
+                ORDER BY bm25(duas_fts)
                 LIMIT ?
                 """
             let rows = try Row.fetchAll(db, sql: sql, arguments: [sanitized + "*", limit])
