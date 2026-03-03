@@ -91,6 +91,16 @@ def main():
         # Not a hard failure — translation may not contain 'rahman'
         print("  (No matches found — this is OK if the translation doesn't use 'rahman')")
 
+    # Check duas table exists (empty for v1 is OK)
+    cur.execute("SELECT COUNT(*) FROM duas")
+    duas_count = cur.fetchone()[0]
+    print(f"\nDuas table: {duas_count} rows (empty is OK for v1)")
+
+    # Check duas_fts table exists
+    cur.execute("SELECT COUNT(*) FROM duas_fts")
+    duas_fts_count = cur.fetchone()[0]
+    print(f"Duas FTS:   {duas_fts_count} rows")
+
     # FTS search test with Turkish word from Elmalılı
     print(f"\nFTS search for 'Allah':")
     cur.execute(

@@ -22,19 +22,36 @@ protocol StaticDBClientProtocol: Sendable {
     func verses(forSurah surahId: Int) async throws -> [VerseDTO]
 }
 
+/// Lightweight fallback when the static database is missing or corrupted.
+/// All methods throw `databaseNotFound` so that callers degrade gracefully.
+final class NoopStaticDBClient: StaticDBClientProtocol, Sendable {
+    func searchVerses(query: String, limit: Int) async throws -> [VerseDTO] {
+        throw StaticDBError.databaseNotFound
+    }
+    func searchDuas(query: String, limit: Int) async throws -> [DuaDTO] {
+        throw StaticDBError.databaseNotFound
+    }
+    func allSurahs() async throws -> [SurahDTO] {
+        throw StaticDBError.databaseNotFound
+    }
+    func verses(forSurah surahId: Int) async throws -> [VerseDTO] {
+        throw StaticDBError.databaseNotFound
+    }
+}
+
 final class StaticDBClient: StaticDBClientProtocol, Sendable {
     private let dbQueue: DatabaseQueue
 
     init() throws {
-        guard let dbPath = Bundle.main.path(forResource: "sukun_static", ofType: "sqlite", inDirectory: "Resources/Data") ??
-              Bundle.main.path(forResource: "sukun_static", ofType: "sqlite") else {
+        guard let dbURL = Bundle.main.url(forResource: "sukun_static", withExtension: "sqlite")
+                ?? Bundle.main.url(forResource: "sukun_static", withExtension: "sqlite", subdirectory: "Resources/Data") else {
             throw StaticDBError.databaseNotFound
         }
 
         do {
             var config = Configuration()
             config.readonly = true
-            dbQueue = try DatabaseQueue(path: dbPath, configuration: config)
+            dbQueue = try DatabaseQueue(path: dbURL.path, configuration: config)
         } catch {
             throw StaticDBError.databaseCorrupted(underlying: error)
         }

@@ -31,9 +31,8 @@ final class DuasViewModel {
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }
 
-            guard let repo = container.duaRepository else { return }
             do {
-                searchResults = try await repo.searchDuas(query: query, limit: 30)
+                searchResults = try await container.duaRepository.searchDuas(query: query, limit: 30)
             } catch {
                 if !Task.isCancelled {
                     errorMessage = error.localizedDescription

@@ -145,6 +145,25 @@ def build_database():
             content_rowid='id',
             tokenize='unicode61'
         );
+
+        CREATE TABLE duas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL DEFAULT '',
+            text_arabic TEXT NOT NULL DEFAULT '',
+            text_translation TEXT NOT NULL DEFAULT '',
+            text_transliteration TEXT NOT NULL DEFAULT '',
+            category TEXT NOT NULL DEFAULT '',
+            source TEXT NOT NULL DEFAULT ''
+        );
+
+        CREATE VIRTUAL TABLE duas_fts USING fts5(
+            title,
+            text_translation,
+            text_transliteration,
+            content='duas',
+            content_rowid='id',
+            tokenize='unicode61'
+        );
     """)
 
     # Insert surahs

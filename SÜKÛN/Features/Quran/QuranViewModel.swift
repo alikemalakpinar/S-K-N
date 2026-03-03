@@ -18,12 +18,9 @@ final class QuranViewModel {
     }
 
     func loadSurahs() async {
-        guard let repo = container.quranRepository else {
-            isStaticDBMissing = true
-            return
-        }
+        guard !isStaticDBMissing else { return }
         do {
-            surahs = try await repo.allSurahs()
+            surahs = try await container.quranRepository.allSurahs()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -45,9 +42,8 @@ final class QuranViewModel {
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }
 
-            guard let repo = container.quranRepository else { return }
             do {
-                searchResults = try await repo.searchVerses(query: query, limit: 30)
+                searchResults = try await container.quranRepository.searchVerses(query: query, limit: 30)
             } catch {
                 if !Task.isCancelled {
                     errorMessage = error.localizedDescription
