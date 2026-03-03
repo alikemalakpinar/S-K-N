@@ -11,11 +11,13 @@ struct QuranView: View {
     @State private var activeVerseID: String?
     @State private var isImmersive = false
     @Binding var selectedSegment: QuranSegment
+    @Binding var resumePage: Int?
     let container: DependencyContainer
 
-    init(container: DependencyContainer, selectedSegment: Binding<QuranSegment>) {
+    init(container: DependencyContainer, selectedSegment: Binding<QuranSegment>, resumePage: Binding<Int?> = .constant(nil)) {
         _viewModel = State(initialValue: QuranViewModel(container: container))
         _selectedSegment = selectedSegment
+        _resumePage = resumePage
         self.container = container
     }
 
@@ -69,6 +71,12 @@ struct QuranView: View {
             }
             .task {
                 await viewModel.loadSurahs()
+            }
+            .onChange(of: resumePage) { _, newPage in
+                if let page = newPage {
+                    viewModel.currentPage = page
+                    resumePage = nil
+                }
             }
         }
     }
@@ -228,6 +236,13 @@ struct QuranView: View {
 
 // MARK: - Surah Detail View
 
+enum ReadingMode: String, CaseIterable {
+    case arabic = "Arapça"
+    case transliteration = "Okunuş"
+    case translation = "Meal"
+    case all = "Tümü"
+}
+
 struct SurahDetailView: View {
     let surahId: Int
     let container: DependencyContainer
@@ -235,38 +250,51 @@ struct SurahDetailView: View {
     @State private var verses: [VerseDTO] = []
     @State private var surah: SurahDTO?
     @State private var selectedVerse: VerseDTO?
+    @State private var readingMode: ReadingMode = .all
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVStack(spacing: 0) {
-                // Surah header
-                if let surah {
-                    surahHeader(surah)
-                        .padding(.bottom, DS.Space.lg)
-                }
-
-                // Bismillah (except surah 1 and 9)
-                if let surah, surah.id != 1 && surah.id != 9 {
-                    Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
-                        .font(DS.Typography.arabicBismillah)
-                        .foregroundStyle(DS.Color.textPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, DS.Space.md)
-                        .padding(.bottom, DS.Space.sm)
-                }
-
-                // Verses
-                ForEach(verses) { verse in
-                    Button {
-                        selectedVerse = verse
-                    } label: {
-                        verseCard(verse)
-                    }
-                    .buttonStyle(VerseCardButtonStyle())
+        VStack(spacing: 0) {
+            // Reading mode picker
+            Picker("Okuma Modu", selection: $readingMode) {
+                ForEach(ReadingMode.allCases, id: \.self) { mode in
+                    Text(mode.rawValue).tag(mode)
                 }
             }
+            .pickerStyle(.segmented)
             .padding(.horizontal, DS.Space.lg)
-            .padding(.bottom, DS.Space.x4)
+            .padding(.vertical, DS.Space.sm)
+
+            ScrollView(showsIndicators: false) {
+                LazyVStack(spacing: 0) {
+                    // Surah header
+                    if let surah {
+                        surahHeader(surah)
+                            .padding(.bottom, DS.Space.lg)
+                    }
+
+                    // Bismillah (except surah 1 and 9)
+                    if let surah, surah.id != 1 && surah.id != 9 {
+                        Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
+                            .font(DS.Typography.arabicBismillah)
+                            .foregroundStyle(DS.Color.textPrimary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, DS.Space.md)
+                            .padding(.bottom, DS.Space.sm)
+                    }
+
+                    // Verses
+                    ForEach(verses) { verse in
+                        Button {
+                            selectedVerse = verse
+                        } label: {
+                            verseCard(verse)
+                        }
+                        .buttonStyle(VerseCardButtonStyle())
+                    }
+                }
+                .padding(.horizontal, DS.Space.lg)
+                .padding(.bottom, DS.Space.x4)
+            }
         }
         .background(DS.Color.backgroundPrimary)
         .navigationTitle(surah?.nameTurkish ?? "")
@@ -305,6 +333,14 @@ struct SurahDetailView: View {
         )
     }
 
+    private var showTransliteration: Bool {
+        readingMode == .transliteration || readingMode == .all
+    }
+
+    private var showTranslation: Bool {
+        readingMode == .translation || readingMode == .all
+    }
+
     private func verseCard(_ verse: VerseDTO) -> some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             // Verse number + Arabic text
@@ -329,8 +365,18 @@ struct SurahDetailView: View {
                     .lineSpacing(12)
             }
 
-            // Translation
-            if !verse.textTranslation.isEmpty {
+            // Transliteration (okunuş)
+            if showTransliteration && !verse.textTransliteration.isEmpty {
+                Text(verse.textTransliteration)
+                    .font(DS.Typography.transliteration)
+                    .italic()
+                    .foregroundStyle(DS.Color.accent.opacity(0.7))
+                    .lineSpacing(5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            // Translation (meal)
+            if showTranslation && !verse.textTranslation.isEmpty {
                 Text(verse.textTranslation)
                     .font(DS.Typography.caption)
                     .foregroundStyle(DS.Color.textSecondary)
@@ -340,6 +386,7 @@ struct SurahDetailView: View {
         }
         .padding(.vertical, DS.Space.lg)
         .overlay(alignment: .bottom) { Hairline() }
+        .animation(.easeOut(duration: 0.2), value: readingMode)
     }
 }
 

@@ -4,11 +4,12 @@ struct RootView: View {
     let container: DependencyContainer
     @State private var selectedTab = 0
     @State private var quranSegment: QuranSegment = .mushaf
+    @State private var resumePage: Int?
 
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Ana Sayfa", systemImage: "house.fill", value: 0) {
-                DashboardView(container: container, onOpenRehber: openRehber)
+                DashboardView(container: container, onOpenRehber: openRehber, onResumeReading: resumeReading)
             }
 
             Tab("Namaz", systemImage: "clock.fill", value: 1) {
@@ -16,7 +17,7 @@ struct RootView: View {
             }
 
             Tab("Kur'an", systemImage: "book.fill", value: 2) {
-                QuranView(container: container, selectedSegment: $quranSegment)
+                QuranView(container: container, selectedSegment: $quranSegment, resumePage: $resumePage)
             }
 
             Tab("Zikir", systemImage: "circle.circle.fill", value: 3) {
@@ -32,6 +33,12 @@ struct RootView: View {
 
     private func openRehber() {
         quranSegment = .rehber
+        selectedTab = 2
+    }
+
+    private func resumeReading(_ page: Int) {
+        resumePage = page
+        quranSegment = .mushaf
         selectedTab = 2
     }
 }

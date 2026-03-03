@@ -30,4 +30,8 @@ final class DefaultQuranRepository: QuranRepository {
     func pageForSurah(surahId: Int) async throws -> Int {
         try await dbClient.pageForSurah(surahId: surahId)
     }
+
+    func randomVerse() async throws -> VerseDTO {
+        try await dbClient.randomVerse()
+    }
 }

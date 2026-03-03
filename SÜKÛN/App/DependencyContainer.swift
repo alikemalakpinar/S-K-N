@@ -40,6 +40,8 @@ final class DependencyContainer {
             CounterSession.self,
             FavoriteItem.self,
             Bookmark.self,
+            LastReadPosition.self,
+            PageReadLog.self,
         ])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
