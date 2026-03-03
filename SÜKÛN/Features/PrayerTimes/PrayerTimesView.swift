@@ -39,19 +39,30 @@ struct PrayerTimesView: View {
             .navigationTitle("Namaz Vakitleri")
             .navigationBarTitleDisplayMode(.inline)
             .task {
-                await container.locationService.requestPermission()
+                let descriptor = FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" })
+                let settings = (try? modelContext.fetch(descriptor))?.first
+                let method = settings?.calculationMethod ?? "Turkey"
+                let asr = settings?.asrMethod ?? "hanafi"
+
+                // Try cached prayer times first (no location needed)
+                if let cached = await container.prayerTimeService.loadCached() {
+                    viewModel.todayTimes = cached.first
+                    viewModel.upcomingDays = cached
+                }
+
+                // Then try fresh location in background (non-blocking)
                 do {
                     let coords = try await container.locationService.currentCoordinates()
-                    let descriptor = FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" })
-                    let settings = (try? modelContext.fetch(descriptor))?.first
                     await viewModel.loadPrayerTimes(
                         latitude: coords.latitude,
                         longitude: coords.longitude,
-                        method: settings?.calculationMethod ?? "Turkey",
-                        asrMethod: settings?.asrMethod ?? "hanafi"
+                        method: method,
+                        asrMethod: asr
                     )
                 } catch {
-                    viewModel.errorMessage = "Konum erişimi sağlanamadı. Lütfen Ayarlar'dan konum iznini etkinleştirin."
+                    if viewModel.todayTimes == nil {
+                        viewModel.errorMessage = UserFriendlyError.message(from: error)
+                    }
                 }
             }
         }

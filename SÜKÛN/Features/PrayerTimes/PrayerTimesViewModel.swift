@@ -27,7 +27,7 @@ final class PrayerTimesViewModel {
             todayTimes = days.first
             upcomingDays = days
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = UserFriendlyError.message(from: error)
 
             // Try loading from cache
             if let cached = await container.prayerTimeService.loadCached() {

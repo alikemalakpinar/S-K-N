@@ -9,6 +9,7 @@ enum QuranSegment: String, CaseIterable {
 struct QuranView: View {
     @State private var viewModel: QuranViewModel
     @State private var activeVerseID: String?
+    @State private var isImmersive = false
     @Binding var selectedSegment: QuranSegment
     let container: DependencyContainer
 
@@ -21,14 +22,17 @@ struct QuranView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("", selection: $selectedSegment) {
-                    ForEach(QuranSegment.allCases, id: \.self) { segment in
-                        Text(segment.rawValue).tag(segment)
+                if !isImmersive {
+                    Picker("", selection: $selectedSegment) {
+                        ForEach(QuranSegment.allCases, id: \.self) { segment in
+                            Text(segment.rawValue).tag(segment)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, DS.Space.lg)
+                    .padding(.vertical, DS.Space.sm)
+                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, DS.Space.lg)
-                .padding(.vertical, DS.Space.sm)
 
                 Group {
                     switch selectedSegment {
@@ -42,8 +46,11 @@ struct QuranView: View {
                 }
                 .frame(maxHeight: .infinity)
             }
-            .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Kur'an")
+            .background(selectedSegment == .mushaf ? DS.Color.quranCard : DS.Color.backgroundPrimary)
+            .navigationTitle(isImmersive ? "" : "Kur'an")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(isImmersive ? .hidden : .visible, for: .navigationBar)
+            .toolbar(isImmersive ? .hidden : .visible, for: .tabBar)
             .searchable(
                 text: $viewModel.searchQuery,
                 prompt: "Ayet ara..."
@@ -51,6 +58,10 @@ struct QuranView: View {
             .onChange(of: selectedSegment) {
                 if selectedSegment != .sureler {
                     viewModel.searchQuery = ""
+                }
+                // Exit immersive when switching away from mushaf
+                if selectedSegment != .mushaf && isImmersive {
+                    withAnimation(DS.Motion.standard) { isImmersive = false }
                 }
             }
             .onChange(of: viewModel.searchQuery) {
@@ -69,7 +80,7 @@ struct QuranView: View {
         if viewModel.isStaticDBMissing {
             dbMissingView
         } else {
-            MushafReaderView(viewModel: viewModel, container: container)
+            MushafReaderView(viewModel: viewModel, container: container, isImmersive: $isImmersive)
         }
     }
 
