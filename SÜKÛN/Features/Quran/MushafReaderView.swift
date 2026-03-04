@@ -8,12 +8,15 @@ struct MushafReaderView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var showPagePicker = false
-    @State private var showTransliteration = false
+    @State private var showTransliteration = true
+    @State private var showTranslation = true
     @State private var saveTask: Task<Void, Never>?
     @State private var pageLogTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
+            DS.Color.backgroundPrimary.ignoresSafeArea()
+
             // Full-bleed page reader
             TabView(selection: $viewModel.currentPage) {
                 ForEach(1...viewModel.totalPages, id: \.self) { page in
@@ -23,13 +26,12 @@ struct MushafReaderView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .environment(\.showTransliteration, showTransliteration)
+            .environment(\.showTranslation, showTranslation)
             .onTapGesture {
-                withAnimation(DS.Motion.standard) {
-                    isImmersive.toggle()
-                }
+                withAnimation(DS.Motion.standard) { isImmersive.toggle() }
             }
 
-            // Floating bottom bar — hides in immersive mode
+            // Floating bottom bar
             if !isImmersive {
                 VStack {
                     Spacer()
@@ -38,23 +40,16 @@ struct MushafReaderView: View {
                 }
             }
         }
-        .background(DS.Color.quranCard)
         .sheet(isPresented: $showPagePicker) {
-            PagePickerSheet(
-                viewModel: viewModel,
-                isPresented: $showPagePicker
-            )
+            PagePickerSheet(viewModel: viewModel, isPresented: $showPagePicker)
         }
         .onChange(of: viewModel.currentPage) { _, newPage in
-            // Debounce 2s — save last read position
             saveTask?.cancel()
             saveTask = Task {
                 try? await Task.sleep(for: .seconds(2))
                 guard !Task.isCancelled else { return }
                 await MainActor.run { saveCurrentPosition(page: newPage) }
             }
-
-            // Log page read after 3s viewing
             pageLogTask?.cancel()
             pageLogTask = Task {
                 try? await Task.sleep(for: .seconds(3))
@@ -64,7 +59,7 @@ struct MushafReaderView: View {
         }
     }
 
-    // MARK: - Auto-Save Helpers
+    // MARK: - Auto-Save
 
     private func saveCurrentPosition(page: Int) {
         let surahInfo = viewModel.surahInfoForCurrentPage()
@@ -85,67 +80,54 @@ struct MushafReaderView: View {
     // MARK: - Bottom Bar
 
     private var bottomBar: some View {
-        HStack(spacing: DS.Space.md) {
-            // Transliteration toggle
-            Button {
-                withAnimation(DS.Motion.tap) {
-                    showTransliteration.toggle()
-                }
-            } label: {
-                Image(systemName: showTransliteration ? "text.word.spacing" : "textformat.alt")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(showTransliteration ? DS.Color.accent : DS.Color.textSecondary)
-                    .frame(width: 32, height: 32)
-                    .background(
-                        Circle()
-                            .fill(showTransliteration ? DS.Color.accentSoft : .clear)
-                    )
-            }
+        VStack(spacing: 0) {
+            // Toggle row
+            HStack(spacing: DS.Space.sm) {
+                toggleChip(label: "Okunuş", active: $showTransliteration)
+                toggleChip(label: "Meal", active: $showTranslation)
 
-            // Page info button
-            Button {
-                showPagePicker = true
-            } label: {
-                HStack(spacing: DS.Space.md) {
-                    // Juz indicator
-                    Text("Cüz \(viewModel.currentJuzNumber)")
-                        .font(DS.Typography.captionSm)
-                        .foregroundStyle(DS.Color.accent)
-                        .padding(.horizontal, DS.Space.sm)
-                        .padding(.vertical, 3)
-                        .background(
-                            Capsule().fill(DS.Color.accentSoft)
-                        )
+                Spacer()
 
-                    // Page number
-                    HStack(spacing: 4) {
-                        Image(systemName: "book.pages")
-                            .font(.system(size: 10, weight: .medium))
-                        Text("\(viewModel.currentPage)")
-                            .font(DS.Typography.pageNumber)
+                // Page info
+                Button { showPagePicker = true } label: {
+                    HStack(spacing: DS.Space.xs) {
+                        Text("Cüz \(viewModel.currentJuzNumber)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(DS.Color.accent)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill(DS.Color.accentSoft))
+
+                        Text("\(viewModel.currentPage)/\(viewModel.totalPages)")
+                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .foregroundStyle(DS.Color.textSecondary)
                     }
-                    .foregroundStyle(DS.Color.textSecondary)
-
-                    // Divider dot
-                    Circle()
-                        .fill(DS.Color.textSecondary.opacity(0.3))
-                        .frame(width: 3, height: 3)
-
-                    // Total pages
-                    Text("/ \(viewModel.totalPages)")
-                        .font(DS.Typography.captionSm)
-                        .foregroundStyle(DS.Color.textSecondary.opacity(0.6))
                 }
             }
+            .padding(.horizontal, DS.Space.lg)
+            .padding(.vertical, DS.Space.sm)
+            .background(
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .shadow(color: .black.opacity(0.05), radius: 8, y: -2)
+            )
         }
-        .padding(.horizontal, DS.Space.lg)
-        .padding(.vertical, DS.Space.sm)
-        .background(
-            Capsule()
-                .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
-        )
-        .padding(.bottom, DS.Space.sm)
+    }
+
+    private func toggleChip(label: String, active: Binding<Bool>) -> some View {
+        Button {
+            withAnimation(DS.Motion.tap) { active.wrappedValue.toggle() }
+        } label: {
+            Text(label)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(active.wrappedValue ? .white : DS.Color.textSecondary)
+                .padding(.horizontal, DS.Space.md)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(active.wrappedValue ? DS.Color.accent : DS.Color.hairline.opacity(0.5))
+                )
+        }
     }
 }
 
@@ -172,10 +154,8 @@ private struct PagePickerSheet: View {
             VStack(spacing: 0) {
                 pageSliderSection
                     .padding(.top, DS.Space.lg)
-
                 Hairline()
                     .padding(.vertical, DS.Space.sm)
-
                 surahListSection
             }
             .background(DS.Color.backgroundPrimary)
@@ -184,11 +164,9 @@ private struct PagePickerSheet: View {
             .searchable(text: $searchText, prompt: "Sure ara...")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Tamam") {
-                        isPresented = false
-                    }
-                    .foregroundStyle(DS.Color.accent)
-                    .fontWeight(.medium)
+                    Button("Tamam") { isPresented = false }
+                        .foregroundStyle(DS.Color.accent)
+                        .fontWeight(.medium)
                 }
             }
         }
@@ -205,11 +183,9 @@ private struct PagePickerSheet: View {
                     .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundStyle(DS.Color.textSecondary)
             }
-
             Text("Cüz \(viewModel.currentJuzNumber)")
                 .font(DS.Typography.caption)
                 .foregroundStyle(DS.Color.textSecondary)
-
             Slider(
                 value: Binding(
                     get: { Double(viewModel.currentPage) },
@@ -236,17 +212,13 @@ private struct PagePickerSheet: View {
             } label: {
                 HStack(spacing: DS.Space.md) {
                     ZStack {
-                        RotatedStarSmall()
+                        Circle()
                             .fill(DS.Color.accentSoft)
-                            .frame(width: 32, height: 32)
-                        RotatedStarSmall()
-                            .stroke(DS.Color.accent.opacity(0.3), lineWidth: 0.5)
-                            .frame(width: 32, height: 32)
+                            .frame(width: 34, height: 34)
                         Text("\(surah.id)")
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
                             .foregroundStyle(DS.Color.accent)
                     }
-
                     VStack(alignment: .leading, spacing: 2) {
                         Text(surah.nameTurkish)
                             .font(.system(size: 16, weight: .medium))
@@ -255,9 +227,7 @@ private struct PagePickerSheet: View {
                             .font(DS.Typography.captionSm)
                             .foregroundStyle(DS.Color.textSecondary)
                     }
-
                     Spacer()
-
                     Text(surah.nameArabic)
                         .font(.system(size: 20, weight: .regular))
                         .foregroundStyle(DS.Color.textPrimary)
@@ -270,29 +240,5 @@ private struct PagePickerSheet: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
-    }
-}
-
-// MARK: - Small Rotated Star (for page picker)
-
-private struct RotatedStarSmall: Shape {
-    func path(in rect: CGRect) -> Path {
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let outerRadius = min(rect.width, rect.height) / 2
-        let innerRadius = outerRadius * 0.65
-        let points = 8
-        var path = Path()
-        for i in 0..<(points * 2) {
-            let radius = i.isMultiple(of: 2) ? outerRadius : innerRadius
-            let angle = (Double(i) * .pi / Double(points)) - .pi / 2
-            let point = CGPoint(
-                x: center.x + CGFloat(cos(angle)) * radius,
-                y: center.y + CGFloat(sin(angle)) * radius
-            )
-            if i == 0 { path.move(to: point) }
-            else { path.addLine(to: point) }
-        }
-        path.closeSubpath()
-        return path
     }
 }

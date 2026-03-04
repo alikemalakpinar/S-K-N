@@ -187,30 +187,46 @@ struct DashboardView: View {
 
             if let log = viewModel.todayLog {
                 HStack(spacing: 0) {
-                    PrayerPill(name: "Sabah", status: log.fajr)
+                    PrayerPill(name: "Sabah", status: log.fajr) { togglePrayer("fajr") }
                     Spacer()
-                    PrayerPill(name: "Öğle", status: log.dhuhr)
+                    PrayerPill(name: "Öğle", status: log.dhuhr) { togglePrayer("dhuhr") }
                     Spacer()
-                    PrayerPill(name: "İkindi", status: log.asr)
+                    PrayerPill(name: "İkindi", status: log.asr) { togglePrayer("asr") }
                     Spacer()
-                    PrayerPill(name: "Akşam", status: log.maghrib)
+                    PrayerPill(name: "Akşam", status: log.maghrib) { togglePrayer("maghrib") }
                     Spacer()
-                    PrayerPill(name: "Yatsı", status: log.isha)
+                    PrayerPill(name: "Yatsı", status: log.isha) { togglePrayer("isha") }
                 }
             } else {
                 HStack(spacing: 0) {
-                    PrayerPill(name: "Sabah", status: .notLogged)
+                    PrayerPill(name: "Sabah", status: .notLogged) {}
                     Spacer()
-                    PrayerPill(name: "Öğle", status: .notLogged)
+                    PrayerPill(name: "Öğle", status: .notLogged) {}
                     Spacer()
-                    PrayerPill(name: "İkindi", status: .notLogged)
+                    PrayerPill(name: "İkindi", status: .notLogged) {}
                     Spacer()
-                    PrayerPill(name: "Akşam", status: .notLogged)
+                    PrayerPill(name: "Akşam", status: .notLogged) {}
                     Spacer()
-                    PrayerPill(name: "Yatsı", status: .notLogged)
+                    PrayerPill(name: "Yatsı", status: .notLogged) {}
                 }
             }
         }
+    }
+
+    private func togglePrayer(_ key: String) {
+        guard let log = viewModel.todayLog else { return }
+        withAnimation(DS.Motion.tap) {
+            switch key {
+            case "fajr":    log.fajr = log.fajr == .prayed ? .notLogged : .prayed
+            case "dhuhr":   log.dhuhr = log.dhuhr == .prayed ? .notLogged : .prayed
+            case "asr":     log.asr = log.asr == .prayed ? .notLogged : .prayed
+            case "maghrib": log.maghrib = log.maghrib == .prayed ? .notLogged : .prayed
+            case "isha":    log.isha = log.isha == .prayed ? .notLogged : .prayed
+            default: break
+            }
+        }
+        try? modelContext.save()
+        DS.Haptic.dhikrTap()
     }
 
     // MARK: - Last Read Card
@@ -437,32 +453,37 @@ struct DashboardView: View {
 private struct PrayerPill: View {
     let name: String
     let status: PrayerStatus
+    let onTap: () -> Void
 
     private var isPrayed: Bool { status == .prayed }
 
     var body: some View {
-        VStack(spacing: DS.Space.sm) {
-            ZStack {
-                Circle()
-                    .fill(isPrayed ? DS.Color.accent : DS.Color.cardElevated)
-                    .frame(width: 48, height: 48)
-                    .shadow(color: .black.opacity(isPrayed ? 0.06 : 0.03), radius: 4, y: 1)
-
-                if isPrayed {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                } else {
+        Button { onTap() } label: {
+            VStack(spacing: DS.Space.sm) {
+                ZStack {
                     Circle()
-                        .stroke(DS.Color.hairline, lineWidth: 1.5)
+                        .fill(isPrayed ? DS.Color.accent : DS.Color.cardElevated)
                         .frame(width: 48, height: 48)
-                }
-            }
+                        .shadow(color: .black.opacity(isPrayed ? 0.06 : 0.03), radius: 4, y: 1)
 
-            Text(name)
-                .font(DS.Typography.captionSm)
-                .foregroundStyle(isPrayed ? DS.Color.accent : DS.Color.textSecondary)
+                    if isPrayed {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                    } else {
+                        Circle()
+                            .stroke(DS.Color.hairline, lineWidth: 1.5)
+                            .frame(width: 48, height: 48)
+                    }
+                }
+
+                Text(name)
+                    .font(DS.Typography.captionSm)
+                    .foregroundStyle(isPrayed ? DS.Color.accent : DS.Color.textSecondary)
+            }
         }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: isPrayed)
     }
 }
 

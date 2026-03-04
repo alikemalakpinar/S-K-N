@@ -48,7 +48,7 @@ struct QuranView: View {
                 }
                 .frame(maxHeight: .infinity)
             }
-            .background(selectedSegment == .mushaf ? DS.Color.quranCard : DS.Color.backgroundPrimary)
+            .background(DS.Color.backgroundPrimary)
             .navigationTitle(isImmersive ? "" : "Kur'an")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(isImmersive ? .hidden : .visible, for: .navigationBar)
