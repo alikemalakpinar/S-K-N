@@ -51,7 +51,11 @@ final class DashboardViewModel {
             if let settings = try? context.fetch(descriptor).first {
                 dailyPageGoal = settings.dailyPageGoal
             }
-        } catch {}
+        } catch {
+            #if DEBUG
+            print("[Dashboard] Reading progress load failed: \(error)")
+            #endif
+        }
 
         // Load verse of the day (cached per day)
         let today = Calendar.current.startOfDay(for: Date())
@@ -66,7 +70,11 @@ final class DashboardViewModel {
                 verseOfTheDay = verse
                 verseOfTheDaySurahName = surahName
                 Self.cachedVerseOfDay = (date: today, verse: verse, surahName: surahName)
-            } catch {}
+            } catch {
+                #if DEBUG
+                print("[Dashboard] Verse of the day failed: \(error)")
+                #endif
+            }
         }
 
         isDashboardLoaded = true

@@ -53,11 +53,41 @@ struct DashboardView: View {
                             .staggerIn(index: 2, loaded: viewModel.isDashboardLoaded)
                     }
 
-                    // Quick action
+                    // Quick actions
                     rehberCard
                         .padding(.top, DS.Space.xl)
                         .padding(.horizontal, DS.Space.lg)
                         .staggerIn(index: 3, loaded: viewModel.isDashboardLoaded)
+
+                    // Duas quick action
+                    NavigationLink {
+                        DuasView(container: container)
+                    } label: {
+                        quickActionRow(
+                            icon: "hands.sparkles.fill",
+                            title: "Dualar",
+                            subtitle: "Dua ara ve oku"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, DS.Space.md)
+                    .padding(.horizontal, DS.Space.lg)
+                    .staggerIn(index: 4, loaded: viewModel.isDashboardLoaded)
+
+                    // Tracker quick action
+                    NavigationLink {
+                        TrackerView(container: container)
+                    } label: {
+                        quickActionRow(
+                            icon: "chart.bar.fill",
+                            title: "Takip",
+                            subtitle: "Okuma ve zikir geçmişi"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, DS.Space.md)
+                    .padding(.horizontal, DS.Space.lg)
+                    .staggerIn(index: 5, loaded: viewModel.isDashboardLoaded)
 
                     Spacer(minLength: DS.Space.x4)
                 }
@@ -446,6 +476,42 @@ struct DashboardView: View {
         }
         .buttonStyle(.plain)
     }
+
+    // MARK: - Quick Action Row
+
+    private func quickActionRow(icon: String, title: String, subtitle: String) -> some View {
+        HStack(spacing: DS.Space.md) {
+            Image(systemName: icon)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(DS.Color.accent)
+                .frame(width: 40, height: 40)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(DS.Color.accentSoft)
+                )
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(DS.Typography.headline)
+                    .foregroundStyle(DS.Color.textPrimary)
+                Text(subtitle)
+                    .font(DS.Typography.captionSm)
+                    .foregroundStyle(DS.Color.textSecondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "arrow.right")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(DS.Color.textSecondary)
+        }
+        .padding(DS.Space.lg)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(DS.Color.cardElevated)
+                .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+        )
+    }
 }
 
 // MARK: - Prayer Pill
@@ -484,6 +550,8 @@ private struct PrayerPill: View {
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.impact(flexibility: .soft), trigger: isPrayed)
+        .accessibilityLabel("\(name) namazı, \(isPrayed ? "kılındı" : "kılınmadı")")
+        .accessibilityAddTraits(.isToggle)
     }
 }
 

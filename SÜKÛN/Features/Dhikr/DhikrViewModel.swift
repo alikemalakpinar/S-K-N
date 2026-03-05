@@ -108,7 +108,13 @@ final class DhikrViewModel {
             durationSeconds: duration
         )
         context.insert(session)
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            #if DEBUG
+            print("[Dhikr] Session save failed: \(error)")
+            #endif
+        }
         reset()
     }
 }

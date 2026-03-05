@@ -20,7 +20,7 @@ struct MushafReaderView: View {
             // Full-bleed page reader
             TabView(selection: $viewModel.currentPage) {
                 ForEach(1...viewModel.totalPages, id: \.self) { page in
-                    MushafPageView(pageNumber: page, container: container)
+                    MushafPageView(pageNumber: page, container: container, preloadedSurahs: viewModel.surahsDict)
                         .tag(page)
                 }
             }
@@ -103,6 +103,7 @@ struct MushafReaderView: View {
                             .foregroundStyle(DS.Color.textSecondary)
                     }
                 }
+                .accessibilityLabel("Sayfa Seç, Sayfa \(viewModel.currentPage), Cüz \(viewModel.currentJuzNumber)")
             }
             .padding(.horizontal, DS.Space.lg)
             .padding(.vertical, DS.Space.sm)
@@ -128,6 +129,8 @@ struct MushafReaderView: View {
                         .fill(active.wrappedValue ? DS.Color.accent : DS.Color.hairline.opacity(0.5))
                 )
         }
+        .accessibilityLabel("\(label) \(active.wrappedValue ? "açık" : "kapalı")")
+        .accessibilityAddTraits(.isToggle)
     }
 }
 

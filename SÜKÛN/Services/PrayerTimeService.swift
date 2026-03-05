@@ -14,7 +14,9 @@ final class PrayerTimeService: PrayerTimeServiceProtocol, Sendable {
     init(repository: PrayerTimesRepository) {
         self.repository = repository
 
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            fatalError("applicationSupportDirectory unavailable — system configuration error")
+        }
         let dir = appSupport.appendingPathComponent("Sukun", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         self.cacheURL = dir.appendingPathComponent("PrayerTimesCache.json")

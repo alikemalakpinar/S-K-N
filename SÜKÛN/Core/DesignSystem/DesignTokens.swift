@@ -72,11 +72,11 @@ extension DS {
         static let hero        = Font.system(size: 48, weight: .bold, design: .default)
         static let title1      = Font.system(size: 28, weight: .bold, design: .default)
         static let title2      = Font.system(size: 22, weight: .semibold, design: .default)
-        static let headline    = Font.system(size: 17, weight: .semibold, design: .default)
+        static let headline    = Font.headline
         static let sectionHead = Font.system(size: 12, weight: .semibold, design: .default)
-        static let body        = Font.system(size: 16, weight: .regular, design: .default)
-        static let caption     = Font.system(size: 13, weight: .regular, design: .default)
-        static let captionSm   = Font.system(size: 11, weight: .regular, design: .default)
+        static let body        = Font.body
+        static let caption     = Font.caption
+        static let captionSm   = Font.caption2
         static let micro       = Font.system(size: 9, weight: .medium, design: .default)
 
         // Monospaced numbers for timers/counters
@@ -97,6 +97,19 @@ extension DS {
         // Transliteration typography
         static let transliteration   = Font.system(size: 15, weight: .regular, design: .serif)
         static let transliterationSm = Font.system(size: 13, weight: .regular, design: .serif)
+    }
+}
+
+// MARK: - Font Scale Environment Key
+
+private struct DSFontScaleKey: EnvironmentKey {
+    static let defaultValue: Double = 1.0
+}
+
+extension EnvironmentValues {
+    var dsFontScale: Double {
+        get { self[DSFontScaleKey.self] }
+        set { self[DSFontScaleKey.self] = newValue }
     }
 }
 

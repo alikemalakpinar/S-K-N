@@ -80,6 +80,12 @@ struct DhikrView: View {
         .contentShape(Rectangle())
         .gesture(pullGesture)
         .onTapGesture { performCount() }
+        .onDisappear {
+            // Auto-save any in-progress session when leaving
+            if viewModel.currentCount > 0 || tourCount > 0 {
+                viewModel.saveSession(context: modelContext, tourCount: tourCount)
+            }
+        }
         .task {
             viewModel.loadPresets(context: modelContext)
             viewModel.loadSessionHistory(context: modelContext)
@@ -130,6 +136,7 @@ struct DhikrView: View {
                     .frame(width: 34, height: 34)
                     .background(Circle().fill(DS.Color.cardElevated))
             }
+            .accessibilityLabel("Geçmiş")
         }
         .padding(.horizontal, DS.Space.xl)
     }
@@ -247,6 +254,7 @@ struct DhikrView: View {
                     .frame(width: 44, height: 44)
                     .background(Circle().fill(DS.Color.cardElevated))
             }
+            .accessibilityLabel("Sıfırla")
 
             Spacer()
 
@@ -265,6 +273,7 @@ struct DhikrView: View {
                             .foregroundStyle(DS.Color.accent)
                     }
                 }
+                .accessibilityLabel("\(viewModel.currentCount) / \(preset.target) sayım, \(tourCount) tur")
             }
 
             Spacer()
@@ -277,6 +286,7 @@ struct DhikrView: View {
                     .frame(width: 44, height: 44)
                     .background(Circle().fill(DS.Color.cardElevated))
             }
+            .accessibilityLabel("Zikir Seç")
         }
         .padding(.horizontal, DS.Space.x2)
     }
@@ -327,13 +337,9 @@ struct DhikrView: View {
 
         let c = viewModel.currentCount
         if let p = viewModel.selectedPreset, c == p.target {
-            // Tour complete — auto-save this tour
+            // Tour complete — track it, don't save yet (save on reset/disappear)
             tourCount += 1
             DS.Haptic.goalReached()
-
-            // Auto-save immediately on tour completion
-            viewModel.saveSession(context: modelContext, tourCount: 0)
-            viewModel.loadSessionHistory(context: modelContext)
 
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                 showTourComplete = true
@@ -344,7 +350,7 @@ struct DhikrView: View {
                 }
                 withAnimation(.easeOut(duration: 0.2)) {
                     viewModel.currentCount = 0
-                    viewModel.isSessionActive = false
+                    // Keep session active — timer continues across tours
                 }
             }
         } else if c > 0, c % 33 == 0 {

@@ -26,9 +26,11 @@ extension EnvironmentValues {
 struct MushafPageView: View {
     let pageNumber: Int
     let container: DependencyContainer
+    let preloadedSurahs: [Int: SurahDTO]
 
     @Environment(\.showTransliteration) private var showTransliteration
     @Environment(\.showTranslation) private var showTranslation
+    @Environment(\.dsFontScale) private var fontScale
     @State private var verses: [VerseDTO] = []
     @State private var selectedVerse: VerseDTO?
     @State private var surahs: [Int: SurahDTO] = [:]
@@ -49,6 +51,7 @@ struct MushafPageView: View {
 
                     case .bismillah:
                         bismillahView
+
                             .padding(.horizontal, DS.Space.x2)
                             .padding(.bottom, DS.Space.md)
 
@@ -78,13 +81,13 @@ struct MushafPageView: View {
 
     private enum PageItem: Identifiable {
         case surahHeader(SurahDTO)
-        case bismillah
+        case bismillah(surahId: Int)
         case verse(VerseDTO)
 
         var id: String {
             switch self {
             case .surahHeader(let s): return "header-\(s.id)"
-            case .bismillah: return "bismillah-\(UUID().uuidString)"
+            case .bismillah(let surahId): return "bismillah-\(surahId)"
             case .verse(let v): return "\(v.surahId):\(v.verseNumber)"
             }
         }
@@ -99,7 +102,7 @@ struct MushafPageView: View {
                 if let surah = surahs[verse.surahId] {
                     items.append(.surahHeader(surah))
                     if surah.id != 1 && surah.id != 9 {
-                        items.append(.bismillah)
+                        items.append(.bismillah(surahId: surah.id))
                     }
                 }
             }
@@ -146,9 +149,10 @@ struct MushafPageView: View {
                 }
                 .padding(.bottom, DS.Space.sm)
 
-                // Arabic text — right-aligned, large
+                // Arabic text — right-aligned, large (respects fontScale)
+                let baseSize: CGFloat = showTransliteration || showTranslation ? 24 : 28
                 Text(verse.textArabic)
-                    .font(.system(size: showTransliteration || showTranslation ? 24 : 28, weight: .regular))
+                    .font(.system(size: baseSize * fontScale, weight: .regular))
                     .foregroundStyle(DS.Color.textPrimary)
                     .multilineTextAlignment(.trailing)
                     .lineSpacing(showTransliteration || showTranslation ? 12 : 18)
@@ -212,10 +216,19 @@ struct MushafPageView: View {
     private func loadPage() async {
         do {
             verses = try await container.quranRepository.versesForPage(page: pageNumber)
-            let allSurahs = try await container.quranRepository.allSurahs()
-            for s in allSurahs { surahs[s.id] = s }
+            if !preloadedSurahs.isEmpty {
+                surahs = preloadedSurahs
+            } else {
+                let allSurahs = try await container.quranRepository.allSurahs()
+                for s in allSurahs { surahs[s.id] = s }
+            }
             isLoaded = true
-        } catch { isLoaded = true }
+        } catch {
+            isLoaded = true
+            #if DEBUG
+            print("[MushafPage] Load failed for page \(pageNumber): \(error)")
+            #endif
+        }
     }
 
     private func surahName(for id: Int) -> String {

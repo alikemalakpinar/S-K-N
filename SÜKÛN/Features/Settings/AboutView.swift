@@ -26,11 +26,15 @@ struct AboutView: View {
             .listRowBackground(DS.Color.cardElevated)
 
             Section {
-                Link(destination: URL(string: "https://github.com/groue/GRDB.swift")!) {
-                    row(name: "GRDB.swift", detail: "Swift için SQLite araç seti — MIT Lisansı")
+                if let grdbURL = URL(string: "https://github.com/groue/GRDB.swift") {
+                    Link(destination: grdbURL) {
+                        row(name: "GRDB.swift", detail: "Swift için SQLite araç seti — MIT Lisansı")
+                    }
                 }
-                Link(destination: URL(string: "https://github.com/batoulapps/adhan-swift")!) {
-                    row(name: "Adhan-swift", detail: "Namaz vakti hesaplama — MIT Lisansı")
+                if let adhanURL = URL(string: "https://github.com/batoulapps/adhan-swift") {
+                    Link(destination: adhanURL) {
+                        row(name: "Adhan-swift", detail: "Namaz vakti hesaplama — MIT Lisansı")
+                    }
                 }
             } header: {
                 Text("Açık Kaynak Kütüphaneler")
