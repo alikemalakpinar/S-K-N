@@ -3,7 +3,6 @@ import SwiftUI
 enum QuranSegment: String, CaseIterable {
     case mushaf = "Mushaf"
     case sureler = "Sureler"
-    case rehber = "Rehber"
 }
 
 struct QuranView: View {
@@ -12,12 +11,19 @@ struct QuranView: View {
     @State private var isImmersive = false
     @Binding var selectedSegment: QuranSegment
     @Binding var resumePage: Int?
+    @Binding var showRehber: Bool
     let container: DependencyContainer
 
-    init(container: DependencyContainer, selectedSegment: Binding<QuranSegment>, resumePage: Binding<Int?> = .constant(nil)) {
+    init(
+        container: DependencyContainer,
+        selectedSegment: Binding<QuranSegment>,
+        resumePage: Binding<Int?> = .constant(nil),
+        showRehber: Binding<Bool> = .constant(false)
+    ) {
         _viewModel = State(initialValue: QuranViewModel(container: container))
         _selectedSegment = selectedSegment
         _resumePage = resumePage
+        _showRehber = showRehber
         self.container = container
     }
 
@@ -42,8 +48,6 @@ struct QuranView: View {
                         mushafContent
                     case .sureler:
                         surelerContent
-                    case .rehber:
-                        RehberView(container: container)
                     }
                 }
                 .frame(maxHeight: .infinity)
@@ -57,6 +61,11 @@ struct QuranView: View {
                 text: $viewModel.searchQuery,
                 prompt: "Ayet ara..."
             )
+            .sheet(isPresented: $showRehber) {
+                NavigationStack {
+                    RehberView(container: container)
+                }
+            }
             .onChange(of: selectedSegment) {
                 if selectedSegment != .sureler {
                     viewModel.searchQuery = ""
@@ -225,9 +234,9 @@ struct QuranView: View {
                     .listRowBackground(DS.Color.backgroundPrimary)
                     .listRowSeparator(.hidden)
                     .onTapGesture {
-                        withAnimation(DS.Motion.verse) {
-                            activeVerseID = isActive ? nil : verseID
-                        }
+                        // Jump to the verse's Mushaf page
+                        viewModel.currentPage = verse.pageNumber
+                        selectedSegment = .mushaf
                     }
                 }
                 .listStyle(.plain)

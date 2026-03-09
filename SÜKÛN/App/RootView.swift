@@ -5,6 +5,7 @@ struct RootView: View {
     @State private var selectedTab = 0
     @State private var quranSegment: QuranSegment = .mushaf
     @State private var resumePage: Int?
+    @State private var showRehber = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -17,7 +18,7 @@ struct RootView: View {
             }
 
             Tab("Kur'an", systemImage: "book.fill", value: 2) {
-                QuranView(container: container, selectedSegment: $quranSegment, resumePage: $resumePage)
+                QuranView(container: container, selectedSegment: $quranSegment, resumePage: $resumePage, showRehber: $showRehber)
             }
 
             Tab("Kıble", systemImage: "location.north.fill", value: 3) {
@@ -32,8 +33,8 @@ struct RootView: View {
     }
 
     private func openRehber() {
-        quranSegment = .rehber
         selectedTab = 2
+        showRehber = true
     }
 
     private func resumeReading(_ page: Int) {

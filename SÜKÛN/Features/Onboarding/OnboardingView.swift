@@ -266,7 +266,9 @@ struct OnboardingView: View {
             } else {
                 Task {
                     await container.locationService.requestPermission()
-                    locationGranted = true
+                    // Check actual system authorization — don't assume success
+                    let status = CLLocationManager().authorizationStatus
+                    locationGranted = (status == .authorizedWhenInUse || status == .authorizedAlways)
                     try? await Task.sleep(for: .milliseconds(500))
                     withAnimation { currentPage = 2 }
                 }

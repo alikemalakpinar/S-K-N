@@ -4,7 +4,7 @@ struct AboutView: View {
     var body: some View {
         List {
             Section {
-                Text("Kur'an-ı Kerim metni Al Quran Cloud API aracılığıyla sağlanmaktadır. Orijinal Arapça Osmanlı hattı metni değiştirilmemiştir.")
+                Text("Kur'an-ı Kerim metni yerel SQLite veritabanında saklanmaktadır. Orijinal Arapça Osmanlı hattı metni değiştirilmemiştir.")
                     .font(DS.Typography.caption)
                     .foregroundStyle(DS.Color.textSecondary)
             } header: {

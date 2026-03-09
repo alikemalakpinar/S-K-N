@@ -45,7 +45,7 @@ struct MushafPageView: View {
                 ForEach(Array(pageContent.enumerated()), id: \.element.id) { index, item in
                     switch item {
                     case .surahHeader(let surah):
-                        PremiumSurahHeader(surah: surah)
+                        SKNSurahHeader(surah: surah)
                             .padding(.horizontal, DS.Space.lg)
                             .padding(.bottom, DS.Space.lg)
                             .padding(.top, index == 0 ? 0 : DS.Space.x2)
@@ -185,6 +185,7 @@ struct MushafPageView: View {
                 .shadow(color: .black.opacity(0.03), radius: 6, y: 2)
         )
         .padding(.bottom, DS.Space.sm)
+        .contentShape(Rectangle())   // Ensure full card is tappable (44pt minimum)
         .onTapGesture {
             DS.Haptic.softTap()
             selectedVerse = verse
@@ -193,6 +194,9 @@ struct MushafPageView: View {
             DS.Haptic.snap()
             selectedVerse = verse
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Ayet \(verse.verseNumber). \(verse.textTranslation)")
+        .accessibilityHint("Ayrıntıları görmek için dokunun")
     }
 
     // MARK: - Page Footer
@@ -238,36 +242,39 @@ struct MushafPageView: View {
     }
 }
 
-// MARK: - Premium Surah Header
+// MARK: - SKNSurahHeader (Reusable)
 
-private struct PremiumSurahHeader: View {
+struct SKNSurahHeader: View {
     let surah: SurahDTO
+    @Environment(\.readingTheme) private var theme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: DS.Space.md) {
             Text(surah.nameArabic)
                 .font(.system(size: 36, weight: .regular))
-                .foregroundStyle(.white)
+                .foregroundStyle(DS.Color.textPrimary)
+                .accessibilityLabel(surah.nameTurkish)
 
             Text(surah.nameTurkish)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(DS.Color.textSecondary)
                 .tracking(1)
 
             Rectangle()
-                .fill(.white.opacity(0.2))
+                .fill(DS.Color.accent.opacity(0.3))
                 .frame(width: 40, height: 1)
 
             HStack(spacing: DS.Space.md) {
                 Text(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(DS.Color.textSecondary)
                 Circle()
-                    .fill(.white.opacity(0.4))
+                    .fill(DS.Color.accent.opacity(0.5))
                     .frame(width: 3, height: 3)
                 Text("\(surah.verseCount) ayet")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(DS.Color.textSecondary)
             }
         }
         .frame(maxWidth: .infinity)
@@ -277,20 +284,21 @@ private struct PremiumSurahHeader: View {
                 .fill(
                     LinearGradient(
                         colors: [
-                            Color(red: 0.25, green: 0.22, blue: 0.50),
-                            Color(red: 0.35, green: 0.30, blue: 0.58),
-                            Color(red: 0.45, green: 0.38, blue: 0.65)
+                            DS.Color.accentSoft,
+                            DS.Color.accentSoft.opacity(0.6)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
-                .shadow(color: Color(red: 0.30, green: 0.25, blue: 0.55).opacity(0.3), radius: 12, y: 6)
+                .shadow(color: DS.Color.accent.opacity(0.08), radius: 12, y: 6)
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
-                .stroke(.white.opacity(0.08), lineWidth: 0.5)
+                .stroke(DS.Color.accent.opacity(0.12), lineWidth: 0.5)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(surah.nameTurkish), \(surah.verseCount) ayet, \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
     }
 }
 

@@ -20,8 +20,8 @@ struct NotificationSettings: Sendable {
 final class NotificationScheduler: NotificationSchedulerProtocol, Sendable {
     private let center = UNUserNotificationCenter.current()
     private let maxDays = 10
-    // iOS allows max 64 pending notifications; 5 prayers x 10 days = 50, leaving headroom
-    private let prayersPerDay = 5
+    // iOS allows max 64 pending notifications; 6 prayers x 10 days = 60, leaving headroom
+    private let prayersPerDay = 6
 
     func requestAuthorization() async throws -> Bool {
         try await center.requestAuthorization(options: [.alert, .sound, .badge])
@@ -70,11 +70,12 @@ final class NotificationScheduler: NotificationSchedulerProtocol, Sendable {
 
     private func enabledPrayers(for day: PrayerDay, settings: NotificationSettings) -> [(String, Date)] {
         var prayers: [(String, Date)] = []
-        if settings.fajrEnabled { prayers.append(("Fajr", day.fajr)) }
-        if settings.dhuhrEnabled { prayers.append(("Dhuhr", day.dhuhr)) }
-        if settings.asrEnabled { prayers.append(("Asr", day.asr)) }
-        if settings.maghribEnabled { prayers.append(("Maghrib", day.maghrib)) }
-        if settings.ishaEnabled { prayers.append(("Isha", day.isha)) }
+        if settings.fajrEnabled    { prayers.append(("Sabah", day.fajr)) }
+        if settings.sunriseEnabled { prayers.append(("Güneş", day.sunrise)) }
+        if settings.dhuhrEnabled   { prayers.append(("Öğle", day.dhuhr)) }
+        if settings.asrEnabled     { prayers.append(("İkindi", day.asr)) }
+        if settings.maghribEnabled { prayers.append(("Akşam", day.maghrib)) }
+        if settings.ishaEnabled    { prayers.append(("Yatsı", day.isha)) }
         return prayers
     }
 }

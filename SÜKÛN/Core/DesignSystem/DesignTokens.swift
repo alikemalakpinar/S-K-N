@@ -149,6 +149,20 @@ extension DS {
         /// 9pt medium — micro labels
         static let micro       = Font.system(size: 9, weight: .medium, design: .default)
 
+        // ── UI Labels (buttons, badges, chips) ───────────────
+        /// 17pt semibold — primary button labels
+        static let buttonLabel = Font.system(size: 17, weight: .semibold, design: .default)
+        /// 15pt medium — secondary text, form labels
+        static let bodyMedium  = Font.system(size: 15, weight: .medium, design: .default)
+        /// 16pt medium — list item titles
+        static let listTitle   = Font.system(size: 16, weight: .medium, design: .default)
+        /// 13pt regular — auxiliary info, metadata
+        static let footnote    = Font.system(size: 13, weight: .regular, design: .default)
+        /// 10pt bold — chip labels, uppercase tags
+        static let chipLabel   = Font.system(size: 10, weight: .bold, design: .default)
+        /// 11pt bold — section tracker labels, uppercase
+        static let trackerLabel = Font.system(size: 11, weight: .bold, design: .default)
+
         // ── Monospaced (timers, counters) ────────────────────
         static let monoMega    = Font.system(size: 96, weight: .black, design: .monospaced)
         static let monoGiga    = Font.system(size: 72, weight: .heavy, design: .monospaced)

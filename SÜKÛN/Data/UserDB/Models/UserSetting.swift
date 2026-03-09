@@ -37,6 +37,8 @@ final class UserSetting {
     var showTranslation: Bool = true
     var dailyPageGoal: Int = 5
     var quranReadingMode: String = "arabic"
+    var quranReadingTheme: String = "Açık"   // ReadingTheme.rawValue
+    var quranFontScale: Double = 1.0
 
     // Live Activity
     var liveActivityEnabled: Bool = false

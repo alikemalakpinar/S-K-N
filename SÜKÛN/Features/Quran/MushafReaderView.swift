@@ -87,6 +87,7 @@ struct MushafReaderView: View {
     let container: DependencyContainer
     @Binding var isImmersive: Bool
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var showPagePicker = false
     @State private var showReadingSettings = false
@@ -96,13 +97,14 @@ struct MushafReaderView: View {
     @State private var arabicFontScale: Double = 1.0
     @State private var saveTask: Task<Void, Never>?
     @State private var pageLogTask: Task<Void, Never>?
+    @State private var didLoadPrefs = false
 
     var body: some View {
         ZStack {
             // Theme-aware background
             readingTheme.background
                 .ignoresSafeArea()
-                .animation(DS.Motion.standard, value: readingTheme)
+                .animation(reduceMotion ? nil : DS.Motion.standard, value: readingTheme)
 
             // Full-bleed page reader
             TabView(selection: $viewModel.currentPage) {
@@ -117,7 +119,7 @@ struct MushafReaderView: View {
             .environment(\.readingTheme, readingTheme)
             .environment(\.dsFontScale, arabicFontScale)
             .onTapGesture {
-                withAnimation(DS.Motion.standard) { isImmersive.toggle() }
+                withAnimation(reduceMotion ? nil : DS.Motion.standard) { isImmersive.toggle() }
             }
 
             // Floating bottom bar
@@ -133,7 +135,7 @@ struct MushafReaderView: View {
             PagePickerSheet(viewModel: viewModel, isPresented: $showPagePicker)
         }
         .sheet(isPresented: $showReadingSettings) {
-            ReadingSettingsSheet(
+            SKNReadingSettingsSheet(
                 theme: $readingTheme,
                 fontScale: $arabicFontScale,
                 showTransliteration: $showTransliteration,
@@ -156,26 +158,65 @@ struct MushafReaderView: View {
                 await MainActor.run { logPageRead(page: newPage) }
             }
         }
+        // Persist reading prefs on change
+        .onChange(of: showTransliteration) { _, _ in persistReadingPrefs() }
+        .onChange(of: showTranslation) { _, _ in persistReadingPrefs() }
+        .onChange(of: readingTheme) { _, _ in persistReadingPrefs() }
+        .onChange(of: arabicFontScale) { _, _ in persistReadingPrefs() }
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
+            loadReadingPrefs()
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
         }
     }
 
+    // MARK: - Preference Persistence
+
+    private func loadReadingPrefs() {
+        guard !didLoadPrefs else { return }
+        didLoadPrefs = true
+        let descriptor = FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" })
+        if let settings = try? modelContext.fetch(descriptor).first {
+            showTransliteration = settings.showTransliteration
+            showTranslation = settings.showTranslation
+            readingTheme = ReadingTheme(rawValue: settings.quranReadingTheme) ?? .light
+            arabicFontScale = settings.quranFontScale
+        }
+    }
+
+    private func persistReadingPrefs() {
+        guard didLoadPrefs else { return }
+        let descriptor = FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" })
+        if let settings = try? modelContext.fetch(descriptor).first {
+            settings.showTransliteration = showTransliteration
+            settings.showTranslation = showTranslation
+            settings.quranReadingTheme = readingTheme.rawValue
+            settings.quranFontScale = arabicFontScale
+            try? modelContext.save()
+        }
+    }
+
     // MARK: - Auto-Save
 
     private func saveCurrentPosition(page: Int) {
-        let surahInfo = viewModel.surahInfoForCurrentPage()
-        let firstVerse = viewModel.pageVerses.first
-        try? container.userActivityRepository.saveLastReadPosition(
-            page: page,
-            surahId: surahInfo?.id ?? firstVerse?.surahId ?? 1,
-            verseNumber: firstVerse?.verseNumber ?? 1,
-            surahName: surahInfo?.name ?? "",
-            context: modelContext
-        )
+        Task {
+            // Load fresh verse data for the displayed page
+            // (viewModel.pageVerses may be stale if user swiped rapidly)
+            await viewModel.loadPage(page)
+            await MainActor.run {
+                let surahInfo = viewModel.surahInfoForCurrentPage()
+                let firstVerse = viewModel.pageVerses.first
+                try? container.userActivityRepository.saveLastReadPosition(
+                    page: page,
+                    surahId: surahInfo?.id ?? firstVerse?.surahId ?? 1,
+                    verseNumber: firstVerse?.verseNumber ?? 1,
+                    surahName: surahInfo?.name ?? "",
+                    context: modelContext
+                )
+            }
+        }
     }
 
     private func logPageRead(page: Int) {
@@ -200,11 +241,12 @@ struct MushafReaderView: View {
                     Image(systemName: "textformat.size")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(DS.Color.accent)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 44, height: 44)
                         .background(
                             Circle().fill(DS.Color.accentSoft)
                         )
                 }
+                .accessibilityLabel("Okuma Ayarları")
 
                 // Page info
                 Button {
@@ -224,10 +266,11 @@ struct MushafReaderView: View {
                             .foregroundStyle(DS.Color.textSecondary)
                     }
                 }
+                .frame(minHeight: 44)   // Accessibility: 44pt minimum
                 .accessibilityLabel("Sayfa Seç, Sayfa \(viewModel.currentPage), Cüz \(viewModel.currentJuzNumber)")
             }
             .padding(.horizontal, DS.Space.lg)
-            .padding(.vertical, DS.Space.sm)
+            .padding(.vertical, DS.Space.xs)
             .background(
                 Rectangle()
                     .fill(.ultraThinMaterial)
@@ -238,27 +281,28 @@ struct MushafReaderView: View {
 
     private func toggleChip(label: String, active: Binding<Bool>) -> some View {
         Button {
-            withAnimation(DS.Motion.tap) { active.wrappedValue.toggle() }
+            withAnimation(reduceMotion ? nil : DS.Motion.tap) { active.wrappedValue.toggle() }
             DS.Haptic.selection()
         } label: {
             Text(label)
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(active.wrappedValue ? .white : DS.Color.textSecondary)
                 .padding(.horizontal, DS.Space.md)
-                .padding(.vertical, 6)
+                .padding(.vertical, 10)
                 .background(
                     Capsule()
                         .fill(active.wrappedValue ? DS.Color.accent : DS.Color.hairline.opacity(0.5))
                 )
         }
+        .frame(minHeight: 44)   // Accessibility: 44pt minimum
         .accessibilityLabel("\(label) \(active.wrappedValue ? "açık" : "kapalı")")
         .accessibilityAddTraits(.isToggle)
     }
 }
 
-// MARK: - Reading Settings Sheet
+// MARK: - SKNReadingSettingsSheet (Reusable)
 
-private struct ReadingSettingsSheet: View {
+struct SKNReadingSettingsSheet: View {
     @Binding var theme: ReadingTheme
     @Binding var fontScale: Double
     @Binding var showTransliteration: Bool
@@ -301,6 +345,8 @@ private struct ReadingSettingsSheet: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("\(t.rawValue) tema")
+                            .accessibilityAddTraits(theme == t ? .isSelected : [])
                         }
                     }
                 }
@@ -325,6 +371,8 @@ private struct ReadingSettingsSheet: View {
 
                         Slider(value: $fontScale, in: 0.7...1.5, step: 0.05)
                             .tint(DS.Color.accent)
+                            .accessibilityLabel("Yazı boyutu")
+                            .accessibilityValue("Yüzde \(Int(fontScale * 100))")
 
                         Image(systemName: "textformat.size.larger")
                             .font(.system(size: 16))
