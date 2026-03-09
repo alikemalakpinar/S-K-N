@@ -20,9 +20,9 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Location header
-                    locationHeader
-                        .padding(.top, DS.Space.xl)
+                    // Greeting + location header
+                    greetingHeader
+                        .padding(.top, DS.Space.lg)
                         .padding(.horizontal, DS.Space.lg)
 
                     // Giant typographic countdown — THE HERO
@@ -34,35 +34,24 @@ struct DashboardView: View {
                         .padding(.top, DS.Space.x3)
                         .padding(.horizontal, DS.Space.lg)
 
-                    // Last read position
-                    if viewModel.lastReadPosition != nil {
-                        lastReadCard
-                            .padding(.top, DS.Space.xl)
-                            .padding(.horizontal, DS.Space.lg)
-                            .staggerIn(index: 0, loaded: viewModel.isDashboardLoaded)
-                    }
+                    // Horizontal widget strip
+                    horizontalWidgets
+                        .padding(.top, DS.Space.xl)
+                        .dsAppear(loaded: viewModel.isDashboardLoaded, index: 0)
 
                     // Verse of the day
                     if viewModel.verseOfTheDay != nil {
                         verseOfTheDayCard
                             .padding(.top, DS.Space.xl)
                             .padding(.horizontal, DS.Space.lg)
-                            .staggerIn(index: 1, loaded: viewModel.isDashboardLoaded)
-                    }
-
-                    // Quran progress
-                    if viewModel.totalUniquePages > 0 || viewModel.readingStreakDays > 0 {
-                        progressSection
-                            .padding(.top, DS.Space.xl)
-                            .padding(.horizontal, DS.Space.lg)
-                            .staggerIn(index: 2, loaded: viewModel.isDashboardLoaded)
+                            .dsAppear(loaded: viewModel.isDashboardLoaded, index: 1)
                     }
 
                     // Quick actions grid
                     quickActionsGrid
                         .padding(.top, DS.Space.xl)
                         .padding(.horizontal, DS.Space.lg)
-                        .staggerIn(index: 3, loaded: viewModel.isDashboardLoaded)
+                        .dsAppear(loaded: viewModel.isDashboardLoaded, index: 2)
 
                     Spacer(minLength: DS.Space.x4 + 60)
                 }
@@ -94,7 +83,6 @@ struct DashboardView: View {
                 let method = settings?.calculationMethod ?? "Turkey"
                 let asr = settings?.asrMethod ?? "hanafi"
 
-                // Try cached prayer times first
                 if let cached = await container.prayerTimeService.loadCached(),
                    let today = cached.first {
                     if let next = container.prayerTimeService.nextPrayer(from: today, after: Date()) {
@@ -103,7 +91,6 @@ struct DashboardView: View {
                     }
                 }
 
-                // Then try fresh location in background
                 do {
                     let coords = try await container.locationService.currentCoordinates()
                     viewModel.loadLocationName(latitude: coords.latitude, longitude: coords.longitude)
@@ -113,27 +100,45 @@ struct DashboardView: View {
                         method: method,
                         asrMethod: asr
                     )
-                } catch {
-                    // Location unavailable — keep cached data
-                }
+
+                    // Auto-start Live Activity if enabled in settings
+                    if settings?.liveActivityEnabled == true,
+                       !container.liveActivityManager.isLiveActivityActive {
+                        viewModel.startLiveActivity()
+                    } else if container.liveActivityManager.isLiveActivityActive {
+                        viewModel.startPeriodicLiveActivityUpdates()
+                    }
+                } catch {}
+            }
+            .onDisappear {
+                viewModel.stopPeriodicLiveActivityUpdates()
             }
         }
     }
 
-    // MARK: - Location Header
+    // MARK: - Greeting Header
 
-    private var locationHeader: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(viewModel.locationName.isEmpty ? "Konum alınıyor..." : viewModel.locationName)
-                    .font(.system(size: 28, weight: .black))
-                    .foregroundStyle(DS.Color.textPrimary)
-                    .tracking(-0.8)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+    private var greetingHeader: some View {
+        VStack(alignment: .leading, spacing: DS.Space.xs) {
+            HStack(spacing: DS.Space.sm) {
+                Image(systemName: viewModel.greetingIcon)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(DS.Color.accent)
+                    .symbolEffect(.pulse, options: .repeating.speed(0.3))
+
+                Text(viewModel.greeting)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(DS.Color.textSecondary)
             }
-            Spacer()
+
+            Text(viewModel.locationName.isEmpty ? "Konum alınıyor..." : viewModel.locationName)
+                .font(.system(size: 28, weight: .black))
+                .foregroundStyle(DS.Color.textPrimary)
+                .tracking(-0.8)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Countdown Hero (Typographic Clock)
@@ -151,21 +156,16 @@ struct DashboardView: View {
                     let minutes = (Int(remaining) % 3600) / 60
                     let seconds = Int(remaining) % 60
 
-                    // Hours band — ghost
                     countdownBand(
                         value: String(format: "%02d", hours),
                         label: "SAAT",
                         opacity: 0.08
                     )
-
-                    // Minutes band — medium
                     countdownBand(
                         value: String(format: "%02d", minutes),
                         label: "DAKİKA",
                         opacity: 0.25
                     )
-
-                    // Seconds band — full
                     countdownBand(
                         value: String(format: "%02d", seconds),
                         label: "SANİYE",
@@ -200,11 +200,8 @@ struct DashboardView: View {
         }
     }
 
-    /// Each band: massively oversized number that overflows top & bottom, clipped to bandHeight.
-    /// The number is vertically centered so clipping is symmetrical.
     private func countdownBand(value: String, label: String, opacity: Double) -> some View {
         ZStack {
-            // Giant number — way bigger than the band, centered, clipped evenly
             Text(value)
                 .font(.system(size: 260, weight: .black).width(.condensed))
                 .foregroundStyle(DS.Color.textPrimary.opacity(opacity))
@@ -214,7 +211,6 @@ struct DashboardView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, DS.Space.sm)
 
-            // Label at top-right
             VStack {
                 HStack {
                     Spacer()
@@ -242,10 +238,18 @@ struct DashboardView: View {
 
     private var prayerChecklist: some View {
         VStack(alignment: .leading, spacing: DS.Space.lg) {
-            Text("GÜNÜN NAMAZLARI")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(DS.Color.textSecondary)
-                .tracking(3)
+            HStack {
+                Text("GÜNÜN NAMAZLARI")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .tracking(3)
+
+                Spacer()
+
+                Text("\(viewModel.prayedCount)/5")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(DS.Color.accent)
+            }
 
             if let log = viewModel.todayLog {
                 HStack(spacing: 0) {
@@ -288,55 +292,153 @@ struct DashboardView: View {
             }
         }
         try? modelContext.save()
-        DS.Haptic.dhikrTap()
+        DS.Haptic.mediumTap()
     }
 
-    // MARK: - Last Read Card
+    // MARK: - Horizontal Widgets
 
-    @ViewBuilder
-    private var lastReadCard: some View {
-        if let position = viewModel.lastReadPosition {
-            Button {
-                onResumeReading?(position.mushafPage)
-            } label: {
-                HStack(spacing: DS.Space.md) {
-                    ZStack {
-                        Circle()
-                            .fill(DS.Color.accentSoft)
-                            .frame(width: 44, height: 44)
-                        Image(systemName: "book.fill")
-                            .font(.system(size: 18))
-                            .foregroundStyle(DS.Color.accent)
+    private var horizontalWidgets: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DS.Space.md) {
+                Color.clear.frame(width: DS.Space.sm)
+
+                // Continue Reading Widget
+                if let position = viewModel.lastReadPosition {
+                    Button {
+                        DS.Haptic.softTap()
+                        onResumeReading?(position.mushafPage)
+                    } label: {
+                        continueReadingWidget(position)
                     }
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("KALDIĞIN YER")
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(DS.Color.textSecondary)
-                            .tracking(2)
-                        Text(position.surahNameTurkish)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(DS.Color.textPrimary)
-                        Text("Sayfa \(position.mushafPage)")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundStyle(DS.Color.textSecondary)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "arrow.right.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundStyle(DS.Color.accent)
+                    .buttonStyle(WidgetButtonStyle())
                 }
-                .padding(DS.Space.lg)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(DS.Color.cardElevated)
-                        .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
-                )
+
+                // Daily Progress Widget
+                dailyProgressWidget
+
+                // Streak Widget
+                if viewModel.readingStreakDays > 0 {
+                    streakWidget
+                }
+
+                Color.clear.frame(width: DS.Space.sm)
             }
-            .buttonStyle(.plain)
         }
+    }
+
+    private func continueReadingWidget(_ position: LastReadPosition) -> some View {
+        VStack(alignment: .leading, spacing: DS.Space.md) {
+            HStack {
+                Image(systemName: "book.fill")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(DS.Color.accent)
+                Spacer()
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(DS.Color.accent.opacity(0.5))
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("KALDIĞIN YER")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .tracking(1.5)
+                Text(position.surahNameTurkish)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(DS.Color.textPrimary)
+                    .lineLimit(1)
+                Text("Sayfa \(position.mushafPage)")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(DS.Color.textSecondary)
+            }
+        }
+        .frame(width: 160)
+        .padding(DS.Space.lg)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(DS.Color.glassBorder, lineWidth: 0.5)
+        )
+    }
+
+    private var dailyProgressWidget: some View {
+        VStack(alignment: .leading, spacing: DS.Space.md) {
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(DS.Color.accent)
+                Spacer()
+                Text("\(Int(viewModel.quranProgressPercent * 100))%")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundStyle(DS.Color.accent)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("BUGÜN")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .tracking(1.5)
+                Text("\(viewModel.pagesReadToday)/\(viewModel.dailyPageGoal) sayfa")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(DS.Color.textPrimary)
+
+                // Mini progress bar
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(DS.Color.hairline).frame(height: 4)
+                        Capsule().fill(DS.Color.accent).frame(
+                            width: geo.size.width * min(1.0, Double(viewModel.pagesReadToday) / Double(max(1, viewModel.dailyPageGoal))),
+                            height: 4
+                        )
+                    }
+                }
+                .frame(height: 4)
+            }
+        }
+        .frame(width: 160)
+        .padding(DS.Space.lg)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(DS.Color.glassBorder, lineWidth: 0.5)
+        )
+    }
+
+    private var streakWidget: some View {
+        VStack(alignment: .leading, spacing: DS.Space.md) {
+            Image(systemName: "flame.fill")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.orange)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("SERİ")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .tracking(1.5)
+                Text("\(viewModel.readingStreakDays)")
+                    .font(.system(size: 32, weight: .black, design: .rounded))
+                    .foregroundStyle(DS.Color.textPrimary)
+                Text("gün")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(DS.Color.textSecondary)
+            }
+        }
+        .frame(width: 120)
+        .padding(DS.Space.lg)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(DS.Color.glassBorder, lineWidth: 0.5)
+        )
     }
 
     // MARK: - Verse of the Day
@@ -382,79 +484,14 @@ struct DashboardView: View {
             }
             .padding(DS.Space.lg)
             .background(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
                     .fill(DS.Color.quranCard)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
                     .stroke(DS.Color.ornamentLine, lineWidth: 0.5)
             )
         }
-    }
-
-    // MARK: - Progress Section
-
-    private var progressSection: some View {
-        HStack(spacing: DS.Space.lg) {
-            ZStack {
-                Circle()
-                    .stroke(DS.Color.hairline, lineWidth: 6)
-                    .frame(width: 72, height: 72)
-                Circle()
-                    .trim(from: 0, to: min(1.0, viewModel.quranProgressPercent))
-                    .stroke(DS.Color.accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                    .frame(width: 72, height: 72)
-                    .rotationEffect(.degrees(-90))
-                VStack(spacing: 0) {
-                    Text("\(Int(viewModel.quranProgressPercent * 100))")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundStyle(DS.Color.textPrimary)
-                    Text("%")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(DS.Color.textSecondary)
-                }
-            }
-
-            VStack(alignment: .leading, spacing: DS.Space.sm) {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Bugün")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundStyle(DS.Color.textSecondary)
-                        Spacer()
-                        Text("\(viewModel.pagesReadToday)/\(viewModel.dailyPageGoal) sayfa")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(DS.Color.accent)
-                    }
-
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(DS.Color.hairline).frame(height: 5)
-                            Capsule().fill(DS.Color.accent).frame(
-                                width: geo.size.width * min(1.0, Double(viewModel.pagesReadToday) / Double(max(1, viewModel.dailyPageGoal))),
-                                height: 5
-                            )
-                        }
-                    }
-                    .frame(height: 5)
-                }
-
-                HStack(spacing: DS.Space.xs) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.orange)
-                    Text("\(viewModel.readingStreakDays) gün seri")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(DS.Color.textPrimary)
-                }
-            }
-        }
-        .padding(DS.Space.lg)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(DS.Color.cardElevated)
-                .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
-        )
     }
 
     // MARK: - Quick Actions Grid
@@ -465,7 +502,7 @@ struct DashboardView: View {
                 Button { onOpenRehber?() } label: {
                     quickActionCard(icon: "book.pages", title: "Rehber", subtitle: "Temel bilgiler")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(WidgetButtonStyle())
 
                 NavigationLink {
                     KazaView()
@@ -508,10 +545,19 @@ struct DashboardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DS.Space.lg)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
                 .fill(DS.Color.cardElevated)
                 .shadow(color: .black.opacity(0.03), radius: 6, y: 2)
         )
+    }
+}
+
+// MARK: - Widget Button Style
+
+private struct WidgetButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .dsPress(configuration.isPressed)
     }
 }
 
@@ -553,28 +599,5 @@ private struct PrayerPill: View {
         .sensoryFeedback(.impact(flexibility: .soft), trigger: isPrayed)
         .accessibilityLabel("\(name) namazı, \(isPrayed ? "kılındı" : "kılınmadı")")
         .accessibilityAddTraits(.isToggle)
-    }
-}
-
-// MARK: - Stagger Animation
-
-private struct StaggerModifier: ViewModifier {
-    let index: Int
-    let loaded: Bool
-
-    func body(content: Content) -> some View {
-        content
-            .opacity(loaded ? 1 : 0)
-            .offset(y: loaded ? 0 : 16)
-            .animation(
-                DS.Motion.standard.delay(Double(index) * 0.1),
-                value: loaded
-            )
-    }
-}
-
-extension View {
-    fileprivate func staggerIn(index: Int, loaded: Bool) -> some View {
-        modifier(StaggerModifier(index: index, loaded: loaded))
     }
 }

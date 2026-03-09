@@ -25,6 +25,7 @@ final class DependencyContainer {
     let prayerTimeService: any PrayerTimeServiceProtocol
     let notificationScheduler: any NotificationSchedulerProtocol = NotificationScheduler()
     let widgetDataService: any WidgetDataServiceProtocol = WidgetDataService()
+    let liveActivityManager: any LiveActivityManagerProtocol = LiveActivityManager()
 
     // MARK: - SwiftData
 

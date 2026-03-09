@@ -12,6 +12,13 @@ final class QiblaViewModel: NSObject, CLLocationManagerDelegate {
     var hasLocation = false
     var errorMessage: String?
 
+    // ── Lock State ─────────────────────────────────────────
+    /// True while device is within ±2° of Qibla
+    var isLockedOnQibla = false
+    /// Fires once at the moment of lock-in (consumed by view)
+    var didJustLock = false
+    private var wasLockedLastUpdate = false
+
     // Kaaba coordinates (decimal degrees)
     private static let kaabaLatDeg = 21.4225
     private static let kaabaLonDeg = 39.8262
@@ -34,16 +41,21 @@ final class QiblaViewModel: NSObject, CLLocationManagerDelegate {
         -heading
     }
 
-    /// Whether the device is pointing close to the Qibla (within 5 degrees)
+    /// Whether the device is pointing close to the Qibla (within ±2 degrees)
     var isPointingAtQibla: Bool {
-        abs(rotationAngle) < 5
+        abs(rotationAngle) < 2
+    }
+
+    /// Consume the one-shot lock event so the view only triggers haptics once.
+    func consumeLockEvent() {
+        didJustLock = false
     }
 
     override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.headingFilter = 1
+        locationManager.headingFilter = 0.5          // tighter filter for smoother compass
     }
 
     func start() {
@@ -77,6 +89,16 @@ final class QiblaViewModel: NSObject, CLLocationManagerDelegate {
             // Prefer true heading if available, fall back to magnetic
             heading = newHeading.trueHeading >= 0 ? newHeading.trueHeading : newHeading.magneticHeading
             accuracy = newHeading.headingAccuracy
+
+            // ── Lock detection ─────────────────────────────
+            let nowLocked = isPointingAtQibla
+            if nowLocked && !wasLockedLastUpdate {
+                isLockedOnQibla = true
+                didJustLock = true
+            } else if !nowLocked {
+                isLockedOnQibla = false
+            }
+            wasLockedLastUpdate = nowLocked
         }
     }
 

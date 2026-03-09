@@ -133,6 +133,12 @@ struct SettingsView: View {
                 Task { await viewModel.requestNotifications() }
             }
             .foregroundStyle(DS.Color.accent)
+
+            // Live Activity toggle
+            Toggle("Canlı Etkinlik (Kilit Ekranı)", isOn: Binding(
+                get: { settings.liveActivityEnabled },
+                set: { settings.liveActivityEnabled = $0; viewModel.saveSettings(context: modelContext) }
+            ))
         } header: {
             Text("Bildirimler")
                 .font(DS.Typography.sectionHead)

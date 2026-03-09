@@ -2,42 +2,69 @@ import SwiftUI
 
 struct QiblaView: View {
     @State private var viewModel = QiblaViewModel()
+    @State private var glowPulse = false
+    @State private var appeared = false
+
+    // Compass geometry
+    private let compassSize: CGFloat = 280
 
     var body: some View {
         NavigationStack {
             ZStack {
-                // Warm gradient background
-                backgroundGradient
+                DS.Color.backgroundPrimary.ignoresSafeArea()
+
+                // Green ambient glow when locked
+                if viewModel.isLockedOnQibla {
+                    RadialGradient(
+                        colors: [
+                            DS.Color.success.opacity(0.12),
+                            DS.Color.success.opacity(0.04),
+                            .clear
+                        ],
+                        center: .center,
+                        startRadius: 40,
+                        endRadius: 300
+                    )
                     .ignoresSafeArea()
+                    .transition(.opacity)
+                }
 
                 VStack(spacing: 0) {
                     Spacer()
 
                     if viewModel.hasLocation {
-                        // Location label
+                        // Location
                         if !viewModel.locationName.isEmpty {
-                            Text(viewModel.locationName)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(DS.Color.textSecondary)
-                                .padding(.bottom, DS.Space.xl)
+                            HStack(spacing: 6) {
+                                Image(systemName: "location.fill")
+                                    .font(.system(size: 9))
+                                Text(viewModel.locationName)
+                                    .font(.system(size: 13, weight: .medium))
+                            }
+                            .foregroundStyle(DS.Color.textSecondary)
+                            .padding(.bottom, DS.Space.x3)
+                            .dsAppear(loaded: appeared, index: 0)
                         }
 
-                        // Qibla indicator arrow above compass
-                        qiblaTopIndicator
-                            .padding(.bottom, DS.Space.sm)
+                        // Fixed Qibla indicator above compass
+                        qiblaIndicator
+                            .padding(.bottom, DS.Space.md)
+                            .dsAppear(loaded: appeared, index: 1)
 
-                        // Compass
-                        compassView
-                            .padding(.horizontal, DS.Space.x2)
+                        // Compass dial
+                        compassDial
+                            .dsAppear(loaded: appeared, index: 2)
 
                         Spacer().frame(height: DS.Space.x3)
 
                         // Degree readout
                         degreeReadout
+                            .dsAppear(loaded: appeared, index: 3)
 
-                        // Direction instruction
-                        directionInstruction
+                        // Direction pill
+                        directionPill
                             .padding(.top, DS.Space.lg)
+                            .dsAppear(loaded: appeared, index: 4)
 
                     } else if viewModel.errorMessage != nil {
                         errorView
@@ -46,6 +73,12 @@ struct QiblaView: View {
                     }
 
                     Spacer()
+
+                    // Accuracy badge
+                    if viewModel.accuracy > 0 && viewModel.hasLocation {
+                        accuracyBadge
+                            .padding(.bottom, DS.Space.sm)
+                    }
 
                     // Calibration warning
                     if viewModel.isCalibrationNeeded {
@@ -57,124 +90,169 @@ struct QiblaView: View {
             }
             .navigationTitle("Kıble")
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear { viewModel.start() }
+            .onAppear {
+                viewModel.start()
+                DS.Haptic.prepare()
+                withAnimation(DS.Motion.slowReveal) {
+                    appeared = true
+                }
+            }
             .onDisappear { viewModel.stop() }
+            .onChange(of: viewModel.didJustLock) { _, locked in
+                if locked {
+                    DS.Haptic.qiblaLocked()
+                    viewModel.consumeLockEvent()
+                    // Start glow pulse
+                    withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                        glowPulse = true
+                    }
+                }
+            }
+            .onChange(of: viewModel.isLockedOnQibla) { _, locked in
+                if !locked {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        glowPulse = false
+                    }
+                }
+            }
         }
     }
 
-    // MARK: - Background
+    // MARK: - Qibla Indicator (fixed above compass)
 
-    private var backgroundGradient: some View {
-        LinearGradient(
-            colors: [
-                DS.Color.backgroundPrimary,
-                DS.Color.backgroundPrimary,
-                DS.Color.accent.opacity(0.04)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-    }
+    private var qiblaIndicator: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "arrow.down")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
+                .animation(DS.Motion.standard, value: viewModel.isLockedOnQibla)
 
-    // MARK: - Qibla Top Indicator
-
-    private var qiblaTopIndicator: some View {
-        VStack(spacing: DS.Space.xs) {
-            // Down-pointing triangle
-            Image(systemName: "arrowtriangle.down.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(DS.Color.accent)
-
-            // Kaaba icon
-            Text("🕋")
-                .font(.system(size: 24))
+            Image(systemName: "building.columns.fill")
+                .font(.system(size: 22))
+                .foregroundStyle(viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
+                .symbolEffect(.pulse, options: .repeating, isActive: viewModel.isLockedOnQibla)
         }
-        .opacity(viewModel.isPointingAtQibla ? 1 : 0.6)
-        .animation(.easeInOut(duration: 0.3), value: viewModel.isPointingAtQibla)
     }
 
-    // MARK: - Compass
+    // MARK: - Compass Dial
 
-    private var compassView: some View {
-        GeometryReader { geo in
-            let size = min(geo.size.width, geo.size.height)
-            let radius = size / 2 - 20
+    private var compassDial: some View {
+        ZStack {
+            // Outer ring
+            Circle()
+                .stroke(
+                    viewModel.isLockedOnQibla
+                        ? DS.Color.success.opacity(0.35)
+                        : DS.Color.hairline,
+                    lineWidth: 1.5
+                )
+                .frame(width: compassSize, height: compassSize)
+                .shadow(
+                    color: viewModel.isLockedOnQibla
+                        ? DS.Color.success.opacity(glowPulse ? 0.4 : 0.15)
+                        : .clear,
+                    radius: glowPulse ? 24 : 12
+                )
+                .animation(.easeInOut(duration: 1.2), value: glowPulse)
 
+            // Inner content rotates with compass
             ZStack {
-                // Compass circle
-                Circle()
-                    .stroke(DS.Color.accent.opacity(0.25), lineWidth: 1.5)
-                    .frame(width: radius * 2, height: radius * 2)
+                // Tick marks — 72 ticks (every 5°)
+                ForEach(0..<72, id: \.self) { i in
+                    let angle = Double(i) * 5.0
+                    let isCardinal = i % 18 == 0         // N, E, S, W
+                    let isIntercardinal = i % 9 == 0     // NE, SE, SW, NW
+                    let isMajor = i % 18 == 0 || i % 9 == 0
 
-                // Cardinal direction dots
-                ForEach(0..<8, id: \.self) { i in
-                    let angle = Double(i) * 45.0
-                    let isPrimary = i % 2 == 0
-                    Circle()
-                        .fill(isPrimary ? DS.Color.textSecondary.opacity(0.5) : DS.Color.textSecondary.opacity(0.25))
-                        .frame(width: isPrimary ? 6 : 4, height: isPrimary ? 6 : 4)
-                        .offset(
-                            x: radius * cos(CGFloat((angle - 90) * .pi / 180)),
-                            y: radius * sin(CGFloat((angle - 90) * .pi / 180))
+                    Rectangle()
+                        .fill(
+                            isCardinal
+                                ? DS.Color.textPrimary.opacity(0.6)
+                                : isMajor
+                                    ? DS.Color.textSecondary.opacity(0.3)
+                                    : DS.Color.hairline
                         )
+                        .frame(
+                            width: isCardinal ? 2 : 1,
+                            height: isCardinal ? 14 : (isIntercardinal ? 10 : 6)
+                        )
+                        .offset(y: -(compassSize / 2 - (isCardinal ? 7 : 5)))
+                        .rotationEffect(.degrees(angle))
                 }
 
-                // Cardinal direction labels
-                cardinalLabel("N", angle: 0, radius: radius + 20)
-                cardinalLabel("S", angle: 180, radius: radius + 20)
-                cardinalLabel("E", angle: 90, radius: radius + 20)
-                cardinalLabel("W", angle: 270, radius: radius + 20)
+                // Cardinal labels
+                cardinalLabel("N", angle: 0, isNorth: true)
+                cardinalLabel("E", angle: 90, isNorth: false)
+                cardinalLabel("S", angle: 180, isNorth: false)
+                cardinalLabel("W", angle: 270, isNorth: false)
 
                 // Qibla needle
-                qiblaNeedle(radius: radius)
-
-                // Center dot
-                Circle()
-                    .fill(DS.Color.accent.opacity(0.8))
-                    .frame(width: 16, height: 16)
-                    .shadow(color: DS.Color.accent.opacity(0.3), radius: 6)
+                qiblaNeedle
             }
-            .frame(width: size, height: size)
             .rotationEffect(.degrees(viewModel.compassRotation))
-            .animation(.easeOut(duration: 0.15), value: viewModel.heading)
+            .animation(DS.Motion.elastic, value: viewModel.heading)
+
+            // Center dot
+            Circle()
+                .fill(
+                    viewModel.isLockedOnQibla
+                        ? DS.Color.success
+                        : DS.Color.accent
+                )
+                .frame(width: 10, height: 10)
+                .shadow(
+                    color: viewModel.isLockedOnQibla
+                        ? DS.Color.success.opacity(0.5)
+                        : DS.Color.accent.opacity(0.3),
+                    radius: 6
+                )
+                .animation(DS.Motion.standard, value: viewModel.isLockedOnQibla)
         }
-        .aspectRatio(1, contentMode: .fit)
+        .frame(width: compassSize + 40, height: compassSize + 40)
     }
 
-    private func cardinalLabel(_ text: String, angle: Double, radius: CGFloat) -> some View {
-        Text(text)
-            .font(.system(size: 18, weight: .semibold))
-            .foregroundStyle(text == "N" ? DS.Color.accent : DS.Color.textPrimary)
+    private func cardinalLabel(_ text: String, angle: Double, isNorth: Bool) -> some View {
+        let radius = compassSize / 2 - 30
+        return Text(text)
+            .font(.system(size: 15, weight: .bold, design: .rounded))
+            .foregroundStyle(
+                isNorth
+                    ? (viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
+                    : DS.Color.textSecondary
+            )
             .offset(
                 x: radius * cos(CGFloat((angle - 90) * .pi / 180)),
                 y: radius * sin(CGFloat((angle - 90) * .pi / 180))
             )
+            // Counter-rotate so labels stay upright
             .rotationEffect(.degrees(-viewModel.compassRotation))
-            .animation(.easeOut(duration: 0.15), value: viewModel.heading)
+            .animation(DS.Motion.elastic, value: viewModel.heading)
     }
 
-    private func qiblaNeedle(radius: CGFloat) -> some View {
-        ZStack {
-            // Needle line
-            Rectangle()
+    private var qiblaNeedle: some View {
+        let needleLength = compassSize / 2 - 38
+
+        return ZStack {
+            // Needle body — tapered capsule
+            Capsule()
                 .fill(
                     LinearGradient(
-                        colors: [DS.Color.accent.opacity(0.1), DS.Color.accent],
+                        colors: [
+                            (viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent).opacity(0.08),
+                            viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent
+                        ],
                         startPoint: .bottom,
                         endPoint: .top
                     )
                 )
-                .frame(width: 3, height: radius - 10)
-                .clipShape(Capsule())
-                .offset(y: -(radius - 10) / 2)
+                .frame(width: 3, height: needleLength)
+                .offset(y: -needleLength / 2)
 
-            // Kaaba icon at tip
-            Text("🕋")
-                .font(.system(size: 20))
-                .offset(y: -radius + 6)
-                .rotationEffect(.degrees(-viewModel.qiblaDirection))
-                .rotationEffect(.degrees(-viewModel.compassRotation))
-                .animation(.easeOut(duration: 0.15), value: viewModel.heading)
+            // Needle tip — diamond
+            Image(systemName: "diamond.fill")
+                .font(.system(size: 10))
+                .foregroundStyle(viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
+                .offset(y: -needleLength - 2)
         }
         .rotationEffect(.degrees(viewModel.qiblaDirection))
     }
@@ -183,53 +261,81 @@ struct QiblaView: View {
 
     private var degreeReadout: some View {
         VStack(spacing: DS.Space.xs) {
-            Text("\(Int(viewModel.qiblaDirection))\u{00B0}")
-                .font(.system(size: 48, weight: .bold, design: .rounded))
-                .foregroundStyle(DS.Color.textPrimary)
+            Text("\(Int(viewModel.qiblaDirection))°")
+                .font(.system(size: 56, weight: .thin, design: .rounded))
+                .foregroundStyle(
+                    viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.textPrimary
+                )
                 .contentTransition(.numericText())
-                .animation(.easeOut(duration: 0.2), value: Int(viewModel.qiblaDirection))
+                .animation(DS.Motion.countdown, value: Int(viewModel.qiblaDirection))
 
             Text("Kıble Yönü")
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(DS.Color.textSecondary)
+                .tracking(2)
+                .textCase(.uppercase)
         }
     }
 
-    // MARK: - Direction Instruction
+    // MARK: - Direction Pill
 
-    private var directionInstruction: some View {
+    private var directionPill: some View {
         Group {
-            if viewModel.isPointingAtQibla {
+            if viewModel.isLockedOnQibla {
                 HStack(spacing: DS.Space.sm) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(.green)
-                    Text("Kıbleye dönüksünüz")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(.green)
+                        .font(.system(size: 16))
+                    Text("Kıbleye Dönüksünüz")
+                        .font(.system(size: 14, weight: .semibold))
                 }
+                .foregroundStyle(DS.Color.success)
                 .padding(.horizontal, DS.Space.xl)
                 .padding(.vertical, DS.Space.md)
                 .background(
                     Capsule()
-                        .fill(.green.opacity(0.1))
+                        .fill(DS.Color.success.opacity(0.12))
+                        .overlay(
+                            Capsule()
+                                .stroke(DS.Color.success.opacity(0.2), lineWidth: 0.5)
+                        )
                 )
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
             } else {
                 let absAngle = Int(abs(viewModel.rotationAngle))
                 let direction = viewModel.rotationAngle > 0 ? "sağa" : "sola"
 
-                Text("Telefonu \(absAngle)\u{00B0} \(direction) döndürün")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(DS.Color.accent)
-                    .padding(.horizontal, DS.Space.xl)
-                    .padding(.vertical, DS.Space.md)
-                    .background(
-                        Capsule()
-                            .fill(DS.Color.accentSoft)
-                    )
-                    .contentTransition(.numericText())
-                    .animation(.easeOut(duration: 0.2), value: absAngle)
+                HStack(spacing: DS.Space.sm) {
+                    Image(systemName: viewModel.rotationAngle > 0
+                          ? "arrow.turn.right.up"
+                          : "arrow.turn.left.up")
+                        .font(.system(size: 14, weight: .medium))
+                    Text("\(absAngle)° \(direction)")
+                        .font(.system(size: 14, weight: .semibold))
+                        .contentTransition(.numericText())
+                }
+                .foregroundStyle(DS.Color.accent)
+                .padding(.horizontal, DS.Space.xl)
+                .padding(.vertical, DS.Space.md)
+                .background(
+                    Capsule()
+                        .fill(DS.Color.accentSoft)
+                )
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
             }
+        }
+        .animation(DS.Motion.standard, value: viewModel.isLockedOnQibla)
+    }
+
+    // MARK: - Accuracy Badge
+
+    private var accuracyBadge: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(viewModel.accuracy < 15 ? DS.Color.success : DS.Color.warning)
+                .frame(width: 5, height: 5)
+            Text("±\(Int(viewModel.accuracy))°")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundStyle(DS.Color.textSecondary)
         }
     }
 
@@ -263,15 +369,15 @@ struct QiblaView: View {
     private var calibrationBanner: some View {
         HStack(spacing: DS.Space.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(.orange)
+                .font(.system(size: 13))
+                .foregroundStyle(DS.Color.warning)
             Text("Pusula kalibrasyonu gerekiyor. Telefonunuzu 8 şeklinde hareket ettirin.")
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(DS.Color.textSecondary)
         }
         .padding(DS.Space.md)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
                 .fill(DS.Color.cardElevated)
                 .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
         )
