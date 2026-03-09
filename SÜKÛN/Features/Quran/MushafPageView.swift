@@ -51,7 +51,6 @@ struct MushafPageView: View {
 
                     case .bismillah:
                         bismillahView
-
                             .padding(.horizontal, DS.Space.x2)
                             .padding(.bottom, DS.Space.md)
 
@@ -61,7 +60,6 @@ struct MushafPageView: View {
                     }
                 }
 
-                // Page number footer
                 pageFooter
                     .padding(.top, DS.Space.x2)
 
@@ -117,7 +115,7 @@ struct MushafPageView: View {
     private var bismillahView: some View {
         VStack(spacing: DS.Space.sm) {
             Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
-                .font(.system(size: 22, weight: .regular))
+                .font(.system(size: 24 * fontScale, weight: .regular))
                 .foregroundStyle(DS.Color.textPrimary)
                 .frame(maxWidth: .infinity)
 
@@ -133,9 +131,8 @@ struct MushafPageView: View {
     private func verseCard(_ verse: VerseDTO) -> some View {
         Button { selectedVerse = verse } label: {
             VStack(alignment: .leading, spacing: 0) {
-                // Verse number badge row
+                // Verse number badge
                 HStack(alignment: .center, spacing: DS.Space.sm) {
-                    // Colored circle badge
                     ZStack {
                         Circle()
                             .fill(DS.Color.accent)
@@ -144,40 +141,39 @@ struct MushafPageView: View {
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                     }
-
                     Spacer()
                 }
                 .padding(.bottom, DS.Space.sm)
 
-                // Arabic text — right-aligned, large (respects fontScale)
+                // Arabic text — larger with better line spacing
                 let baseSize: CGFloat = showTransliteration || showTranslation ? 24 : 28
                 Text(verse.textArabic)
                     .font(.system(size: baseSize * fontScale, weight: .regular))
                     .foregroundStyle(DS.Color.textPrimary)
                     .multilineTextAlignment(.trailing)
-                    .lineSpacing(showTransliteration || showTranslation ? 12 : 18)
+                    .lineSpacing(showTransliteration || showTranslation ? 14 : 20)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .trailing)
 
-                // Transliteration
+                // Transliteration — clear, readable serif
                 if showTransliteration && !verse.textTransliteration.isEmpty {
                     Text(verse.textTransliteration)
-                        .font(.system(size: 14, weight: .regular, design: .serif))
+                        .font(.system(size: 15 * fontScale, weight: .regular, design: .serif))
                         .italic()
                         .foregroundStyle(DS.Color.accent.opacity(0.7))
                         .multilineTextAlignment(.leading)
-                        .lineSpacing(4)
+                        .lineSpacing(5)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, DS.Space.sm)
+                        .padding(.top, DS.Space.md)
                 }
 
-                // Translation
+                // Translation — clean body text
                 if showTranslation && !verse.textTranslation.isEmpty {
                     Text(verse.textTranslation)
-                        .font(.system(size: 14, weight: .regular))
+                        .font(.system(size: 15 * fontScale, weight: .regular))
                         .foregroundStyle(DS.Color.textSecondary)
                         .multilineTextAlignment(.leading)
-                        .lineSpacing(4)
+                        .lineSpacing(5)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, DS.Space.sm)
                 }
@@ -253,23 +249,19 @@ private struct PremiumSurahHeader: View {
 
     var body: some View {
         VStack(spacing: DS.Space.md) {
-            // Arabic calligraphy name — large
             Text(surah.nameArabic)
                 .font(.system(size: 36, weight: .regular))
                 .foregroundStyle(.white)
 
-            // Turkish name
             Text(surah.nameTurkish)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.85))
                 .tracking(1)
 
-            // Divider
             Rectangle()
                 .fill(.white.opacity(0.2))
                 .frame(width: 40, height: 1)
 
-            // Info
             HStack(spacing: DS.Space.md) {
                 Text(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")
                     .font(.system(size: 11, weight: .medium))

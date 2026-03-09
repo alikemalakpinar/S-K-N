@@ -4,6 +4,7 @@ import SwiftData
 @main
 struct SU_KU_NApp: App {
     @State private var container = DependencyContainer()
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @Query(FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" }))
     private var userSettings: [UserSetting]
 
@@ -12,7 +13,7 @@ struct SU_KU_NApp: App {
         switch theme {
         case "light": return .light
         case "dark": return .dark
-        default: return nil // "system" → follow device setting
+        default: return nil
         }
     }
 
@@ -22,10 +23,16 @@ struct SU_KU_NApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(container: container)
-                .background(DS.Color.backgroundPrimary)
-                .preferredColorScheme(resolvedColorScheme)
-                .environment(\.dsFontScale, fontScale)
+            Group {
+                if hasCompletedOnboarding {
+                    RootView(container: container)
+                } else {
+                    OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding, container: container)
+                }
+            }
+            .background(DS.Color.backgroundPrimary)
+            .preferredColorScheme(resolvedColorScheme)
+            .environment(\.dsFontScale, fontScale)
         }
         .modelContainer(container.modelContainer)
     }

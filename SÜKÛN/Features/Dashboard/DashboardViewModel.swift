@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import CoreLocation
 
 @Observable
 final class DashboardViewModel {
@@ -8,6 +9,7 @@ final class DashboardViewModel {
     var todayLog: PrayerLog?
     var isLoading = false
     var errorMessage: String?
+    var locationName: String = ""
 
     // Reading progress
     var lastReadPosition: LastReadPosition?
@@ -22,6 +24,7 @@ final class DashboardViewModel {
 
     private let container: DependencyContainer
     private static var cachedVerseOfDay: (date: Date, verse: VerseDTO, surahName: String)?
+    private var hasGeocoded = false
 
     init(container: DependencyContainer) {
         self.container = container
@@ -31,7 +34,7 @@ final class DashboardViewModel {
         isLoading = true
         defer { isLoading = false }
 
-        // Load today's prayer log (upsert prevents duplicates)
+        // Load today's prayer log
         do {
             todayLog = try container.userActivityRepository.getOrCreatePrayerLog(for: Date(), context: context)
         } catch {
@@ -46,7 +49,6 @@ final class DashboardViewModel {
             readingStreakDays = try container.userActivityRepository.readingStreakDays(context: context)
             quranProgressPercent = Double(totalUniquePages) / 604.0
 
-            // Load daily goal from settings
             let descriptor = FetchDescriptor<UserSetting>(predicate: #Predicate { $0.id == "default" })
             if let settings = try? context.fetch(descriptor).first {
                 dailyPageGoal = settings.dailyPageGoal
@@ -92,7 +94,6 @@ final class DashboardViewModel {
                 nextPrayerName = next.name
                 nextPrayerTime = next.time
 
-                // Update widget data
                 try? container.widgetDataService.writeNextPrayerData(name: next.name, time: next.time)
             } else {
                 nextPrayerName = "Yatsı"
@@ -100,6 +101,29 @@ final class DashboardViewModel {
             }
         } catch {
             errorMessage = UserFriendlyError.message(from: error)
+        }
+    }
+
+    // MARK: - Reverse Geocoding
+
+    func loadLocationName(latitude: Double, longitude: Double) {
+        guard !hasGeocoded else { return }
+        hasGeocoded = true
+
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        let geocoder = CLGeocoder()
+
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
+            guard let self, let placemark = placemarks?.first else { return }
+            Task { @MainActor in
+                let city = placemark.locality ?? placemark.administrativeArea ?? ""
+                let country = placemark.country ?? ""
+                if !city.isEmpty && !country.isEmpty {
+                    self.locationName = "\(city), \(country)"
+                } else if !country.isEmpty {
+                    self.locationName = country
+                }
+            }
         }
     }
 }

@@ -42,6 +42,7 @@ final class DependencyContainer {
             Bookmark.self,
             LastReadPosition.self,
             PageReadLog.self,
+            KazaPrayer.self,
         ])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
