@@ -9,16 +9,60 @@
 /* Begin PBXBuildFile section */
 		A99837452F572E0000C9933B /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B9A0B1C22F570D0100C9933B /* GRDB */; };
 		A99837462F572E0000C9933B /* Adhan in Frameworks */ = {isa = PBXBuildFile; productRef = B3D4E5F62F570D0100C9933B /* Adhan */; };
+		C1AA000D2F580B01E1234AAA /* SukunLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C1AA00012F580B01E1234AAA /* SukunLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		C1AA000A2F580B01E1234AAA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A99834EA2F570D0100C9933B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C1AA00032F580B01E1234AAA;
+			remoteInfo = SukunLiveActivity;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C1AA000C2F580B01E1234AAA /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C1AA000D2F580B01E1234AAA /* SukunLiveActivity.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		A99834F22F570D0100C9933B /* SÜKÛN.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SÜKÛN.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A99834F22F570D0100C9933B /* SÜKÛN.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "SÜKÛN.app"; path = "SÜKÛN.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1AA00012F580B01E1234AAA /* SukunLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SukunLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C1AA000E2F580B01E1234AAA /* Exceptions for "SÜKÛN" folder in "SukunLiveActivity" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Core/LiveActivity/PrayerAttributes.swift,
+			);
+			target = C1AA00032F580B01E1234AAA /* SukunLiveActivity */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A99834F42F570D0100C9933B /* SÜKÛN */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "SÜKÛN";
+			exceptions = (
+				C1AA000E2F580B01E1234AAA /* Exceptions for "SÜKÛN" folder in "SukunLiveActivity" target */,
+			);
+			path = "SÜKÛN";
+			sourceTree = "<group>";
+		};
+		C1AA00022F580B01E1234AAA /* SukunLiveActivity */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SukunLiveActivity;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -33,6 +77,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C1AA00052F580B01E1234AAA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -40,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				A99834F42F570D0100C9933B /* SÜKÛN */,
+				C1AA00022F580B01E1234AAA /* SukunLiveActivity */,
 				A99834F32F570D0100C9933B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -48,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				A99834F22F570D0100C9933B /* SÜKÛN.app */,
+				C1AA00012F580B01E1234AAA /* SukunLiveActivity.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -62,22 +115,44 @@
 				A99834EE2F570D0100C9933B /* Sources */,
 				A99834EF2F570D0100C9933B /* Frameworks */,
 				A99834F02F570D0100C9933B /* Resources */,
+				C1AA000C2F580B01E1234AAA /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C1AA000B2F580B01E1234AAA /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A99834F42F570D0100C9933B /* SÜKÛN */,
+			);
+			name = "SÜKÛN";
+			packageProductDependencies = (
+				B9A0B1C22F570D0100C9933B /* GRDB */,
+				B3D4E5F62F570D0100C9933B /* Adhan */,
+			);
+			productName = "SÜKÛN";
+			productReference = A99834F22F570D0100C9933B /* SÜKÛN.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C1AA00032F580B01E1234AAA /* SukunLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1AA00092F580B01E1234AAA /* Build configuration list for PBXNativeTarget "SukunLiveActivity" */;
+			buildPhases = (
+				C1AA00042F580B01E1234AAA /* Sources */,
+				C1AA00052F580B01E1234AAA /* Frameworks */,
+				C1AA00062F580B01E1234AAA /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				A99834F42F570D0100C9933B /* SÜKÛN */,
+				C1AA00022F580B01E1234AAA /* SukunLiveActivity */,
 			);
-			name = "SÜKÛN";
-			packageProductDependencies = (
-				B9A0B1C22F570D0100C9933B /* GRDB */,
-				B3D4E5F62F570D0100C9933B /* Adhan */,
-			);
-			productName = "SÜKÛN";
-			productReference = A99834F22F570D0100C9933B /* SÜKÛN.app */;
-			productType = "com.apple.product-type.application";
+			name = SukunLiveActivity;
+			productName = SukunLiveActivity;
+			productReference = C1AA00012F580B01E1234AAA /* SukunLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -90,6 +165,9 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					A99834F12F570D0100C9933B = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					C1AA00032F580B01E1234AAA = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -113,12 +191,20 @@
 			projectRoot = "";
 			targets = (
 				A99834F12F570D0100C9933B /* SÜKÛN */,
+				C1AA00032F580B01E1234AAA /* SukunLiveActivity */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A99834F02F570D0100C9933B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1AA00062F580B01E1234AAA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -135,7 +221,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C1AA00042F580B01E1234AAA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C1AA000B2F580B01E1234AAA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C1AA00032F580B01E1234AAA /* SukunLiveActivity */;
+			targetProxy = C1AA000A2F580B01E1234AAA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A99834FB2F570D0200C9933B /* Debug */ = {
@@ -257,17 +358,17 @@
 		A99834FE2F570D0200C9933B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "SÜKÛN/SÜKÛN.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 88M456LPCD;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Namaz vakitlerini hesaplamak için konumunuz kullanılır.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -302,17 +403,17 @@
 		A99834FF2F570D0200C9933B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "SÜKÛN/SÜKÛN.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 88M456LPCD;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Namaz vakitlerini hesaplamak için konumunuz kullanılır.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -344,6 +445,66 @@
 			};
 			name = Release;
 		};
+		C1AA00072F580B01E1234AAA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SukunLiveActivity/SukunLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 88M456LPCD;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SukunLiveActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.AliKemalAkpinar.SU-KU-N.SukunLiveActivity";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C1AA00082F580B01E1234AAA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SukunLiveActivity/SukunLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 88M456LPCD;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SukunLiveActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.AliKemalAkpinar.SU-KU-N.SukunLiveActivity";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -361,6 +522,15 @@
 			buildConfigurations = (
 				A99834FE2F570D0200C9933B /* Debug */,
 				A99834FF2F570D0200C9933B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1AA00092F580B01E1234AAA /* Build configuration list for PBXNativeTarget "SukunLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1AA00072F580B01E1234AAA /* Debug */,
+				C1AA00082F580B01E1234AAA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -412,12 +412,12 @@ struct DashboardView: View {
 
     private var streakWidget: some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
-            Image(systemName: "flame.fill")
+            Image(systemName: "leaf.fill")
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(.orange)
+                .foregroundStyle(DS.Color.accent)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("SERİ")
+                Text("DEVAMLILIK")
                     .font(.system(size: 9, weight: .bold))
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1.5)

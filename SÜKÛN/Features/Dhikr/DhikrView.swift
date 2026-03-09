@@ -123,9 +123,9 @@ struct DhikrView: View {
             // Today total
             if viewModel.todayTotalCount > 0 {
                 HStack(spacing: 4) {
-                    Image(systemName: "flame.fill")
+                    Image(systemName: "heart.fill")
                         .font(.system(size: 10))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(DS.Color.accent)
                     Text("\(viewModel.todayTotalCount)")
                         .font(.system(size: 12, weight: .semibold, design: .monospaced))
                         .foregroundStyle(DS.Color.textSecondary)
@@ -181,11 +181,11 @@ struct DhikrView: View {
             if let preset = viewModel.selectedPreset, preset.target > 0 {
                 let pct = min(1.0, Double(viewModel.currentCount) / Double(preset.target))
 
-                // Progress arc
+                // Progress arc — warm gold at milestones
                 Circle()
                     .trim(from: 0, to: pct)
                     .stroke(
-                        isMilestone ? DS.Color.success : DS.Color.accent,
+                        DS.Color.accent,
                         style: StrokeStyle(lineWidth: 4, lineCap: .round)
                     )
                     .frame(width: ringSize, height: ringSize)
@@ -197,7 +197,7 @@ struct DhikrView: View {
                 Circle()
                     .trim(from: 0, to: pct)
                     .stroke(
-                        (isMilestone ? DS.Color.success : DS.Color.accent).opacity(0.25),
+                        DS.Color.accent.opacity(isMilestone ? 0.4 : 0.25),
                         lineWidth: 14
                     )
                     .blur(radius: 8)
@@ -207,10 +207,10 @@ struct DhikrView: View {
                     .animation(.easeOut(duration: 0.3), value: viewModel.currentCount)
             }
 
-            // Milestone glow background
+            // Milestone warm glow background
             if milestoneGlow > 0 {
                 Circle()
-                    .fill(DS.Color.success.opacity(milestoneGlow * 0.15))
+                    .fill(DS.Color.accent.opacity(milestoneGlow * 0.12))
                     .frame(width: ringSize + 40, height: ringSize + 40)
                     .blur(radius: 20)
             }
