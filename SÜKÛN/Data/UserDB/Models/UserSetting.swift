@@ -38,5 +38,8 @@ final class UserSetting {
     var dailyPageGoal: Int = 5
     var quranReadingMode: String = "arabic"
 
+    // Live Activity
+    var liveActivityEnabled: Bool = false
+
     init() {}
 }

@@ -1,34 +1,152 @@
 import UIKit
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SÜKÛN Design System — Haptic Tokens
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
+//  Every interaction in SÜKÛN has a tactile signature.
+//  These haptics map to spiritual micro-moments:
+//  a bead sliding, a page turning, a prayer logged.
+//
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 extension DS {
     enum Haptic {
+        // ── Throttle State ───────────────────────────────────
         private static var lastDhikrTap: CFAbsoluteTime = 0
-        // ~12 taps/sec → minimum ~83ms between taps
-        private static let minDhikrInterval: CFAbsoluteTime = 0.083
+        private static let minDhikrInterval: CFAbsoluteTime = 0.075
+
+        // ── Pre-warmed Generators ────────────────────────────
+        // Reusing generators avoids allocation overhead on hot paths.
+        private static let lightEngine  = UIImpactFeedbackGenerator(style: .light)
+        private static let mediumEngine = UIImpactFeedbackGenerator(style: .medium)
+        private static let heavyEngine  = UIImpactFeedbackGenerator(style: .heavy)
+        private static let softEngine   = UIImpactFeedbackGenerator(style: .soft)
+        private static let rigidEngine  = UIImpactFeedbackGenerator(style: .rigid)
+        private static let selectionEngine = UISelectionFeedbackGenerator()
+        private static let notificationEngine = UINotificationFeedbackGenerator()
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MARK: Dhikr (Zikir)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         /// Light tap for each dhikr count — like a bead sliding.
+        /// Throttled to ~13 taps/sec to prevent engine saturation.
         static func dhikrTap() {
             let now = CFAbsoluteTimeGetCurrent()
             guard now - lastDhikrTap >= minDhikrInterval else { return }
             lastDhikrTap = now
-
-            let gen = UIImpactFeedbackGenerator(style: .light)
-            gen.prepare()
-            gen.impactOccurred()
+            lightEngine.impactOccurred(intensity: 0.65)
         }
 
-        /// Medium tap for milestone counts (33, 66, 99) — nişane hissi.
+        /// Firm pulse at milestone counts (33, 66, 99).
         static func dhikrMilestone() {
-            let gen = UIImpactFeedbackGenerator(style: .heavy)
-            gen.prepare()
-            gen.impactOccurred(intensity: 1.0)
+            heavyEngine.impactOccurred(intensity: 1.0)
         }
 
-        /// Success notification for reaching a dhikr goal.
+        /// Success burst when a dhikr goal is reached.
         static func goalReached() {
-            let gen = UINotificationFeedbackGenerator()
-            gen.prepare()
-            gen.notificationOccurred(.success)
+            notificationEngine.notificationOccurred(.success)
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MARK: UI Micro-interactions
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /// Soft tap — button presses, card selections, general UI taps.
+        static func softTap() {
+            softEngine.impactOccurred(intensity: 0.5)
+        }
+
+        /// Selection tick — segment changes, picker scrolling, toggle flips.
+        static func selection() {
+            selectionEngine.selectionChanged()
+        }
+
+        /// Medium impact — toggling prayer status, tab switching.
+        static func mediumTap() {
+            mediumEngine.impactOccurred(intensity: 0.7)
+        }
+
+        /// Rigid snap — confirming an action, locking in a choice.
+        static func snap() {
+            rigidEngine.impactOccurred(intensity: 0.8)
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MARK: Notifications
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /// Success vibration — prayer logged, bookmark saved.
+        static func success() {
+            notificationEngine.notificationOccurred(.success)
+        }
+
+        /// Warning vibration — calibration needed, error state.
+        static func warning() {
+            notificationEngine.notificationOccurred(.warning)
+        }
+
+        /// Error vibration — action failed, invalid input.
+        static func error() {
+            notificationEngine.notificationOccurred(.error)
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MARK: Complex Patterns
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /// Page turn — soft double-tap like paper being turned.
+        static func pageTurn() {
+            softEngine.impactOccurred(intensity: 0.35)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                lightEngine.impactOccurred(intensity: 0.25)
+            }
+        }
+
+        /// Prayer complete — ascending triple pulse (sabah→öğle→ikindi feeling).
+        static func prayerComplete() {
+            lightEngine.impactOccurred(intensity: 0.4)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                mediumEngine.impactOccurred(intensity: 0.6)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+                heavyEngine.impactOccurred(intensity: 0.9)
+            }
+        }
+
+        /// Qibla locked — strong pulse when phone aligns with Qibla direction.
+        static func qiblaLocked() {
+            rigidEngine.impactOccurred(intensity: 1.0)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
+                rigidEngine.impactOccurred(intensity: 0.6)
+            }
+        }
+
+        /// Countdown finish — when the prayer time arrives.
+        static func countdownFinish() {
+            heavyEngine.impactOccurred(intensity: 1.0)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                notificationEngine.notificationOccurred(.success)
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MARK: Preparation
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /// Call before a known interaction to reduce latency.
+        /// Warms the Taptic Engine so the first tap feels instant.
+        static func prepare() {
+            lightEngine.prepare()
+            mediumEngine.prepare()
+            selectionEngine.prepare()
+        }
+
+        /// Prepare the heavy engine for milestone/goal haptics.
+        static func prepareMilestone() {
+            heavyEngine.prepare()
+            notificationEngine.prepare()
         }
     }
 }

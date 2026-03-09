@@ -30,6 +30,7 @@ struct MushafPageView: View {
 
     @Environment(\.showTransliteration) private var showTransliteration
     @Environment(\.showTranslation) private var showTranslation
+    @Environment(\.readingTheme) private var theme
     @Environment(\.dsFontScale) private var fontScale
     @State private var verses: [VerseDTO] = []
     @State private var selectedVerse: VerseDTO?
@@ -66,7 +67,7 @@ struct MushafPageView: View {
                 Spacer(minLength: 90)
             }
         }
-        .background(DS.Color.backgroundPrimary)
+        .background(theme.background)
         .opacity(isLoaded ? 1 : 0)
         .animation(.easeIn(duration: 0.25), value: isLoaded)
         .task { await loadPage() }
@@ -116,12 +117,12 @@ struct MushafPageView: View {
         VStack(spacing: DS.Space.sm) {
             Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
                 .font(.system(size: 24 * fontScale, weight: .regular))
-                .foregroundStyle(DS.Color.textPrimary)
+                .foregroundStyle(theme.textPrimary)
                 .frame(maxWidth: .infinity)
 
             Text("Rahmân ve Rahîm olan Allah'ın adıyla")
                 .font(.system(size: 12, weight: .regular))
-                .foregroundStyle(DS.Color.textSecondary)
+                .foregroundStyle(theme.textSecondary)
         }
         .padding(.vertical, DS.Space.md)
     }
@@ -129,64 +130,69 @@ struct MushafPageView: View {
     // MARK: - Verse Card
 
     private func verseCard(_ verse: VerseDTO) -> some View {
-        Button { selectedVerse = verse } label: {
-            VStack(alignment: .leading, spacing: 0) {
-                // Verse number badge
-                HStack(alignment: .center, spacing: DS.Space.sm) {
-                    ZStack {
-                        Circle()
-                            .fill(DS.Color.accent)
-                            .frame(width: 32, height: 32)
-                        Text("\(verse.verseNumber)")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                    }
-                    Spacer()
+        VStack(alignment: .leading, spacing: 0) {
+            // Verse number badge
+            HStack(alignment: .center, spacing: DS.Space.sm) {
+                ZStack {
+                    Circle()
+                        .fill(theme.accent)
+                        .frame(width: 32, height: 32)
+                    Text("\(verse.verseNumber)")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
                 }
-                .padding(.bottom, DS.Space.sm)
-
-                // Arabic text — larger with better line spacing
-                let baseSize: CGFloat = showTransliteration || showTranslation ? 24 : 28
-                Text(verse.textArabic)
-                    .font(.system(size: baseSize * fontScale, weight: .regular))
-                    .foregroundStyle(DS.Color.textPrimary)
-                    .multilineTextAlignment(.trailing)
-                    .lineSpacing(showTransliteration || showTranslation ? 14 : 20)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-
-                // Transliteration — clear, readable serif
-                if showTransliteration && !verse.textTransliteration.isEmpty {
-                    Text(verse.textTransliteration)
-                        .font(.system(size: 15 * fontScale, weight: .regular, design: .serif))
-                        .italic()
-                        .foregroundStyle(DS.Color.accent.opacity(0.7))
-                        .multilineTextAlignment(.leading)
-                        .lineSpacing(5)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, DS.Space.md)
-                }
-
-                // Translation — clean body text
-                if showTranslation && !verse.textTranslation.isEmpty {
-                    Text(verse.textTranslation)
-                        .font(.system(size: 15 * fontScale, weight: .regular))
-                        .foregroundStyle(DS.Color.textSecondary)
-                        .multilineTextAlignment(.leading)
-                        .lineSpacing(5)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, DS.Space.sm)
-                }
+                Spacer()
             }
-            .padding(DS.Space.lg)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(DS.Color.cardElevated)
-                    .shadow(color: .black.opacity(0.03), radius: 6, y: 2)
-            )
             .padding(.bottom, DS.Space.sm)
+
+            // Arabic text
+            let baseSize: CGFloat = showTransliteration || showTranslation ? 24 : 28
+            Text(verse.textArabic)
+                .font(.system(size: baseSize * fontScale, weight: .regular))
+                .foregroundStyle(theme.textPrimary)
+                .multilineTextAlignment(.trailing)
+                .lineSpacing(showTransliteration || showTranslation ? 14 : 20)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+
+            // Transliteration
+            if showTransliteration && !verse.textTransliteration.isEmpty {
+                Text(verse.textTransliteration)
+                    .font(.system(size: 15 * fontScale, weight: .regular, design: .serif))
+                    .italic()
+                    .foregroundStyle(theme.accent.opacity(0.7))
+                    .multilineTextAlignment(.leading)
+                    .lineSpacing(5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, DS.Space.md)
+            }
+
+            // Translation
+            if showTranslation && !verse.textTranslation.isEmpty {
+                Text(verse.textTranslation)
+                    .font(.system(size: 15 * fontScale, weight: .regular))
+                    .foregroundStyle(theme.textSecondary)
+                    .multilineTextAlignment(.leading)
+                    .lineSpacing(5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, DS.Space.sm)
+            }
         }
-        .buttonStyle(VerseCardStyle())
+        .padding(DS.Space.lg)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .fill(theme.cardFill)
+                .shadow(color: .black.opacity(0.03), radius: 6, y: 2)
+        )
+        .padding(.bottom, DS.Space.sm)
+        .onTapGesture {
+            DS.Haptic.softTap()
+            selectedVerse = verse
+        }
+        .onLongPressGesture(minimumDuration: 0.4) {
+            DS.Haptic.snap()
+            selectedVerse = verse
+        }
     }
 
     // MARK: - Page Footer
@@ -194,15 +200,15 @@ struct MushafPageView: View {
     private var pageFooter: some View {
         HStack(spacing: DS.Space.sm) {
             Rectangle()
-                .fill(DS.Color.hairline)
+                .fill(theme.hairline)
                 .frame(width: 30, height: 0.5)
 
             Text("\(pageNumber)")
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundStyle(DS.Color.textSecondary)
+                .foregroundStyle(theme.textSecondary)
 
             Rectangle()
-                .fill(DS.Color.hairline)
+                .fill(theme.hairline)
                 .frame(width: 30, height: 0.5)
         }
     }
@@ -229,16 +235,6 @@ struct MushafPageView: View {
 
     private func surahName(for id: Int) -> String {
         surahs[id]?.nameTurkish ?? "\(id)"
-    }
-}
-
-// MARK: - Verse Card Style
-
-private struct VerseCardStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
@@ -277,7 +273,7 @@ private struct PremiumSurahHeader: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, DS.Space.x2)
         .background(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
                 .fill(
                     LinearGradient(
                         colors: [
@@ -292,7 +288,7 @@ private struct PremiumSurahHeader: View {
                 .shadow(color: Color(red: 0.30, green: 0.25, blue: 0.55).opacity(0.3), radius: 12, y: 6)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
                 .stroke(.white.opacity(0.08), lineWidth: 0.5)
         )
     }

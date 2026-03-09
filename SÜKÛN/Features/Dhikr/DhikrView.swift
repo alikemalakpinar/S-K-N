@@ -15,6 +15,11 @@ struct DhikrView: View {
     @State private var showTourComplete = false
     @State private var tourCount = 0
 
+    // ── Organic Animation State ────────────────────────────
+    @State private var counterScale: CGFloat = 1.0
+    @State private var milestoneGlow: CGFloat = 0
+    @State private var ringPulse: CGFloat = 1.0
+
     init(container: DependencyContainer) {
         _viewModel = State(initialValue: DhikrViewModel(container: container))
     }
@@ -80,6 +85,7 @@ struct DhikrView: View {
         .contentShape(Rectangle())
         .gesture(pullGesture)
         .onTapGesture { performCount() }
+        .onAppear { DS.Haptic.prepare() }
         .onDisappear {
             // Auto-save any in-progress session when leaving
             if viewModel.currentCount > 0 || tourCount > 0 {
@@ -164,7 +170,9 @@ struct DhikrView: View {
     // MARK: - Ring
 
     private var ring: some View {
-        ZStack {
+        let isMilestone = viewModel.currentCount > 0 && viewModel.currentCount % 33 == 0
+
+        return ZStack {
             // Track
             Circle()
                 .stroke(DS.Color.hairline, lineWidth: 4)
@@ -176,28 +184,45 @@ struct DhikrView: View {
                 // Progress arc
                 Circle()
                     .trim(from: 0, to: pct)
-                    .stroke(DS.Color.accent, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .stroke(
+                        isMilestone ? DS.Color.success : DS.Color.accent,
+                        style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                    )
                     .frame(width: ringSize, height: ringSize)
                     .rotationEffect(.degrees(-90))
+                    .scaleEffect(ringPulse)
                     .animation(.easeOut(duration: 0.3), value: viewModel.currentCount)
 
-                // Glow
+                // Glow layer
                 Circle()
                     .trim(from: 0, to: pct)
-                    .stroke(DS.Color.accent.opacity(0.2), lineWidth: 12)
+                    .stroke(
+                        (isMilestone ? DS.Color.success : DS.Color.accent).opacity(0.25),
+                        lineWidth: 14
+                    )
                     .blur(radius: 8)
                     .frame(width: ringSize, height: ringSize)
                     .rotationEffect(.degrees(-90))
+                    .scaleEffect(ringPulse)
                     .animation(.easeOut(duration: 0.3), value: viewModel.currentCount)
             }
 
-            // Number
+            // Milestone glow background
+            if milestoneGlow > 0 {
+                Circle()
+                    .fill(DS.Color.success.opacity(milestoneGlow * 0.15))
+                    .frame(width: ringSize + 40, height: ringSize + 40)
+                    .blur(radius: 20)
+            }
+
+            // Number — organic scale animation
             VStack(spacing: 2) {
                 Text("\(viewModel.currentCount)")
                     .font(.system(size: 64, weight: .thin, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(DS.Color.textPrimary)
                     .contentTransition(.numericText())
+                    .scaleEffect(counterScale)
                     .animation(.easeOut(duration: 0.12), value: viewModel.currentCount)
 
                 if let preset = viewModel.selectedPreset {
@@ -307,7 +332,7 @@ struct DhikrView: View {
         }
         .padding(DS.Space.x2)
         .background(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
                 .fill(DS.Color.cardElevated)
                 .shadow(color: .black.opacity(0.1), radius: 20)
         )
@@ -335,11 +360,31 @@ struct DhikrView: View {
     private func performCount() {
         withAnimation(.easeOut(duration: 0.12)) { viewModel.increment() }
 
+        // ── Organic scale pulse on every count ─────────────
+        withAnimation(.spring(response: 0.15, dampingFraction: 0.5)) {
+            counterScale = 1.12
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                counterScale = 1.0
+            }
+        }
+
         let c = viewModel.currentCount
         if let p = viewModel.selectedPreset, c == p.target {
-            // Tour complete — track it, don't save yet (save on reset/disappear)
+            // ── Tour complete ────────────────────────────────
             tourCount += 1
             DS.Haptic.goalReached()
+
+            // Big ring pulse
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                ringPulse = 1.08
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    ringPulse = 1.0
+                }
+            }
 
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                 showTourComplete = true
@@ -350,11 +395,41 @@ struct DhikrView: View {
                 }
                 withAnimation(.easeOut(duration: 0.2)) {
                     viewModel.currentCount = 0
-                    // Keep session active — timer continues across tours
                 }
             }
-        } else if c > 0, c % 33 == 0 {
+        } else if c > 0 && c % 33 == 0 {
+            // ── Milestone (33, 66, 99) ───────────────────────
             DS.Haptic.dhikrMilestone()
+
+            // Heavier scale punch at milestones
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.4)) {
+                counterScale = 1.25
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                    counterScale = 1.0
+                }
+            }
+
+            // Green milestone glow
+            withAnimation(.easeOut(duration: 0.15)) {
+                milestoneGlow = 1.0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                withAnimation(.easeOut(duration: 0.5)) {
+                    milestoneGlow = 0
+                }
+            }
+
+            // Ring bump
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.5)) {
+                ringPulse = 1.06
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    ringPulse = 1.0
+                }
+            }
         } else {
             DS.Haptic.dhikrTap()
         }

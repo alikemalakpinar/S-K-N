@@ -22,13 +22,59 @@ final class DashboardViewModel {
     var quranProgressPercent: Double = 0.0
     var isDashboardLoaded = false
 
+    // Time-of-day greeting
+    var greeting: String { Self.currentGreeting() }
+    var greetingIcon: String { Self.currentGreetingIcon() }
+
+    // Prayer progress — how far through today's prayers
+    var prayedCount: Int {
+        guard let log = todayLog else { return 0 }
+        return [log.fajr, log.dhuhr, log.asr, log.maghrib, log.isha]
+            .filter { $0 == .prayed }
+            .count
+    }
+
     private let container: DependencyContainer
     private static var cachedVerseOfDay: (date: Date, verse: VerseDTO, surahName: String)?
     private var hasGeocoded = false
 
+    // ── Live Activity periodic update timer ────────────────
+    private var liveActivityTimer: Timer?
+    private var cachedLatitude: Double = 0
+    private var cachedLongitude: Double = 0
+    private var cachedMethod: String = "Turkey"
+    private var cachedAsrMethod: String = "hanafi"
+
     init(container: DependencyContainer) {
         self.container = container
     }
+
+    // MARK: - Greeting Logic
+
+    private static func currentGreeting() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 4..<7:   return "Hayırlı Sabahlar"
+        case 7..<12:  return "Günaydın"
+        case 12..<14: return "Hayırlı Öğleler"
+        case 14..<17: return "İyi Günler"
+        case 17..<20: return "Hayırlı Akşamlar"
+        case 20..<23: return "İyi Geceler"
+        default:      return "Hayırlı Geceler"
+        }
+    }
+
+    private static func currentGreetingIcon() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<8:   return "sunrise.fill"
+        case 8..<17:  return "sun.max.fill"
+        case 17..<20: return "sunset.fill"
+        default:      return "moon.stars.fill"
+        }
+    }
+
+    // MARK: - Data Loading
 
     func loadTodayData(context: ModelContext) async {
         isLoading = true
@@ -83,6 +129,12 @@ final class DashboardViewModel {
     }
 
     func loadNextPrayer(latitude: Double, longitude: Double, method: String, asrMethod: String) async {
+        // Cache coordinates for periodic Live Activity updates
+        cachedLatitude = latitude
+        cachedLongitude = longitude
+        cachedMethod = method
+        cachedAsrMethod = asrMethod
+
         do {
             let today = try await container.prayerTimeService.todayPrayerTimes(
                 latitude: latitude,
@@ -95,6 +147,9 @@ final class DashboardViewModel {
                 nextPrayerTime = next.time
 
                 try? container.widgetDataService.writeNextPrayerData(name: next.name, time: next.time)
+
+                // Update Live Activity if running
+                await updateLiveActivityIfNeeded(today: today, currentPrayer: next)
             } else {
                 nextPrayerName = "Yatsı"
                 nextPrayerTime = today.isha
@@ -102,6 +157,97 @@ final class DashboardViewModel {
         } catch {
             errorMessage = UserFriendlyError.message(from: error)
         }
+    }
+
+    // MARK: - Live Activity Integration
+
+    /// Start a new Live Activity with current prayer data.
+    func startLiveActivity() {
+        guard let time = nextPrayerTime else { return }
+        do {
+            try container.liveActivityManager.startLiveActivity(
+                prayerName: nextPrayerName,
+                prayerTime: time,
+                followingPrayerName: nil,
+                progress: 0.0,
+                locationName: locationName
+            )
+            startPeriodicLiveActivityUpdates()
+        } catch {
+            #if DEBUG
+            print("[LiveActivity] Start failed: \(error)")
+            #endif
+        }
+    }
+
+    /// End the running Live Activity.
+    func stopLiveActivity() {
+        stopPeriodicLiveActivityUpdates()
+        Task { await container.liveActivityManager.endLiveActivity() }
+    }
+
+    /// Update the running Live Activity with current prayer & progress data.
+    private func updateLiveActivityIfNeeded(
+        today: PrayerDay,
+        currentPrayer: (name: String, time: Date)
+    ) async {
+        guard container.liveActivityManager.isLiveActivityActive else { return }
+
+        let allPrayers: [(String, Date)] = [
+            ("Sabah", today.fajr),
+            ("Güneş", today.sunrise),
+            ("Öğle", today.dhuhr),
+            ("İkindi", today.asr),
+            ("Akşam", today.maghrib),
+            ("Yatsı", today.isha)
+        ]
+
+        let now = Date()
+        var previousTime = Calendar.current.startOfDay(for: now)
+        var followingName: String?
+
+        for (i, prayer) in allPrayers.enumerated() {
+            if prayer.0 == currentPrayer.name && prayer.1 == currentPrayer.time {
+                if i > 0 { previousTime = allPrayers[i - 1].1 }
+                if i + 1 < allPrayers.count { followingName = allPrayers[i + 1].0 }
+                break
+            }
+        }
+
+        let totalInterval = currentPrayer.time.timeIntervalSince(previousTime)
+        let elapsed = now.timeIntervalSince(previousTime)
+        let progress = totalInterval > 0 ? min(1.0, max(0.0, elapsed / totalInterval)) : 0.0
+
+        await container.liveActivityManager.updateLiveActivity(
+            prayerName: currentPrayer.name,
+            prayerTime: currentPrayer.time,
+            followingPrayerName: followingName,
+            progress: progress
+        )
+    }
+
+    // MARK: - Periodic Live Activity Updates
+
+    /// Start a 60-second timer to keep the Live Activity progress bar fresh
+    /// and handle prayer transitions.
+    func startPeriodicLiveActivityUpdates() {
+        stopPeriodicLiveActivityUpdates()
+        liveActivityTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                await self.loadNextPrayer(
+                    latitude: self.cachedLatitude,
+                    longitude: self.cachedLongitude,
+                    method: self.cachedMethod,
+                    asrMethod: self.cachedAsrMethod
+                )
+            }
+        }
+    }
+
+    func stopPeriodicLiveActivityUpdates() {
+        liveActivityTimer?.invalidate()
+        liveActivityTimer = nil
     }
 
     // MARK: - Reverse Geocoding
