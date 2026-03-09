@@ -46,7 +46,7 @@ struct SettingsView: View {
         Section {
             Picker("Yöntem", selection: Binding(
                 get: { settings.calculationMethod },
-                set: { settings.calculationMethod = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.calculationMethod = $0; viewModel.saveAndReschedule(context: modelContext) }
             )) {
                 ForEach(viewModel.calculationMethods, id: \.self) { method in
                     Text(method).tag(method)
@@ -56,7 +56,7 @@ struct SettingsView: View {
 
             Picker("İkindi Mezhebi", selection: Binding(
                 get: { settings.asrMethod },
-                set: { settings.asrMethod = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.asrMethod = $0; viewModel.saveAndReschedule(context: modelContext) }
             )) {
                 Text("Standart (Şâfiî)").tag("standard")
                 Text("Hanefî").tag("hanafi")
@@ -74,23 +74,23 @@ struct SettingsView: View {
         Section {
             Stepper("Sabah: \(settings.fajrOffset)", value: Binding(
                 get: { settings.fajrOffset },
-                set: { settings.fajrOffset = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.fajrOffset = $0; viewModel.saveAndReschedule(context: modelContext) }
             ), in: -30...30)
             Stepper("Öğle: \(settings.dhuhrOffset)", value: Binding(
                 get: { settings.dhuhrOffset },
-                set: { settings.dhuhrOffset = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.dhuhrOffset = $0; viewModel.saveAndReschedule(context: modelContext) }
             ), in: -30...30)
             Stepper("İkindi: \(settings.asrOffset)", value: Binding(
                 get: { settings.asrOffset },
-                set: { settings.asrOffset = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.asrOffset = $0; viewModel.saveAndReschedule(context: modelContext) }
             ), in: -30...30)
             Stepper("Akşam: \(settings.maghribOffset)", value: Binding(
                 get: { settings.maghribOffset },
-                set: { settings.maghribOffset = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.maghribOffset = $0; viewModel.saveAndReschedule(context: modelContext) }
             ), in: -30...30)
             Stepper("Yatsı: \(settings.ishaOffset)", value: Binding(
                 get: { settings.ishaOffset },
-                set: { settings.ishaOffset = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.ishaOffset = $0; viewModel.saveAndReschedule(context: modelContext) }
             ), in: -30...30)
         } header: {
             Text("Manuel Düzeltmeler (dakika)")
@@ -105,28 +105,28 @@ struct SettingsView: View {
         Section {
             Toggle("Sabah", isOn: Binding(
                 get: { settings.fajrNotification },
-                set: { settings.fajrNotification = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.fajrNotification = $0; viewModel.saveAndReschedule(context: modelContext) }
             ))
             Toggle("Öğle", isOn: Binding(
                 get: { settings.dhuhrNotification },
-                set: { settings.dhuhrNotification = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.dhuhrNotification = $0; viewModel.saveAndReschedule(context: modelContext) }
             ))
             Toggle("İkindi", isOn: Binding(
                 get: { settings.asrNotification },
-                set: { settings.asrNotification = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.asrNotification = $0; viewModel.saveAndReschedule(context: modelContext) }
             ))
             Toggle("Akşam", isOn: Binding(
                 get: { settings.maghribNotification },
-                set: { settings.maghribNotification = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.maghribNotification = $0; viewModel.saveAndReschedule(context: modelContext) }
             ))
             Toggle("Yatsı", isOn: Binding(
                 get: { settings.ishaNotification },
-                set: { settings.ishaNotification = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.ishaNotification = $0; viewModel.saveAndReschedule(context: modelContext) }
             ))
 
             Stepper("\(settings.notificationMinutesBefore) dk önce uyar", value: Binding(
                 get: { settings.notificationMinutesBefore },
-                set: { settings.notificationMinutesBefore = $0; viewModel.saveSettings(context: modelContext) }
+                set: { settings.notificationMinutesBefore = $0; viewModel.saveAndReschedule(context: modelContext) }
             ), in: 0...30)
 
             Button("Bildirim İzni İste") {

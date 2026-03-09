@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import CoreLocation
 
 @Observable
 final class SettingsViewModel {
@@ -19,20 +20,44 @@ final class SettingsViewModel {
     }
 
     func loadSettings(context: ModelContext) {
-        let descriptor = FetchDescriptor<UserSetting>()
-        let existing = try? context.fetch(descriptor)
-        if let first = existing?.first {
-            settings = first
-        } else {
-            let newSettings = UserSetting()
-            context.insert(newSettings)
-            try? context.save()
-            settings = newSettings
+        do {
+            let descriptor = FetchDescriptor<UserSetting>()
+            let existing = try context.fetch(descriptor)
+            if let first = existing.first {
+                settings = first
+            } else {
+                let newSettings = UserSetting()
+                context.insert(newSettings)
+                try context.save()
+                settings = newSettings
+            }
+        } catch {
+            errorMessage = UserFriendlyError.message(from: error)
         }
     }
 
     func saveSettings(context: ModelContext) {
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            errorMessage = UserFriendlyError.message(from: error)
+        }
+    }
+
+    /// Save settings and reschedule notifications (for prayer-affecting changes)
+    func saveAndReschedule(context: ModelContext) {
+        saveSettings(context: context)
+        Task {
+            do {
+                let coords = try await container.locationService.currentCoordinates()
+                await rescheduleNotifications(latitude: coords.latitude, longitude: coords.longitude)
+            } catch {
+                // Location unavailable — notifications stay as-is
+                #if DEBUG
+                print("[Settings] Reschedule skipped — location unavailable: \(error)")
+                #endif
+            }
+        }
     }
 
     func requestNotifications() async {

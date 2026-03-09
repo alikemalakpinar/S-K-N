@@ -15,6 +15,7 @@ final class QuranViewModel {
     var pageVerses: [VerseDTO] = []
     var isLoadingPage = false
     var currentJuzNumber: Int { juzForPage(currentPage) }
+    var surahsDict: [Int: SurahDTO] = [:]
 
     /// Returns the surah info for the first verse on the given page
     func surahInfoForCurrentPage() -> (id: Int, name: String)? {
@@ -48,6 +49,7 @@ final class QuranViewModel {
         guard !isStaticDBMissing else { return }
         do {
             surahs = try await container.quranRepository.allSurahs()
+            surahsDict = Dictionary(uniqueKeysWithValues: surahs.map { ($0.id, $0) })
             totalPages = try await container.quranRepository.pageCount()
         } catch {
             errorMessage = UserFriendlyError.message(from: error)

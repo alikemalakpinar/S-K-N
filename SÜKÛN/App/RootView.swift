@@ -20,12 +20,12 @@ struct RootView: View {
                 QuranView(container: container, selectedSegment: $quranSegment, resumePage: $resumePage)
             }
 
-            Tab("Zikir", systemImage: "circle.circle.fill", value: 3) {
-                DhikrView(container: container)
+            Tab("Kıble", systemImage: "location.north.fill", value: 3) {
+                QiblaView()
             }
 
-            Tab("Ayarlar", systemImage: "gearshape.fill", value: 4) {
-                SettingsView(container: container)
+            Tab("Zikir", systemImage: "circle.circle.fill", value: 4) {
+                DhikrView(container: container)
             }
         }
         .tint(DS.Color.accent)

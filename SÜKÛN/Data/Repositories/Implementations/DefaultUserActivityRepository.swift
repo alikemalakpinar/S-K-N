@@ -5,7 +5,9 @@ final class DefaultUserActivityRepository: UserActivityRepository {
 
     func prayerLog(for date: Date, context: ModelContext) throws -> PrayerLog? {
         let startOfDay = Calendar.current.startOfDay(for: date)
-        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        guard let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) else {
+            return nil
+        }
 
         let predicate = #Predicate<PrayerLog> { log in
             log.date >= startOfDay && log.date < endOfDay
@@ -93,7 +95,9 @@ final class DefaultUserActivityRepository: UserActivityRepository {
 
     func pagesReadToday(context: ModelContext) throws -> Int {
         let startOfDay = Calendar.current.startOfDay(for: Date())
-        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        guard let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) else {
+            return 0
+        }
         let predicate = #Predicate<PageReadLog> { $0.date >= startOfDay && $0.date < endOfDay }
         let descriptor = FetchDescriptor<PageReadLog>(predicate: predicate)
         let logs = try context.fetch(descriptor)
@@ -114,7 +118,7 @@ final class DefaultUserActivityRepository: UserActivityRepository {
         var checkDate = calendar.startOfDay(for: Date())
 
         while true {
-            let nextDay = calendar.date(byAdding: .day, value: 1, to: checkDate)!
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: checkDate) else { break }
             let predicate = #Predicate<PageReadLog> { $0.date >= checkDate && $0.date < nextDay }
             let descriptor = FetchDescriptor<PageReadLog>(predicate: predicate)
             let logs = try context.fetch(descriptor)

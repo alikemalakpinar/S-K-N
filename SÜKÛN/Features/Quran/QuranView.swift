@@ -48,7 +48,7 @@ struct QuranView: View {
                 }
                 .frame(maxHeight: .infinity)
             }
-            .background(selectedSegment == .mushaf ? DS.Color.quranCard : DS.Color.backgroundPrimary)
+            .background(DS.Color.backgroundPrimary)
             .navigationTitle(isImmersive ? "" : "Kur'an")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(isImmersive ? .hidden : .visible, for: .navigationBar)
@@ -61,7 +61,6 @@ struct QuranView: View {
                 if selectedSegment != .sureler {
                     viewModel.searchQuery = ""
                 }
-                // Exit immersive when switching away from mushaf
                 if selectedSegment != .mushaf && isImmersive {
                     withAnimation(DS.Motion.standard) { isImmersive = false }
                 }
@@ -75,6 +74,7 @@ struct QuranView: View {
             .onChange(of: resumePage) { _, newPage in
                 if let page = newPage {
                     viewModel.currentPage = page
+                    selectedSegment = .mushaf
                     resumePage = nil
                 }
             }
@@ -113,9 +113,17 @@ struct QuranView: View {
         )
     }
 
+    // MARK: - Surah List (tapping jumps to Mushaf page)
+
     private var surahList: some View {
         List(viewModel.surahs) { surah in
-            NavigationLink(value: surah.id) {
+            Button {
+                Task {
+                    let page = await viewModel.jumpToSurah(surah.id)
+                    viewModel.currentPage = page
+                    selectedSegment = .mushaf
+                }
+            } label: {
                 HStack(spacing: DS.Space.md) {
                     // Ornamental number badge
                     ZStack {
@@ -136,7 +144,7 @@ struct QuranView: View {
                             .font(.system(size: 16, weight: .medium))
                             .foregroundStyle(DS.Color.textPrimary)
                         Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
-                            .font(DS.Typography.captionSm)
+                            .font(.system(size: 11, weight: .regular))
                             .foregroundStyle(DS.Color.textSecondary)
                     }
 
@@ -155,10 +163,9 @@ struct QuranView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(DS.Color.backgroundPrimary)
-        .navigationDestination(for: Int.self) { surahId in
-            SurahDetailView(surahId: surahId, container: container)
-        }
     }
+
+    // MARK: - Search Results
 
     private var searchResultsList: some View {
         Group {
@@ -173,7 +180,6 @@ struct QuranView: View {
                     let isActive = activeVerseID == verseID
 
                     VStack(alignment: .leading, spacing: DS.Space.md) {
-                        // Header row with verse ref + page
                         HStack {
                             HStack(spacing: DS.Space.xs) {
                                 ZStack {
@@ -185,13 +191,13 @@ struct QuranView: View {
                                         .foregroundStyle(DS.Color.accent)
                                 }
                                 Text(verseID)
-                                    .font(DS.Typography.caption.bold())
+                                    .font(.system(size: 13, weight: .semibold))
                                     .foregroundStyle(DS.Color.accent)
                             }
                             Spacer()
                             Label {
                                 Text("Sayfa \(verse.pageNumber)")
-                                    .font(DS.Typography.captionSm)
+                                    .font(.system(size: 11, weight: .regular))
                             } icon: {
                                 Image(systemName: "book.pages")
                                     .font(.system(size: 9))
@@ -199,19 +205,17 @@ struct QuranView: View {
                             .foregroundStyle(DS.Color.textSecondary)
                         }
 
-                        // Arabic text
                         Text(verse.textArabic)
-                            .font(DS.Typography.arabicVerse)
+                            .font(.system(size: 24, weight: .regular))
                             .multilineTextAlignment(.trailing)
                             .lineSpacing(10)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                             .foregroundStyle(DS.Color.textPrimary)
 
-                        // Translation
                         Text(verse.textTranslation)
-                            .font(DS.Typography.caption)
+                            .font(.system(size: 13, weight: .regular))
                             .foregroundStyle(DS.Color.textSecondary)
-                            .lineSpacing(3)
+                            .lineSpacing(4)
 
                         AccentUnderline(active: isActive)
                     }
@@ -234,7 +238,7 @@ struct QuranView: View {
     }
 }
 
-// MARK: - Surah Detail View
+// MARK: - Reading Mode
 
 enum ReadingMode: String, CaseIterable {
     case arabic = "Arapça"
@@ -242,6 +246,8 @@ enum ReadingMode: String, CaseIterable {
     case translation = "Meal"
     case all = "Tümü"
 }
+
+// MARK: - Surah Detail View (kept for backward compatibility)
 
 struct SurahDetailView: View {
     let surahId: Int
@@ -254,7 +260,6 @@ struct SurahDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Reading mode picker
             Picker("Okuma Modu", selection: $readingMode) {
                 ForEach(ReadingMode.allCases, id: \.self) { mode in
                     Text(mode.rawValue).tag(mode)
@@ -266,23 +271,20 @@ struct SurahDetailView: View {
 
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 0) {
-                    // Surah header
                     if let surah {
                         surahHeader(surah)
                             .padding(.bottom, DS.Space.lg)
                     }
 
-                    // Bismillah (except surah 1 and 9)
                     if let surah, surah.id != 1 && surah.id != 9 {
                         Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
-                            .font(DS.Typography.arabicBismillah)
+                            .font(.system(size: 22, weight: .regular))
                             .foregroundStyle(DS.Color.textPrimary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, DS.Space.md)
                             .padding(.bottom, DS.Space.sm)
                     }
 
-                    // Verses
                     ForEach(verses) { verse in
                         Button {
                             selectedVerse = verse
@@ -318,7 +320,7 @@ struct SurahDetailView: View {
                 .foregroundStyle(DS.Color.textPrimary)
 
             Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
-                .font(DS.Typography.caption)
+                .font(.system(size: 13, weight: .regular))
                 .foregroundStyle(DS.Color.textSecondary)
         }
         .frame(maxWidth: .infinity)
@@ -343,15 +345,13 @@ struct SurahDetailView: View {
 
     private func verseCard(_ verse: VerseDTO) -> some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
-            // Verse number + Arabic text
             HStack(alignment: .top, spacing: DS.Space.sm) {
-                // Number badge
                 ZStack {
                     Image(systemName: "seal.fill")
                         .font(.system(size: 26))
                         .foregroundStyle(DS.Color.accentSoft)
                     Text(verse.verseNumber.arabicNumeral)
-                        .font(DS.Typography.verseNumber)
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundStyle(DS.Color.accent)
                 }
                 .frame(width: 28, height: 28)
@@ -359,26 +359,24 @@ struct SurahDetailView: View {
                 Spacer()
 
                 Text(verse.textArabic)
-                    .font(DS.Typography.arabicVerse)
+                    .font(.system(size: 24, weight: .regular))
                     .multilineTextAlignment(.trailing)
                     .foregroundStyle(DS.Color.textPrimary)
                     .lineSpacing(12)
             }
 
-            // Transliteration (okunuş)
             if showTransliteration && !verse.textTransliteration.isEmpty {
                 Text(verse.textTransliteration)
-                    .font(DS.Typography.transliteration)
+                    .font(.system(size: 15, weight: .regular, design: .serif))
                     .italic()
                     .foregroundStyle(DS.Color.accent.opacity(0.7))
                     .lineSpacing(5)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            // Translation (meal)
             if showTranslation && !verse.textTranslation.isEmpty {
                 Text(verse.textTranslation)
-                    .font(DS.Typography.caption)
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(DS.Color.textSecondary)
                     .lineSpacing(4)
                     .frame(maxWidth: .infinity, alignment: .leading)

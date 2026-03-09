@@ -28,7 +28,14 @@ final class LocationService: NSObject, LocationServiceProtocol, CLLocationManage
     }
 
     func currentCoordinates() async throws -> CLLocationCoordinate2D {
-        let status = manager.authorizationStatus
+        var status = manager.authorizationStatus
+
+        // Auto-request permission if not yet determined
+        if status == .notDetermined {
+            await requestPermission()
+            status = manager.authorizationStatus
+        }
+
         guard status == .authorizedWhenInUse || status == .authorizedAlways else {
             throw LocationError.notAuthorized
         }
