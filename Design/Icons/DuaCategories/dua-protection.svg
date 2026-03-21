@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Shield with geometric star inside - Protection Dua -->
+  <!-- Secondary: shield fill -->
+  <path d="M12 2L4 6V12C4 16.4 7.4 20.5 12 22C16.6 20.5 20 16.4 20 12V6L12 2Z" fill="#B08D3E" opacity="0.15"/>
+  <!-- Primary: shield outline -->
+  <path d="M12 2L4 6V12C4 16.4 7.4 20.5 12 22C16.6 20.5 20 16.4 20 12V6L12 2Z" stroke="#B08D3E" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Geometric 8-pointed star inside -->
+  <path d="M12 7L13.2 10.2L16.5 10.2L13.8 12.3L14.8 15.5L12 13.5L9.2 15.5L10.2 12.3L7.5 10.2L10.8 10.2L12 7Z" stroke="#B08D3E" stroke-width="1" stroke-linejoin="round" opacity="0.6"/>
+  <path d="M12 7L13.2 10.2L16.5 10.2L13.8 12.3L14.8 15.5L12 13.5L9.2 15.5L10.2 12.3L7.5 10.2L10.8 10.2L12 7Z" fill="#B08D3E" opacity="0.2"/>
+</svg>

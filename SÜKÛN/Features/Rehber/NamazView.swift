@@ -25,10 +25,9 @@ struct NamazView: View {
                     .padding(DS.Space.lg)
                 }
             } else {
-                ContentUnavailableView(
-                    "İçerik Bulunamadı",
-                    systemImage: "doc.text",
-                    description: Text("Namaz verileri yüklenemedi.")
+                SKNErrorState(
+                    icon: "doc.text",
+                    message: "Namaz verileri yüklenemedi."
                 )
             }
         }
@@ -100,16 +99,17 @@ struct NamazView: View {
 
             if displayModes.contains(.metin) {
                 Text(r.arabic)
-                    .font(.system(size: 20, weight: .regular))
+                    .font(DS.Typography.arabicVerse)
                     .multilineTextAlignment(.trailing)
+                    .lineSpacing(DS.Typography.LineSpacing.arabic)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .foregroundStyle(DS.Color.textPrimary)
             }
 
             if displayModes.contains(.okunus) {
                 Text(r.transliteration)
-                    .font(.system(size: 15, weight: .regular, design: .serif))
-                    .foregroundStyle(DS.Color.textSecondary)
+                    .font(DS.Typography.transliteration)
+                    .foregroundStyle(DS.Color.accent.opacity(0.7))
             }
 
             if displayModes.contains(.anlam) {
@@ -130,16 +130,17 @@ struct NamazView: View {
 
             if displayModes.contains(.metin) {
                 Text(reading.arabic)
-                    .font(.system(size: 18, weight: .regular))
+                    .font(DS.Typography.arabicVerse)
                     .multilineTextAlignment(.trailing)
+                    .lineSpacing(DS.Typography.LineSpacing.arabic)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .foregroundStyle(DS.Color.textPrimary)
             }
 
             if displayModes.contains(.okunus) {
                 Text(reading.transliteration)
-                    .font(.system(size: 14, weight: .regular, design: .serif))
-                    .foregroundStyle(DS.Color.textSecondary)
+                    .font(DS.Typography.transliteration)
+                    .foregroundStyle(DS.Color.accent.opacity(0.7))
             }
 
             if displayModes.contains(.anlam) {

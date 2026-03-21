@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!--
+    Small circular verse number marker.
+    Circle with subtle inner ring and tiny decorative dots at cardinal positions.
+    Clear interior for displaying verse numbers.
+    Gold #B08D3E, thin lines.
+  -->
+  <defs>
+    <style>
+      .o { fill: none; stroke: #B08D3E; stroke-width: 0.5; stroke-linecap: round; stroke-linejoin: round; }
+      .ot { fill: none; stroke: #B08D3E; stroke-width: 0.35; stroke-linecap: round; stroke-linejoin: round; }
+      .dot { fill: #B08D3E; stroke: none; }
+    </style>
+  </defs>
+  <g>
+    <!-- Outer circle -->
+    <circle class="o" cx="12" cy="12" r="10.5"/>
+
+    <!-- Inner circle -->
+    <circle class="o" cx="12" cy="12" r="8.5"/>
+
+    <!-- Subtle second inner ring -->
+    <circle class="ot" cx="12" cy="12" r="7"/>
+
+    <!-- Cardinal position decorative dots (N, E, S, W) -->
+    <!-- Top -->
+    <circle class="dot" cx="12" cy="1.5" r="0.6"/>
+    <!-- Right -->
+    <circle class="dot" cx="22.5" cy="12" r="0.6"/>
+    <!-- Bottom -->
+    <circle class="dot" cx="12" cy="22.5" r="0.6"/>
+    <!-- Left -->
+    <circle class="dot" cx="1.5" cy="12" r="0.6"/>
+
+    <!-- Intercardinal tiny dots (NE, SE, SW, NW) between outer and inner rings -->
+    <circle class="dot" cx="18.72" cy="5.28" r="0.35"/>
+    <circle class="dot" cx="18.72" cy="18.72" r="0.35"/>
+    <circle class="dot" cx="5.28" cy="18.72" r="0.35"/>
+    <circle class="dot" cx="5.28" cy="5.28" r="0.35"/>
+
+    <!-- Tiny connecting lines from inner ring to outer ring at cardinals -->
+    <line class="ot" x1="12" y1="1.5" x2="12" y2="3.5"/>
+    <line class="ot" x1="22.5" y1="12" x2="20.5" y2="12"/>
+    <line class="ot" x1="12" y1="22.5" x2="12" y2="20.5"/>
+    <line class="ot" x1="1.5" y1="12" x2="3.5" y2="12"/>
+  </g>
+</svg>

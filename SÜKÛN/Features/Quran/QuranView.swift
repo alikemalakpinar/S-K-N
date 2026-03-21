@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 enum QuranSegment: String, CaseIterable {
     case mushaf = "Mushaf"
@@ -6,9 +7,12 @@ enum QuranSegment: String, CaseIterable {
 }
 
 struct QuranView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var viewModel: QuranViewModel
     @State private var activeVerseID: String?
     @State private var isImmersive = false
+    @State private var lastReadPosition: LastReadPosition?
+    @State private var hatimProgress: Double = 0
     @Binding var selectedSegment: QuranSegment
     @Binding var resumePage: Int?
     @Binding var showRehber: Bool
@@ -31,12 +35,11 @@ struct QuranView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 if !isImmersive {
-                    Picker("", selection: $selectedSegment) {
-                        ForEach(QuranSegment.allCases, id: \.self) { segment in
-                            Text(segment.rawValue).tag(segment)
-                        }
-                    }
-                    .pickerStyle(.segmented)
+                    DSSegmentedControl(
+                        QuranSegment.allCases,
+                        selected: $selectedSegment,
+                        label: { $0.rawValue }
+                    )
                     .padding(.horizontal, DS.Space.lg)
                     .padding(.vertical, DS.Space.sm)
                     .transition(.move(edge: .top).combined(with: .opacity))
@@ -53,13 +56,13 @@ struct QuranView: View {
                 .frame(maxHeight: .infinity)
             }
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle(isImmersive ? "" : "Kur'an")
+            .navigationTitle(isImmersive ? "" : L10n.Quran.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(isImmersive ? .hidden : .visible, for: .navigationBar)
             .toolbar(isImmersive ? .hidden : .visible, for: .tabBar)
             .searchable(
                 text: $viewModel.searchQuery,
-                prompt: "Ayet ara..."
+                prompt: L10n.Quran.searchPrompt
             )
             .sheet(isPresented: $showRehber) {
                 NavigationStack {
@@ -79,6 +82,7 @@ struct QuranView: View {
             }
             .task {
                 await viewModel.loadSurahs()
+                loadReadingProgress()
             }
             .onChange(of: resumePage) { _, newPage in
                 if let page = newPage {
@@ -115,63 +119,186 @@ struct QuranView: View {
     }
 
     private var dbMissingView: some View {
-        ContentUnavailableView(
-            "Veritabanı Bulunamadı",
-            systemImage: "externaldrive.badge.exclamationmark",
-            description: Text("Kur'an veritabanı (sukun_static.sqlite) uygulamada bulunamadı.")
+        SKNErrorState(
+            icon: "externaldrive.badge.exclamationmark",
+            message: L10n.Quran.dbMissing
         )
     }
 
     // MARK: - Surah List (tapping jumps to Mushaf page)
 
     private var surahList: some View {
-        List(viewModel.surahs) { surah in
-            Button {
-                Task {
-                    let page = await viewModel.jumpToSurah(surah.id)
-                    viewModel.currentPage = page
-                    selectedSegment = .mushaf
-                }
-            } label: {
-                HStack(spacing: DS.Space.md) {
-                    // Ornamental number badge
-                    ZStack {
-                        Image(systemName: "seal.fill")
-                            .font(.system(size: 34))
-                            .foregroundStyle(DS.Color.accentSoft)
-                        Image(systemName: "seal")
-                            .font(.system(size: 34))
-                            .foregroundStyle(DS.Color.accent.opacity(0.4))
-                        Text("\(surah.id)")
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            .foregroundStyle(DS.Color.accent)
-                    }
-                    .frame(width: 36, height: 36)
+        List {
+            // Hatim progress + last read card
+            surahListHeader
+                .listRowBackground(DS.Color.backgroundPrimary)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: DS.Space.sm, leading: DS.Space.lg, bottom: DS.Space.md, trailing: DS.Space.lg))
 
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(surah.nameTurkish)
-                            .font(.system(size: 16, weight: .medium))
+            // Surah rows
+            ForEach(viewModel.surahs) { surah in
+                Button {
+                    Task {
+                        let page = await viewModel.jumpToSurah(surah.id)
+                        viewModel.currentPage = page
+                        selectedSegment = .mushaf
+                    }
+                } label: {
+                    HStack(spacing: DS.Space.md) {
+                        // Ornamental number badge
+                        ZStack {
+                            Circle()
+                                .fill(DS.Color.accentSoft)
+                                .frame(width: 36, height: 36)
+                            
+                            Image(systemName: "seal")
+                                .font(.system(size: 34))
+                                .foregroundStyle(DS.Color.accent.opacity(0.8))
+                                .symbolEffect(.pulse, options: .repeating.speed(0.1))
+                            
+                            Text("\(surah.id)")
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .foregroundStyle(DS.Color.accent)
+                        }
+                        .frame(width: 36, height: 36)
+                        .shadow(color: DS.Color.accent.opacity(0.2), radius: 6, y: 3)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(surah.nameTurkish)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundStyle(DS.Color.textPrimary)
+                            
+                            HStack(spacing: DS.Space.xs) {
+                                Text("\(surah.verseCount) ayet \u{2022} \(L10n.revelationType(surah.revelationType))")
+                                    .font(DS.Typography.captionSm)
+                                    .foregroundStyle(DS.Color.textSecondary)
+                                    .textCase(.uppercase)
+                                    .tracking(0.5)
+                            }
+                        }
+
+                        Spacer()
+
+                        Text(surah.nameArabic)
+                            .font(DS.Typography.arabicLarge)
                             .foregroundStyle(DS.Color.textPrimary)
-                        Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
-                            .font(.system(size: 11, weight: .regular))
-                            .foregroundStyle(DS.Color.textSecondary)
+                            .shadow(color: DS.Color.textPrimary.opacity(0.1), radius: 2, y: 1)
                     }
-
-                    Spacer()
-
-                    Text(surah.nameArabic)
-                        .font(.system(size: 22, weight: .regular))
-                        .foregroundStyle(DS.Color.textPrimary)
+                    .padding(.vertical, DS.Space.md)
+                    .padding(.horizontal, DS.Space.lg)
+                    .background(
+                        RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                            .fill(DS.Color.cardElevated.opacity(0.4))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                            .stroke(DS.Color.glassBorder, lineWidth: 0.5)
+                    )
                 }
-                .padding(.vertical, DS.Space.xs)
+                .buttonStyle(.plain)
+                .listRowBackground(DS.Color.backgroundPrimary)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: DS.Space.sm, leading: DS.Space.lg, bottom: DS.Space.sm, trailing: DS.Space.lg))
             }
-            .listRowBackground(DS.Color.backgroundPrimary)
-            .listRowSeparator(.hidden)
-            .overlay(alignment: .bottom) { Hairline() }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(DS.Color.backgroundPrimary)
+    }
+
+    // MARK: - Surah List Header (Hatim Progress + Last Read)
+
+    private var surahListHeader: some View {
+        VStack(spacing: DS.Space.md) {
+            // Hatim progress card
+            VStack(spacing: DS.Space.md) {
+                HStack {
+                    Label {
+                        Text("Hatim")
+                            .font(DS.Typography.sectionHead)
+                            .tracking(1.5)
+                    } icon: {
+                        Image(systemName: "book.closed.fill")
+                            .font(.system(size: 11))
+                    }
+                    .foregroundStyle(DS.Color.accent)
+
+                    Spacer()
+
+                    Text("\(Int(hatimProgress * 100))%")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(DS.Color.accent)
+                }
+
+                DSProgressBar(hatimProgress, height: 6)
+
+                Text(L10n.Common.pagesProgress(Int(hatimProgress * 604), 604))
+                    .font(DS.Typography.captionSm)
+                    .foregroundStyle(DS.Color.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .padding(DS.Space.lg)
+            .dsGlass(.thin, cornerRadius: DS.Radius.lg)
+            .dsShadow(DS.Shadow.premiumCard)
+
+            // Last read card
+            if let pos = lastReadPosition {
+                Button {
+                    viewModel.currentPage = pos.mushafPage
+                    selectedSegment = .mushaf
+                } label: {
+                    HStack(spacing: DS.Space.md) {
+                        Image(systemName: "bookmark.fill")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(DS.Color.accent)
+                            .frame(width: 32, height: 32)
+                            .background(
+                                RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous)
+                                    .fill(DS.Color.accentSoft)
+                            )
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L10n.Dashboard.whereYouLeft)
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(DS.Color.textSecondary)
+                                .tracking(1.5)
+                            Text(pos.surahNameTurkish)
+                                .font(DS.Typography.headline)
+                                .foregroundStyle(DS.Color.textPrimary)
+                        }
+
+                        Spacer()
+
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(L10n.Common.page(pos.mushafPage))
+                                .font(DS.Typography.captionSm)
+                                .foregroundStyle(DS.Color.textSecondary)
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(DS.Color.accent)
+                        }
+                    }
+                    .padding(DS.Space.lg)
+                    .dsGlass(.regular, cornerRadius: DS.Radius.lg)
+                    .dsShadow(DS.Shadow.premiumCard)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: - Reading Progress Loader
+
+    private func loadReadingProgress() {
+        do {
+            lastReadPosition = try container.userActivityRepository.getLastReadPosition(context: modelContext)
+            let totalPages = try container.userActivityRepository.totalUniquePagesRead(context: modelContext)
+            hatimProgress = Double(totalPages) / 604.0
+        } catch {
+            #if DEBUG
+            print("[QuranView] Reading progress load failed: \(error)")
+            #endif
+        }
     }
 
     // MARK: - Search Results
@@ -179,10 +306,13 @@ struct QuranView: View {
     private var searchResultsList: some View {
         Group {
             if viewModel.isSearching {
-                ProgressView()
-                    .tint(DS.Color.accent)
+                DSSkeletonGroup(rows: 4)
             } else if viewModel.searchResults.isEmpty {
-                ContentUnavailableView.search(text: viewModel.searchQuery)
+                SKNEmptyState(
+                    icon: "magnifyingglass",
+                    title: L10n.Quran.noResults,
+                    message: L10n.Quran.noResultsFor(viewModel.searchQuery)
+                )
             } else {
                 List(viewModel.searchResults) { verse in
                     let verseID = "\(verse.surahId):\(verse.verseNumber)"
@@ -215,16 +345,16 @@ struct QuranView: View {
                         }
 
                         Text(verse.textArabic)
-                            .font(.system(size: 24, weight: .regular))
+                            .font(DS.Typography.arabicVerse)
                             .multilineTextAlignment(.trailing)
-                            .lineSpacing(10)
+                            .lineSpacing(DS.Typography.LineSpacing.arabic)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                             .foregroundStyle(DS.Color.textPrimary)
 
                         Text(verse.textTranslation)
-                            .font(.system(size: 13, weight: .regular))
+                            .font(DS.Typography.footnote)
                             .foregroundStyle(DS.Color.textSecondary)
-                            .lineSpacing(4)
+                            .lineSpacing(DS.Typography.LineSpacing.body)
 
                         AccentUnderline(active: isActive)
                     }
@@ -269,12 +399,11 @@ struct SurahDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("Okuma Modu", selection: $readingMode) {
-                ForEach(ReadingMode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue).tag(mode)
-                }
-            }
-            .pickerStyle(.segmented)
+            DSSegmentedControl(
+                ReadingMode.allCases,
+                selected: $readingMode,
+                label: { $0.rawValue }
+            )
             .padding(.horizontal, DS.Space.lg)
             .padding(.vertical, DS.Space.sm)
 
@@ -287,7 +416,7 @@ struct SurahDetailView: View {
 
                     if let surah, surah.id != 1 && surah.id != 9 {
                         Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
-                            .font(.system(size: 22, weight: .regular))
+                            .font(DS.Typography.arabicBismillah)
                             .foregroundStyle(DS.Color.textPrimary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, DS.Space.md)
@@ -325,11 +454,11 @@ struct SurahDetailView: View {
     private func surahHeader(_ surah: SurahDTO) -> some View {
         VStack(spacing: DS.Space.md) {
             Text(surah.nameArabic)
-                .font(.system(size: 32, weight: .regular))
+                .font(DS.Typography.arabicHero)
                 .foregroundStyle(DS.Color.textPrimary)
 
-            Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
-                .font(.system(size: 13, weight: .regular))
+            Text("\(surah.verseCount) ayet \u{2022} \(L10n.revelationType(surah.revelationType))")
+                .font(DS.Typography.caption)
                 .foregroundStyle(DS.Color.textSecondary)
         }
         .frame(maxWidth: .infinity)
@@ -368,18 +497,17 @@ struct SurahDetailView: View {
                 Spacer()
 
                 Text(verse.textArabic)
-                    .font(.system(size: 24, weight: .regular))
+                    .font(DS.Typography.arabicVerse)
                     .multilineTextAlignment(.trailing)
                     .foregroundStyle(DS.Color.textPrimary)
-                    .lineSpacing(12)
+                    .lineSpacing(DS.Typography.LineSpacing.arabic)
             }
 
             if showTransliteration && !verse.textTransliteration.isEmpty {
                 Text(verse.textTransliteration)
-                    .font(.system(size: 15, weight: .regular, design: .serif))
-                    .italic()
+                    .font(DS.Typography.transliteration)
                     .foregroundStyle(DS.Color.accent.opacity(0.7))
-                    .lineSpacing(5)
+                    .lineSpacing(DS.Typography.LineSpacing.transliteration)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
@@ -410,4 +538,16 @@ private struct VerseCardButtonStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.99 : 1.0)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
+}
+
+// MARK: - Preview
+
+#Preview("Quran") {
+    struct Preview: View {
+        @State private var segment: QuranSegment = .sureler
+        var body: some View {
+            DSPreview { c in QuranView(container: c, selectedSegment: $segment) }
+        }
+    }
+    return Preview()
 }

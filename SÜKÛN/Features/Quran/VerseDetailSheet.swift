@@ -8,7 +8,12 @@ struct VerseDetailSheet: View {
     @State private var showTefsir = false
 
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            DSSheetHeader(
+                "\(surahName) \u{2022} \(verse.surahId):\(verse.verseNumber)",
+                onDismiss: { dismiss() }
+            )
+
             ScrollView(showsIndicators: false) {
                 VStack(spacing: DS.Space.lg) {
                     // Reference badge
@@ -37,26 +42,9 @@ struct VerseDetailSheet: View {
                 }
                 .padding(.horizontal, DS.Space.lg)
             }
-            .background(DS.Color.backgroundPrimary)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("\(surahName) \u{2022} \(verse.surahId):\(verse.verseNumber)")
-                        .font(DS.Typography.sectionHead)
-                        .foregroundStyle(DS.Color.textSecondary)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 22))
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(DS.Color.textSecondary)
-                    }
-                }
-            }
         }
+        .background(DS.Color.backgroundPrimary)
         .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
         .presentationCornerRadius(24)
     }
 
@@ -116,9 +104,8 @@ struct VerseDetailSheet: View {
         VStack(alignment: .leading, spacing: DS.Space.sm) {
             sectionLabel("Okunuş", icon: "text.word.spacing")
             Text(verse.textTransliteration)
-                .font(.system(size: 16, weight: .regular, design: .serif))
-                .foregroundStyle(DS.Color.textSecondary)
-                .italic()
+                .font(DS.Typography.transliteration)
+                .foregroundStyle(DS.Color.accent.opacity(0.7))
                 .lineSpacing(6)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }

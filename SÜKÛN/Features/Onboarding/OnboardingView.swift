@@ -9,6 +9,8 @@ struct OnboardingView: View {
     @State private var locationGranted = false
     @State private var notificationGranted = false
     @State private var selectedMethod = "Turkey"
+    @State private var iconFloating = false
+    @State private var appeared = false
 
     private let totalPages = 4
 
@@ -30,12 +32,15 @@ struct OnboardingView: View {
                     readyPage.tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .animation(.easeInOut(duration: 0.4), value: currentPage)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: currentPage)
 
                 // Bottom button
                 bottomButton
                     .padding(.horizontal, DS.Space.lg)
                     .padding(.bottom, DS.Space.x3)
+                    .scaleEffect(appeared ? 1 : 0.9)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.3), value: appeared)
             }
         }
     }
@@ -61,14 +66,18 @@ struct OnboardingView: View {
 
             // Ornamental geometric pattern
             ZStack {
-                // Outer ring
+                // Outer ring — slow rotation
                 Circle()
                     .stroke(DS.Color.accent.opacity(0.15), lineWidth: 1)
                     .frame(width: 180, height: 180)
+                    .rotationEffect(.degrees(appeared ? 360 : 0))
+                    .animation(.linear(duration: 60).repeatForever(autoreverses: false), value: appeared)
 
                 Circle()
                     .stroke(DS.Color.accent.opacity(0.1), lineWidth: 1)
                     .frame(width: 220, height: 220)
+                    .rotationEffect(.degrees(appeared ? -360 : 0))
+                    .animation(.linear(duration: 80).repeatForever(autoreverses: false), value: appeared)
 
                 // Moon crescent
                 ZStack {
@@ -79,26 +88,43 @@ struct OnboardingView: View {
                     Image(systemName: "moon.stars.fill")
                         .font(.system(size: 48))
                         .foregroundStyle(DS.Color.accent)
+                        .offset(y: iconFloating ? -4 : 4)
+                        .animation(
+                            .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                            value: iconFloating
+                        )
                 }
             }
+            .scaleEffect(appeared ? 1 : 0.6)
+            .opacity(appeared ? 1 : 0)
+            .animation(.spring(response: 0.8, dampingFraction: 0.65), value: appeared)
 
             Spacer().frame(height: DS.Space.x4)
 
             // App name
             Text("Sükûn")
-                .font(.system(size: 44, weight: .bold))
+                .font(DS.Typography.displayHero)
                 .foregroundStyle(DS.Color.textPrimary)
-                .tracking(-1)
+                .scaleEffect(appeared ? 1 : 0.8)
+                .opacity(appeared ? 1 : 0)
+                .animation(.spring(response: 0.7, dampingFraction: 0.7).delay(0.15), value: appeared)
 
             Spacer().frame(height: DS.Space.md)
 
             // Tagline
             Text("Huzurlu bir ibadet deneyimi")
-                .font(.system(size: 17, weight: .regular))
+                .font(DS.Typography.displayBody)
                 .foregroundStyle(DS.Color.textSecondary)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 12)
+                .animation(.spring(response: 0.7, dampingFraction: 0.7).delay(0.3), value: appeared)
 
             Spacer()
             Spacer()
+        }
+        .onAppear {
+            appeared = true
+            iconFloating = true
         }
     }
 
@@ -108,7 +134,7 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Icon
+            // Icon with floating effect
             ZStack {
                 Circle()
                     .fill(DS.Color.accentSoft)
@@ -116,12 +142,21 @@ struct OnboardingView: View {
                 Image(systemName: "location.fill")
                     .font(.system(size: 48))
                     .foregroundStyle(DS.Color.accent)
+                    .offset(y: iconFloating ? -3 : 3)
+                    .animation(
+                        .easeInOut(duration: 2.5).repeatForever(autoreverses: true),
+                        value: iconFloating
+                    )
             }
+            .transition(.asymmetric(
+                insertion: .scale(scale: 0.7).combined(with: .opacity),
+                removal: .scale(scale: 1.1).combined(with: .opacity)
+            ))
 
             Spacer().frame(height: DS.Space.x3)
 
             Text("Konum Erişimi")
-                .font(.system(size: 28, weight: .bold))
+                .font(DS.Typography.displayTitle)
                 .foregroundStyle(DS.Color.textPrimary)
 
             Spacer().frame(height: DS.Space.md)
@@ -138,6 +173,7 @@ struct OnboardingView: View {
                 Label("Konum izni verildi", systemImage: "checkmark.circle.fill")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.green)
+                    .transition(.scale.combined(with: .opacity))
             }
 
             Spacer()
@@ -152,7 +188,7 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Icon
+            // Icon with floating effect
             ZStack {
                 Circle()
                     .fill(DS.Color.accentSoft)
@@ -160,12 +196,21 @@ struct OnboardingView: View {
                 Image(systemName: "bell.badge.fill")
                     .font(.system(size: 48))
                     .foregroundStyle(DS.Color.accent)
+                    .offset(y: iconFloating ? -3 : 3)
+                    .animation(
+                        .easeInOut(duration: 2.5).repeatForever(autoreverses: true),
+                        value: iconFloating
+                    )
             }
+            .transition(.asymmetric(
+                insertion: .scale(scale: 0.7).combined(with: .opacity),
+                removal: .scale(scale: 1.1).combined(with: .opacity)
+            ))
 
             Spacer().frame(height: DS.Space.x3)
 
             Text("Bildirimler")
-                .font(.system(size: 28, weight: .bold))
+                .font(DS.Typography.displayTitle)
                 .foregroundStyle(DS.Color.textPrimary)
 
             Spacer().frame(height: DS.Space.md)
@@ -182,6 +227,7 @@ struct OnboardingView: View {
                 Label("Bildirim izni verildi", systemImage: "checkmark.circle.fill")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.green)
+                    .transition(.scale.combined(with: .opacity))
             }
 
             Spacer()
@@ -196,20 +242,37 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Celebration icon
+            // Celebration icon with scale bounce
             ZStack {
+                // Expanding celebration ring
+                Circle()
+                    .stroke(DS.Color.accent.opacity(0.15), lineWidth: 1.5)
+                    .frame(width: 160, height: 160)
+                    .scaleEffect(iconFloating ? 1.1 : 0.9)
+                    .opacity(iconFloating ? 0.3 : 0.8)
+                    .animation(
+                        .easeInOut(duration: 2.0).repeatForever(autoreverses: true),
+                        value: iconFloating
+                    )
+
                 Circle()
                     .fill(DS.Color.accentSoft)
                     .frame(width: 120, height: 120)
+
                 Image(systemName: "sparkles")
                     .font(.system(size: 48))
                     .foregroundStyle(DS.Color.accent)
+                    .symbolEffect(.bounce, options: .repeating.speed(0.3))
             }
+            .transition(.asymmetric(
+                insertion: .scale(scale: 0.5).combined(with: .opacity),
+                removal: .scale(scale: 1.2).combined(with: .opacity)
+            ))
 
             Spacer().frame(height: DS.Space.x3)
 
             Text("Hazırsınız!")
-                .font(.system(size: 28, weight: .bold))
+                .font(DS.Typography.displayTitle)
                 .foregroundStyle(DS.Color.textPrimary)
 
             Spacer().frame(height: DS.Space.md)
@@ -229,19 +292,8 @@ struct OnboardingView: View {
     // MARK: - Bottom Button
 
     private var bottomButton: some View {
-        Button {
+        DSButton(buttonTitle) {
             handleAction()
-        } label: {
-            Text(buttonTitle)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(DS.Color.accent)
-                        .shadow(color: DS.Color.accent.opacity(0.3), radius: 12, y: 4)
-                )
         }
     }
 
@@ -256,13 +308,15 @@ struct OnboardingView: View {
     }
 
     private func handleAction() {
+        DS.Haptic.softTap()
+
         switch currentPage {
         case 0:
-            withAnimation { currentPage = 1 }
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) { currentPage = 1 }
 
         case 1:
             if locationGranted {
-                withAnimation { currentPage = 2 }
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) { currentPage = 2 }
             } else {
                 Task {
                     await container.locationService.requestPermission()
@@ -270,24 +324,25 @@ struct OnboardingView: View {
                     let status = CLLocationManager().authorizationStatus
                     locationGranted = (status == .authorizedWhenInUse || status == .authorizedAlways)
                     try? await Task.sleep(for: .milliseconds(500))
-                    withAnimation { currentPage = 2 }
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) { currentPage = 2 }
                 }
             }
 
         case 2:
             if notificationGranted {
-                withAnimation { currentPage = 3 }
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) { currentPage = 3 }
             } else {
                 Task {
                     let granted = (try? await container.notificationScheduler.requestAuthorization()) ?? false
                     notificationGranted = granted
                     try? await Task.sleep(for: .milliseconds(500))
-                    withAnimation { currentPage = 3 }
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) { currentPage = 3 }
                 }
             }
 
         case 3:
-            withAnimation(.easeInOut(duration: 0.5)) {
+            DS.Haptic.success()
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 hasCompletedOnboarding = true
             }
 

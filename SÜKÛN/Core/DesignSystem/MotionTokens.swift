@@ -143,6 +143,32 @@ extension DS {
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MARK: Breathing & Immersive
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /// Continuous breathing animation — gentle scale cycle (1.0 → 1+scale → 1.0).
+        /// For dhikr ring, prayer pulse, meditation elements.
+        static func breathing(duration: Double = 4.0) -> Animation {
+            reduceMotion
+                ? .linear(duration: 0)
+                : .easeInOut(duration: duration).repeatForever(autoreverses: true)
+        }
+
+        /// Ripple expand — single outward ring that fades.
+        static var ripple: Animation {
+            reduceMotion
+                ? .easeOut(duration: 0.10)
+                : .easeOut(duration: 0.8)
+        }
+
+        /// Ambient fade — slow dimming for ambient/idle mode.
+        static var ambient: Animation {
+            reduceMotion
+                ? .easeOut(duration: 0.15)
+                : .easeInOut(duration: 1.5)
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // MARK: Raw Durations
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // For non-Animation use (CAAnimation, Timer, withAnimation closures).
@@ -203,5 +229,91 @@ extension View {
     func dsPress(_ isPressed: Bool, scale: CGFloat = 0.97) -> some View {
         scaleEffect(isPressed ? scale : 1.0)
             .animation(DS.Motion.tap, value: isPressed)
+    }
+
+    /// Continuous breathing scale animation for meditation elements.
+    /// Usage: `.dsBreathing(active: isActive)`
+    func dsBreathing(active: Bool, scale: CGFloat = 1.02, duration: Double = 4.0) -> some View {
+        scaleEffect(active ? scale : 1.0)
+            .animation(
+                active ? DS.Motion.breathing(duration: duration) : .default,
+                value: active
+            )
+    }
+
+    /// PhaseAnimator-driven entrance for cards.
+    /// Usage: `.dsPhaseEntrance(trigger: appeared)`
+    @ViewBuilder
+    func dsPhaseEntrance(trigger: Bool) -> some View {
+        if UIAccessibility.isReduceMotionEnabled {
+            self.opacity(trigger ? 1 : 0)
+        } else {
+            self
+                .phaseAnimator(
+                    EntrancePhase.allCases,
+                    trigger: trigger
+                ) { content, phase in
+                    content
+                        .opacity(phase.opacity)
+                        .scaleEffect(phase.scale)
+                        .offset(y: phase.offsetY)
+                } animation: { phase in
+                    switch phase {
+                    case .initial: nil
+                    case .appear: .spring(response: 0.45, dampingFraction: 0.82)
+                    case .settle: .spring(response: 0.30, dampingFraction: 0.90)
+                    }
+                }
+        }
+    }
+}
+
+// MARK: - Entrance Phase (PhaseAnimator)
+
+/// Three-phase entrance for rich card animations.
+enum EntrancePhase: CaseIterable {
+    case initial, appear, settle
+
+    var opacity: Double {
+        switch self {
+        case .initial: 0
+        case .appear: 1
+        case .settle: 1
+        }
+    }
+
+    var scale: CGFloat {
+        switch self {
+        case .initial: 0.92
+        case .appear: 1.02
+        case .settle: 1.0
+        }
+    }
+
+    var offsetY: CGFloat {
+        switch self {
+        case .initial: 16
+        case .appear: -2
+        case .settle: 0
+        }
+    }
+}
+
+// MARK: - Number Morph Values (KeyframeAnimator)
+
+/// Values for animating number transitions (lift-up + scale + settle).
+struct NumberMorphValues {
+    var scale: Double = 1.0
+    var offsetY: Double = 0
+    var opacity: Double = 1.0
+}
+
+// MARK: - Scroll Offset Preference Key
+
+/// Tracks scroll position for scroll-driven animations (parallax, header collapse).
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }

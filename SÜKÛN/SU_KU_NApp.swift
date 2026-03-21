@@ -24,11 +24,7 @@ struct SU_KU_NApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if hasCompletedOnboarding {
-                    RootView(container: container)
-                } else {
-                    OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding, container: container)
-                }
+                SplashGateView(container: container, hasCompletedOnboarding: $hasCompletedOnboarding)
             }
             .background(DS.Color.backgroundPrimary)
             .preferredColorScheme(resolvedColorScheme)

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>CormorantGaramond-Regular.ttf</string>
+		<string>CormorantGaramond-SemiBold.ttf</string>
+		<string>CormorantGaramond-Bold.ttf</string>
+		<string>CormorantGaramond-Italic.ttf</string>
+		<string>CormorantGaramond-MediumItalic.ttf</string>
+		<string>Amiri-Regular.ttf</string>
+		<string>Amiri-Bold.ttf</string>
+	</array>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Sükun, hassas 3D Kıble hesaplaması için konumunuza ihtiyaç duyar.</string>
+    <key>NSLocationUsageDescription</key>
+    <string>Sükun, hassas 3D Kıble hesaplaması için konumunuza ihtiyaç duyar.</string>
+    <key>NSMotionUsageDescription</key>
+    <string>Sükun, pusula kadranını gerçekçi bir şekilde yönlendirmek için jiroskop verilerini kullanır.</string>
+</dict>
+</plist>

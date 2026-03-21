@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- SÜKÛN Tab: Home - Mosque Dome with Crescent -->
+  <path d="M12 3C12 3 6 7.5 6 11V19H9V14C9 13.4 9.4 13 10 13H14C14.6 13 15 13.4 15 14V19H18V11C18 7.5 12 3 12 3Z" stroke="#B08D3E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M4 19H20" stroke="#B08D3E" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="12" cy="7.5" r="0.5" fill="#B08D3E" opacity="0.5"/>
+  <path d="M12 2.5C12.4 2.5 12.7 2.3 12.7 2C12.3 2.2 11.8 2 11.5 2C11.8 2 12 2.3 12 2.5Z" fill="#B08D3E" opacity="0.5"/>
+</svg>

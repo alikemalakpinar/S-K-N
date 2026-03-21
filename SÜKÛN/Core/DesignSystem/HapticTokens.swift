@@ -148,5 +148,27 @@ extension DS {
             heavyEngine.prepare()
             notificationEngine.prepare()
         }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MARK: Immersive Patterns
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /// Tab switch haptic — crisp selection for switching tabs.
+        static func tabSwitch() {
+            rigidEngine.impactOccurred(intensity: 0.4)
+        }
+
+        /// Particle burst — celebration for milestone particle effects.
+        static func particleBurst() {
+            heavyEngine.impactOccurred(intensity: 0.9)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                softEngine.impactOccurred(intensity: 0.3)
+            }
+        }
+
+        /// Long press progress — escalating feedback during hold gestures.
+        static func longPressProgress(intensity: CGFloat) {
+            mediumEngine.impactOccurred(intensity: min(1.0, intensity))
+        }
     }
 }

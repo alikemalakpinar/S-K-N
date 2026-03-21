@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#B08D3E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Torch/flame base -->
+  <path d="M52 95 L52 70 Q52 66 56 64 L56 62" />
+  <path d="M68 95 L68 70 Q68 66 64 64 L64 62" />
+  <!-- Base detail -->
+  <line x1="48" y1="95" x2="72" y2="95" />
+  <path d="M50 98 L70 98" />
+  <!-- Flame - outer flowing curves -->
+  <path d="M56 62 Q48 52 50 40 Q52 30 60 20 Q68 30 70 40 Q72 52 64 62" />
+  <!-- Flame - inner flowing curve -->
+  <path d="M58 60 Q54 50 56 40 Q58 32 60 28 Q62 32 64 40 Q66 50 62 60" />
+  <!-- Inner flame wisp -->
+  <path d="M59 56 Q58 48 60 38 Q62 48 61 56" />
+  <!-- Sparkle dots around flame -->
+  <circle cx="40" cy="36" r="1.5" fill="#B08D3E" stroke="none" />
+  <circle cx="80" cy="36" r="1.5" fill="#B08D3E" stroke="none" />
+  <circle cx="44" cy="22" r="1.2" fill="#B08D3E" stroke="none" />
+  <circle cx="76" cy="22" r="1.2" fill="#B08D3E" stroke="none" />
+  <circle cx="36" cy="50" r="1" fill="#B08D3E" stroke="none" />
+  <circle cx="84" cy="50" r="1" fill="#B08D3E" stroke="none" />
+  <circle cx="50" cy="14" r="1" fill="#B08D3E" stroke="none" />
+  <circle cx="70" cy="14" r="1" fill="#B08D3E" stroke="none" />
+  <circle cx="60" cy="10" r="1.2" fill="#B08D3E" stroke="none" />
+  <!-- Small sparkle crosses -->
+  <line x1="38" y1="28" x2="42" y2="28" />
+  <line x1="40" y1="26" x2="40" y2="30" />
+  <line x1="78" y1="28" x2="82" y2="28" />
+  <line x1="80" y1="26" x2="80" y2="30" />
+</svg>

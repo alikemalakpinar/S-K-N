@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 40" width="300" height="40">
+  <!--
+    Horizontal decorative border for Quran surah headers.
+    Symmetrical design with central medallion and extending arabesque lines.
+    Small leaf/palmette terminals at the ends.
+    Gold #B08D3E, thin elegant lines.
+  -->
+  <defs>
+    <style>
+      .o { fill: none; stroke: #B08D3E; stroke-width: 0.5; stroke-linecap: round; stroke-linejoin: round; }
+      .of { fill: none; stroke: #B08D3E; stroke-width: 0.4; stroke-linecap: round; stroke-linejoin: round; }
+      .dot { fill: #B08D3E; stroke: none; }
+      .fill { fill: #B08D3E; stroke: none; opacity: 0.3; }
+    </style>
+  </defs>
+  <g>
+    <!-- Central medallion: 8-pointed star rosette -->
+    <!-- Outer circle -->
+    <circle class="o" cx="150" cy="20" r="12"/>
+    <!-- Inner circle -->
+    <circle class="o" cx="150" cy="20" r="8"/>
+    <!-- 8-pointed star inside -->
+    <polygon class="o" points="
+      150,8   153.06,15.53   160.49,12.93   155.53,19.39
+      162,20  155.53,20.61   160.49,27.07   153.06,24.47
+      150,32  146.94,24.47   139.51,27.07   144.47,20.61
+      138,20  144.47,19.39   139.51,12.93   146.94,15.53
+    "/>
+    <!-- Innermost tiny circle -->
+    <circle class="o" cx="150" cy="20" r="3"/>
+    <!-- Tiny dot at center -->
+    <circle class="dot" cx="150" cy="20" r="0.8"/>
+
+    <!-- Left side extending arabesque -->
+    <!-- Main horizontal line from medallion -->
+    <line class="o" x1="138" y1="20" x2="20" y2="20"/>
+    <!-- Upper decorative wave -->
+    <path class="of" d="M 135,20 Q 125,14 115,20 Q 105,26 95,20 Q 85,14 75,20 Q 65,26 55,20 Q 48,16 40,20"/>
+    <!-- Lower decorative wave (mirror) -->
+    <path class="of" d="M 135,20 Q 125,26 115,20 Q 105,14 95,20 Q 85,26 75,20 Q 65,14 55,20 Q 48,24 40,20"/>
+
+    <!-- Small accent medallions on left -->
+    <circle class="o" cx="95" cy="20" r="3"/>
+    <circle class="dot" cx="95" cy="20" r="0.6"/>
+    <circle class="o" cx="55" cy="20" r="2"/>
+    <circle class="dot" cx="55" cy="20" r="0.5"/>
+
+    <!-- Left terminal: palmette/leaf -->
+    <path class="o" d="M 20,20 Q 14,15 10,20 Q 14,25 20,20"/>
+    <path class="of" d="M 20,20 Q 16,17 13,20"/>
+    <path class="of" d="M 20,20 Q 16,23 13,20"/>
+    <line class="of" x1="13" y1="20" x2="8" y2="20"/>
+    <!-- Palmette petals -->
+    <path class="of" d="M 10,20 Q 7,17 5,20"/>
+    <path class="of" d="M 10,20 Q 7,23 5,20"/>
+    <circle class="dot" cx="5" cy="20" r="0.5"/>
+
+    <!-- Right side extending arabesque (mirror of left) -->
+    <line class="o" x1="162" y1="20" x2="280" y2="20"/>
+    <path class="of" d="M 165,20 Q 175,14 185,20 Q 195,26 205,20 Q 215,14 225,20 Q 235,26 245,20 Q 252,16 260,20"/>
+    <path class="of" d="M 165,20 Q 175,26 185,20 Q 195,14 205,20 Q 215,26 225,20 Q 235,14 245,20 Q 252,24 260,20"/>
+
+    <!-- Small accent medallions on right -->
+    <circle class="o" cx="205" cy="20" r="3"/>
+    <circle class="dot" cx="205" cy="20" r="0.6"/>
+    <circle class="o" cx="245" cy="20" r="2"/>
+    <circle class="dot" cx="245" cy="20" r="0.5"/>
+
+    <!-- Right terminal: palmette/leaf -->
+    <path class="o" d="M 280,20 Q 286,15 290,20 Q 286,25 280,20"/>
+    <path class="of" d="M 280,20 Q 284,17 287,20"/>
+    <path class="of" d="M 280,20 Q 284,23 287,20"/>
+    <line class="of" x1="287" y1="20" x2="292" y2="20"/>
+    <path class="of" d="M 290,20 Q 293,17 295,20"/>
+    <path class="of" d="M 290,20 Q 293,23 295,20"/>
+    <circle class="dot" cx="295" cy="20" r="0.5"/>
+
+    <!-- Small accent dots along the main line -->
+    <circle class="dot" cx="115" cy="20" r="0.4"/>
+    <circle class="dot" cx="75" cy="20" r="0.4"/>
+    <circle class="dot" cx="35" cy="20" r="0.4"/>
+    <circle class="dot" cx="185" cy="20" r="0.4"/>
+    <circle class="dot" cx="225" cy="20" r="0.4"/>
+    <circle class="dot" cx="265" cy="20" r="0.4"/>
+
+    <!-- Tiny decorative marks at cardinal points of central medallion -->
+    <circle class="dot" cx="150" cy="8" r="0.4"/>
+    <circle class="dot" cx="150" cy="32" r="0.4"/>
+  </g>
+</svg>

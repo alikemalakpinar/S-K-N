@@ -36,7 +36,7 @@ struct KazaView: View {
                 }
             }
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Kaza Takibi")
+            .navigationTitle(L10n.Kaza.title)
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 viewModel.load(context: modelContext)
@@ -51,10 +51,7 @@ struct KazaView: View {
 
     private var activityRingsHero: some View {
         VStack(spacing: DS.Space.lg) {
-            Text("TOPLAM KAZA")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(DS.Color.textSecondary)
-                .tracking(3)
+            DSFormSectionHeader(L10n.Kaza.totalKaza)
 
             // Overlapping activity rings
             ZStack {
@@ -80,7 +77,7 @@ struct KazaView: View {
                         .contentTransition(.numericText())
                         .animation(DS.Motion.countdown, value: viewModel.kazaPrayer?.totalCount)
 
-                    Text("namaz")
+                    Text(L10n.Common.namaz)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(DS.Color.textSecondary)
                 }
@@ -233,25 +230,10 @@ struct KazaView: View {
     // MARK: - Info Section
 
     private var infoSection: some View {
-        VStack(alignment: .leading, spacing: DS.Space.sm) {
-            Label {
-                Text("Bilgilendirme")
-                    .font(.system(size: 12, weight: .semibold))
-            } icon: {
-                Image(systemName: "info.circle.fill")
-                    .font(.system(size: 12))
-            }
-            .foregroundStyle(DS.Color.accent)
-
-            Text("Kaza namazlarınızı buradan takip edebilirsiniz. Her kıldığınız kaza namazından sonra ilgili namaz sayısını bir azaltın.")
-                .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(DS.Color.textSecondary)
-                .lineSpacing(4)
-        }
-        .padding(DS.Space.lg)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .fill(DS.Color.accentSoft)
+        DSAlert(
+            L10n.Kaza.infoMessage,
+            title: L10n.Kaza.infoTitle,
+            variant: .info
         )
     }
 }
@@ -265,6 +247,7 @@ private struct ActivityRing: View {
     var size: CGFloat = 120
 
     @State private var animatedProgress: Double = 0
+    @State private var glowPulse = false
 
     var body: some View {
         ZStack {
@@ -272,6 +255,17 @@ private struct ActivityRing: View {
             Circle()
                 .stroke(color.opacity(0.12), lineWidth: lineWidth)
                 .frame(width: size, height: size)
+
+            // Trail glow — wider, softer ring behind progress
+            Circle()
+                .trim(from: 0, to: animatedProgress)
+                .stroke(
+                    color.opacity(glowPulse ? 0.18 : 0.08),
+                    style: StrokeStyle(lineWidth: lineWidth + 6, lineCap: .round)
+                )
+                .frame(width: size, height: size)
+                .rotationEffect(.degrees(-90))
+                .blur(radius: 4)
 
             // Progress
             Circle()
@@ -281,7 +275,7 @@ private struct ActivityRing: View {
                         gradient: Gradient(colors: [color.opacity(0.6), color]),
                         center: .center,
                         startAngle: .degrees(0),
-                        endAngle: .degrees(360 * animatedProgress)
+                        endAngle: .degrees(360 * max(animatedProgress, 0.01))
                     ),
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
@@ -293,7 +287,7 @@ private struct ActivityRing: View {
                 Circle()
                     .fill(color)
                     .frame(width: lineWidth, height: lineWidth)
-                    .shadow(color: color.opacity(0.6), radius: 4)
+                    .shadow(color: color.opacity(glowPulse ? 0.8 : 0.5), radius: glowPulse ? 8 : 4)
                     .offset(y: -size / 2)
                     .rotationEffect(.degrees(360 * animatedProgress - 90))
             }
@@ -302,6 +296,9 @@ private struct ActivityRing: View {
             withAnimation(.spring(response: 0.8, dampingFraction: 0.75).delay(0.2)) {
                 animatedProgress = progress
             }
+            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                glowPulse = true
+            }
         }
         .onChange(of: progress) { _, newVal in
             withAnimation(DS.Motion.standard) {
@@ -309,4 +306,10 @@ private struct ActivityRing: View {
             }
         }
     }
+}
+
+// MARK: - Preview
+
+#Preview("Kaza") {
+    DSPreview { _ in KazaView() }
 }

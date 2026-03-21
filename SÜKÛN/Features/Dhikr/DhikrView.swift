@@ -19,6 +19,12 @@ struct DhikrView: View {
     @State private var counterScale: CGFloat = 1.0
     @State private var milestoneGlow: CGFloat = 0
     @State private var ringPulse: CGFloat = 1.0
+    @State private var ringBreathing = false
+    @State private var showParticles = false
+    @State private var isAmbient = false
+    @State private var ambientTask: Task<Void, Never>?
+    @Environment(\.tabBarVisible) private var tabBarVisible
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(container: DependencyContainer) {
         _viewModel = State(initialValue: DhikrViewModel(container: container))
@@ -32,9 +38,16 @@ struct DhikrView: View {
         ZStack {
             DS.Color.backgroundPrimary.ignoresSafeArea()
 
+            // Ambient background pulse on each count
+            Circle()
+                .fill(DS.Color.accent.opacity(0.02))
+                .scaleEffect(rippleScale * 0.6)
+                .allowsHitTesting(false)
+
             VStack(spacing: 0) {
                 topBar
                     .padding(.top, DS.Space.sm)
+                    .opacity(isAmbient ? 0.3 : 1.0)
 
                 Spacer()
 
@@ -44,14 +57,20 @@ struct DhikrView: View {
                         .padding(.bottom, DS.Space.md)
                 }
 
-                ring
+                // Particle system for milestones
+                ParticleSystem(isEmitting: $showParticles)
+                    .frame(width: 240, height: 240)
+                    .allowsHitTesting(false)
+                    .overlay { ring }
+
                 presetName
                     .padding(.top, DS.Space.lg)
+                    .opacity(isAmbient ? 0.4 : 1.0)
 
                 Spacer()
 
                 // Hint
-                if viewModel.currentCount == 0 {
+                if viewModel.currentCount == 0 && !isAmbient {
                     VStack(spacing: 4) {
                         Image(systemName: "hand.tap.fill")
                             .font(.system(size: 20))
@@ -66,7 +85,8 @@ struct DhikrView: View {
                 }
 
                 bottomBar
-                    .padding(.bottom, DS.Space.md)
+                    .padding(.bottom, DS.Space.md + 60)
+                    .opacity(isAmbient ? 0.3 : 1.0)
             }
 
             // Ripple
@@ -82,11 +102,18 @@ struct DhikrView: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.8)))
             }
         }
+        .animation(DS.Motion.ambient, value: isAmbient)
         .contentShape(Rectangle())
         .gesture(pullGesture)
         .onTapGesture { performCount() }
-        .onAppear { DS.Haptic.prepare() }
+        .onAppear {
+            DS.Haptic.prepare()
+            tabBarVisible.wrappedValue = false
+            if !reduceMotion { ringBreathing = true }
+        }
         .onDisappear {
+            tabBarVisible.wrappedValue = true
+            ambientTask?.cancel()
             // Auto-save any in-progress session when leaving
             if viewModel.currentCount > 0 || tourCount > 0 {
                 viewModel.saveSession(context: modelContext, tourCount: tourCount)
@@ -181,12 +208,22 @@ struct DhikrView: View {
             if let preset = viewModel.selectedPreset, preset.target > 0 {
                 let pct = min(1.0, Double(viewModel.currentCount) / Double(preset.target))
 
-                // Progress arc — warm gold at milestones
+                // Progress arc — gradient stroke from gold to warm amber
                 Circle()
                     .trim(from: 0, to: pct)
                     .stroke(
-                        DS.Color.accent,
-                        style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                        AngularGradient(
+                            gradient: Gradient(colors: [
+                                DS.Color.accent.opacity(0.6),
+                                DS.Color.accent,
+                                DS.Color.warning,
+                                DS.Color.accent
+                            ]),
+                            center: .center,
+                            startAngle: .degrees(-90),
+                            endAngle: .degrees(270)
+                        ),
+                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
                     )
                     .frame(width: ringSize, height: ringSize)
                     .rotationEffect(.degrees(-90))
@@ -197,10 +234,10 @@ struct DhikrView: View {
                 Circle()
                     .trim(from: 0, to: pct)
                     .stroke(
-                        DS.Color.accent.opacity(isMilestone ? 0.4 : 0.25),
-                        lineWidth: 14
+                        DS.Color.accent.opacity(isMilestone ? 0.5 : 0.25),
+                        lineWidth: 16
                     )
-                    .blur(radius: 8)
+                    .blur(radius: 10)
                     .frame(width: ringSize, height: ringSize)
                     .rotationEffect(.degrees(-90))
                     .scaleEffect(ringPulse)
@@ -234,6 +271,7 @@ struct DhikrView: View {
             .offset(y: isDragging ? min(dragOffset * 0.08, 12) : 0)
             .animation(.interactiveSpring, value: isDragging)
         }
+        .dsBreathing(active: ringBreathing, scale: 1.015, duration: 4.0)
     }
 
     // MARK: - Preset Name
@@ -243,13 +281,12 @@ struct DhikrView: View {
             if let preset = viewModel.selectedPreset {
                 VStack(spacing: DS.Space.xs) {
                     Text(preset.title)
-                        .font(.system(size: 17, weight: .medium))
+                        .font(DS.Typography.displayBody)
                         .foregroundStyle(DS.Color.textPrimary.opacity(0.7))
-                        .tracking(0.5)
 
                     if let desc = viewModel.presetDescription {
                         Text(desc)
-                            .font(.system(size: 11))
+                            .font(DS.Typography.captionSm)
                             .foregroundStyle(DS.Color.textSecondary)
                     }
                 }
@@ -319,22 +356,39 @@ struct DhikrView: View {
     // MARK: - Tour Complete
 
     private var tourCompleteOverlay: some View {
-        VStack(spacing: DS.Space.md) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(DS.Color.accent)
-            Text("Tur Tamamlandı!")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(DS.Color.textPrimary)
-            Text("\(tourCount). tur")
-                .font(.system(size: 14, weight: .medium, design: .monospaced))
-                .foregroundStyle(DS.Color.textSecondary)
+        VStack(spacing: DS.Space.lg) {
+            ZStack {
+                Circle()
+                    .fill(DS.Color.accent.opacity(0.12))
+                    .frame(width: 80, height: 80)
+                Circle()
+                    .fill(DS.Color.accent.opacity(0.06))
+                    .frame(width: 100, height: 100)
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(DS.Color.accent)
+                    .symbolEffect(.bounce, value: tourCount)
+            }
+
+            VStack(spacing: DS.Space.xs) {
+                Text(L10n.Dhikr.tourComplete)
+                    .font(DS.Typography.displayBody)
+                    .foregroundStyle(DS.Color.textPrimary)
+                Text("\(tourCount). tur")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(DS.Color.accent)
+            }
         }
         .padding(DS.Space.x2)
+        .padding(.horizontal, DS.Space.lg)
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
                 .fill(DS.Color.cardElevated)
-                .shadow(color: .black.opacity(0.1), radius: 20)
+                .shadow(color: DS.Color.accent.opacity(0.15), radius: 24, y: 8)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
+                .stroke(DS.Color.accent.opacity(0.15), lineWidth: 0.5)
         )
     }
 
@@ -357,7 +411,20 @@ struct DhikrView: View {
 
     // MARK: - Count Logic
 
+    private func resetAmbientTimer() {
+        ambientTask?.cancel()
+        if isAmbient {
+            withAnimation(DS.Motion.ambient) { isAmbient = false }
+        }
+        ambientTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3.0))
+            guard !Task.isCancelled, viewModel.currentCount > 0 else { return }
+            withAnimation(DS.Motion.ambient) { isAmbient = true }
+        }
+    }
+
     private func performCount() {
+        resetAmbientTimer()
         withAnimation(.easeOut(duration: 0.12)) { viewModel.increment() }
 
         // ── Organic scale pulse on every count ─────────────
@@ -400,6 +467,7 @@ struct DhikrView: View {
         } else if c > 0 && c % 33 == 0 {
             // ── Milestone (33, 66, 99) ───────────────────────
             DS.Haptic.dhikrMilestone()
+            showParticles = true
 
             // Heavier scale punch at milestones
             withAnimation(.spring(response: 0.2, dampingFraction: 0.4)) {
@@ -449,72 +517,72 @@ struct DhikrView: View {
     // MARK: - Preset Picker
 
     private var pickerSheet: some View {
-        NavigationStack {
-            List {
-                ForEach(viewModel.presets, id: \.title) { preset in
-                    Button {
-                        // Auto-save current session before switching
-                        if viewModel.currentCount > 0 || tourCount > 0 {
-                            viewModel.saveSession(context: modelContext, tourCount: tourCount)
-                            viewModel.loadSessionHistory(context: modelContext)
-                        }
-                        viewModel.selectPreset(preset)
-                        tourCount = 0
-                        showPresetPicker = false
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(preset.title)
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundStyle(DS.Color.textPrimary)
-                                Text("Hedef: \(preset.target)")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(DS.Color.textSecondary)
+        VStack(spacing: 0) {
+            DSSheetHeader("Zikir Seç", onDismiss: { showPresetPicker = false })
+
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(viewModel.presets, id: \.title) { preset in
+                        let isSelected = viewModel.selectedPreset?.title == preset.title
+                        Button {
+                            if viewModel.currentCount > 0 || tourCount > 0 {
+                                viewModel.saveSession(context: modelContext, tourCount: tourCount)
+                                viewModel.loadSessionHistory(context: modelContext)
                             }
-                            Spacer()
-                            if viewModel.selectedPreset?.title == preset.title {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(DS.Color.accent)
+                            viewModel.selectPreset(preset)
+                            tourCount = 0
+                            showPresetPicker = false
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(preset.title)
+                                        .font(DS.Typography.body)
+                                        .foregroundStyle(DS.Color.textPrimary)
+                                    Text("Hedef: \(preset.target)")
+                                        .font(DS.Typography.captionSm)
+                                        .foregroundStyle(DS.Color.textSecondary)
+                                }
+                                Spacer()
+                                if isSelected {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(DS.Color.accent)
+                                }
                             }
+                            .padding(.horizontal, DS.Space.lg)
+                            .padding(.vertical, DS.Space.lg)
+                            .background(isSelected ? DS.Color.accentSoft : .clear)
                         }
-                        .padding(.vertical, 4)
+
+                        Hairline().padding(.horizontal, DS.Space.lg)
                     }
-                    .listRowBackground(DS.Color.backgroundPrimary)
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Zikir Seç")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Tamam") { showPresetPicker = false }
-                        .foregroundStyle(DS.Color.accent)
                 }
             }
         }
+        .background(DS.Color.backgroundPrimary)
         .presentationDetents([.medium])
     }
 
     // MARK: - History
 
     private var historySheet: some View {
-        NavigationStack {
-            Group {
-                if viewModel.recentSessions.isEmpty {
-                    ContentUnavailableView(
-                        "Kayıt Yok",
-                        systemImage: "clock",
-                        description: Text("Zikir oturumlarınız burada görünecek")
-                    )
-                } else {
-                    List {
-                        // Summary
-                        Section {
+        VStack(spacing: 0) {
+            DSSheetHeader("Zikir Geçmişi", onDismiss: { showHistory = false })
+
+            if viewModel.recentSessions.isEmpty {
+                SKNEmptyState(
+                    icon: "clock",
+                    title: L10n.Dhikr.noHistory,
+                    message: L10n.Dhikr.noHistoryMessage
+                )
+            } else {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: DS.Space.lg) {
+                        // Summary card
+                        DSCard {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("Bugün Toplam")
-                                        .font(.system(size: 13, weight: .medium))
+                                    Text(L10n.Dhikr.todayTotal)
+                                        .font(DS.Typography.captionSm)
                                         .foregroundStyle(DS.Color.textSecondary)
                                     Text("\(viewModel.todayTotalCount) zikir")
                                         .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -523,60 +591,59 @@ struct DhikrView: View {
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 4) {
                                     Text("Oturum")
-                                        .font(.system(size: 13, weight: .medium))
+                                        .font(DS.Typography.captionSm)
                                         .foregroundStyle(DS.Color.textSecondary)
                                     Text("\(viewModel.todaySessionCount)")
                                         .font(.system(size: 24, weight: .bold, design: .rounded))
                                         .foregroundStyle(DS.Color.textPrimary)
                                 }
                             }
-                            .padding(.vertical, DS.Space.sm)
-                            .listRowBackground(DS.Color.cardElevated)
                         }
 
-                        Section("Son Oturumlar") {
-                            ForEach(viewModel.recentSessions, id: \.date) { session in
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(session.presetTitle)
-                                            .font(.system(size: 15, weight: .medium))
-                                            .foregroundStyle(DS.Color.textPrimary)
-                                        Text(session.date, format: .dateTime.day().month().hour().minute())
-                                            .font(.system(size: 11))
+                        // Sessions
+                        DSSectionHeader("Son Oturumlar", serif: true)
+
+                        ForEach(viewModel.recentSessions, id: \.date) { session in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(session.presetTitle)
+                                        .font(DS.Typography.body)
+                                        .foregroundStyle(DS.Color.textPrimary)
+                                    Text(session.date, format: .dateTime.day().month().hour().minute())
+                                        .font(DS.Typography.captionSm)
+                                        .foregroundStyle(DS.Color.textSecondary)
+                                }
+                                Spacer()
+                                VStack(alignment: .trailing, spacing: 3) {
+                                    Text("\(session.count)")
+                                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                                        .foregroundStyle(DS.Color.accent)
+                                    if session.durationSeconds > 0 {
+                                        let mins = session.durationSeconds / 60
+                                        let secs = session.durationSeconds % 60
+                                        Text(mins > 0 ? "\(mins)dk \(secs)sn" : "\(secs)sn")
+                                            .font(.system(size: 10, weight: .medium, design: .monospaced))
                                             .foregroundStyle(DS.Color.textSecondary)
                                     }
-                                    Spacer()
-                                    VStack(alignment: .trailing, spacing: 3) {
-                                        Text("\(session.count)")
-                                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                                            .foregroundStyle(DS.Color.accent)
-                                        if session.durationSeconds > 0 {
-                                            let mins = session.durationSeconds / 60
-                                            let secs = session.durationSeconds % 60
-                                            Text(mins > 0 ? "\(mins)dk \(secs)sn" : "\(secs)sn")
-                                                .font(.system(size: 10, weight: .medium, design: .monospaced))
-                                                .foregroundStyle(DS.Color.textSecondary)
-                                        }
-                                    }
                                 }
-                                .padding(.vertical, 2)
-                                .listRowBackground(DS.Color.backgroundPrimary)
                             }
+                            .padding(.vertical, DS.Space.sm)
+
+                            Hairline()
                         }
                     }
-                    .scrollContentBackground(.hidden)
-                }
-            }
-            .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Zikir Geçmişi")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Tamam") { showHistory = false }
-                        .foregroundStyle(DS.Color.accent)
+                    .padding(.horizontal, DS.Space.lg)
+                    .padding(.vertical, DS.Space.lg)
                 }
             }
         }
+        .background(DS.Color.backgroundPrimary)
         .presentationDetents([.large])
     }
+}
+
+// MARK: - Preview
+
+#Preview("Dhikr") {
+    DSPreview { c in DhikrView(container: c) }
 }

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#B08D3E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Magnifying glass lens circle -->
+  <circle cx="52" cy="50" r="24" />
+  <!-- Magnifying glass handle -->
+  <line x1="69" y1="67" x2="90" y2="88" />
+  <!-- Handle grip detail -->
+  <line x1="86" y1="84" x2="94" y2="92" stroke-width="3" />
+  <!-- Crescent moon inside lens -->
+  <path d="M46 38 A12 12 0 1 0 46 62 A9 9 0 1 1 46 38" />
+  <!-- Small star dot near crescent -->
+  <circle cx="58" cy="42" r="1.2" fill="#B08D3E" stroke="none" />
+</svg>

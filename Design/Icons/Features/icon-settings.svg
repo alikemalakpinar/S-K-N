@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Gear/cog with crescent cutout detail -->
+  <!-- Secondary: gear body fill -->
+  <path d="M12 15.5C13.933 15.5 15.5 13.933 15.5 12C15.5 10.067 13.933 8.5 12 8.5C10.067 8.5 8.5 10.067 8.5 12C8.5 13.933 10.067 15.5 12 15.5Z" fill="#B08D3E" opacity="0.2"/>
+  <!-- Primary: gear outline with teeth -->
+  <path d="M10.3 2.7L10.7 5.1C10.1 5.3 9.5 5.6 9 6L6.8 4.8L4.8 6.8L6 9C5.6 9.5 5.3 10.1 5.1 10.7L2.7 10.3V13.7L5.1 13.3C5.3 13.9 5.6 14.5 6 15L4.8 17.2L6.8 19.2L9 18C9.5 18.4 10.1 18.7 10.7 18.9L10.3 21.3H13.7L13.3 18.9C13.9 18.7 14.5 18.4 15 18L17.2 19.2L19.2 17.2L18 15C18.4 14.5 18.7 13.9 18.9 13.3L21.3 13.7V10.3L18.9 10.7C18.7 10.1 18.4 9.5 18 9L19.2 6.8L17.2 4.8L15 6C14.5 5.6 13.9 5.3 13.3 5.1L13.7 2.7H10.3Z" stroke="#B08D3E" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Inner circle -->
+  <circle cx="12" cy="12" r="3.5" stroke="#B08D3E" stroke-width="1.5"/>
+  <!-- Crescent cutout detail inside gear center -->
+  <path d="M13.5 10C12.7 10.5 12.2 11.2 12.2 12C12.2 12.8 12.7 13.5 13.5 14C14.3 13.2 14.5 12.6 14.5 12C14.5 11.4 14.3 10.8 13.5 10Z" fill="#B08D3E" opacity="0.45"/>
+</svg>

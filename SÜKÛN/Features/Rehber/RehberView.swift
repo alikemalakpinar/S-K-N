@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RehberView: View {
     @State private var viewModel: RehberViewModel
+    @State private var appeared = false
 
     init(container: DependencyContainer) {
         _viewModel = State(initialValue: RehberViewModel(container: container))
@@ -16,6 +17,7 @@ struct RehberView: View {
                     icon: "character.textbox",
                     destination: ElifbaView(viewModel: viewModel)
                 )
+                .dsAppear(loaded: appeared, index: 0)
 
                 moduleCard(
                     title: "Arınma Adımları",
@@ -23,6 +25,7 @@ struct RehberView: View {
                     icon: "drop.fill",
                     destination: AbdestView(viewModel: viewModel)
                 )
+                .dsAppear(loaded: appeared, index: 1)
 
                 moduleCard(
                     title: "Namazın Anatomisi",
@@ -30,12 +33,16 @@ struct RehberView: View {
                     icon: "figure.mind.and.body",
                     destination: NamazView(viewModel: viewModel)
                 )
+                .dsAppear(loaded: appeared, index: 2)
             }
             .padding(DS.Space.lg)
         }
         .background(DS.Color.backgroundPrimary)
         .task {
             viewModel.loadAll()
+            withAnimation(DS.Motion.slowReveal) {
+                appeared = true
+            }
         }
     }
 
@@ -52,7 +59,7 @@ struct RehberView: View {
 
                     VStack(alignment: .leading, spacing: DS.Space.xs) {
                         Text(title)
-                            .font(.system(size: 17, weight: .medium))
+                            .font(DS.Typography.displayBody)
                             .foregroundStyle(DS.Color.textPrimary)
                         Text(subtitle)
                             .font(DS.Typography.caption)

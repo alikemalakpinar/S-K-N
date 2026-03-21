@@ -93,6 +93,39 @@ extension DS {
         static var glassBorder: SwiftUI.Color {
             SwiftUI.Color(.glassBorder)
         }
+
+        // ── Immersive ──────────────────────────────────────
+        /// Deep background for immersive modes (dhikr, quran reader)
+        static var surfaceImmersive: SwiftUI.Color {
+            SwiftUI.Color(.surfaceImmersive)
+        }
+
+        // ── Time-based Gradients ───────────────────────────
+        /// Returns a pair of gradient colors keyed to prayer-time periods.
+        /// Use for ambient backgrounds that shift throughout the day.
+        static func timeGradient(for date: Date = .now) -> [SwiftUI.Color] {
+            let hour = Calendar.current.component(.hour, from: date)
+            switch hour {
+            case 4..<7:   // Fajr — dawn rose + deep blue
+                return [SwiftUI.Color(hex: 0xF4C6A5, opacity: 0.25),
+                        SwiftUI.Color(hex: 0x2B3A67, opacity: 0.20)]
+            case 7..<12:  // Morning — warm ivory + soft gold
+                return [SwiftUI.Color(hex: 0xF5E6C8, opacity: 0.20),
+                        SwiftUI.Color(hex: 0xDBC68F, opacity: 0.12)]
+            case 12..<15: // Dhuhr — bright gold + warm white
+                return [SwiftUI.Color(hex: 0xF0D890, opacity: 0.18),
+                        SwiftUI.Color(hex: 0xFFF8E8, opacity: 0.10)]
+            case 15..<18: // Asr — amber + soft orange
+                return [SwiftUI.Color(hex: 0xE8B86D, opacity: 0.22),
+                        SwiftUI.Color(hex: 0xD4845A, opacity: 0.14)]
+            case 18..<20: // Maghrib — sunset copper + deep purple
+                return [SwiftUI.Color(hex: 0xD47B5E, opacity: 0.25),
+                        SwiftUI.Color(hex: 0x4A2D6B, opacity: 0.18)]
+            default:      // Isha — deep navy + midnight teal
+                return [SwiftUI.Color(hex: 0x1A2744, opacity: 0.28),
+                        SwiftUI.Color(hex: 0x0F2027, opacity: 0.22)]
+            }
+        }
     }
 }
 
@@ -125,6 +158,24 @@ extension DS {
 
 extension DS {
     enum Typography {
+
+        // ── Serif Display (Cormorant Garamond) ──────────────
+        //    Editorial headlines that carry the brand's voice.
+        //    Falls back to system serif if custom font unavailable.
+
+        /// 48pt serif bold — onboarding titles, hero text
+        static let displayHero = cormorant(size: 48, weight: "Bold")
+        /// 36pt serif bold — large section heroes
+        static let displayTitle = cormorant(size: 36, weight: "Bold")
+        /// 32pt serif semibold — card/section heroes
+        static let displaySubtitle = cormorant(size: 32, weight: "SemiBold")
+        /// 22pt serif regular — editorial card titles
+        static let displayBody = cormorant(size: 22, weight: "Regular")
+        /// 13pt serif medium italic — source references, attributions
+        static let serifSource = cormorant(size: 13, weight: "MediumItalic")
+        /// 14pt serif italic — Hijri dates, cultural context
+        static let serifDate = cormorant(size: 14, weight: "Italic")
+
         // ── Display Scale ────────────────────────────────────
         /// 96pt black — giant countdown numbers
         static let mega        = Font.system(size: 96, weight: .black, design: .default)
@@ -177,29 +228,70 @@ extension DS {
         static let roundedCaption = Font.system(size: 13, weight: .semibold, design: .rounded)
 
         // ── Arabic / Quranic ─────────────────────────────────
-        //    Uses system Arabic rendering with carefully tuned sizes.
-        //    For custom Uthmanic Script, use .arabicUthmanic() below.
-        static let arabicVerse      = Font.system(size: 24, weight: .regular)
-        static let arabicLarge      = Font.system(size: 28, weight: .regular)
-        static let arabicHero       = Font.system(size: 32, weight: .regular)
-        static let arabicDisplay    = Font.system(size: 40, weight: .regular)
-        static let arabicBismillah  = Font.system(size: 22, weight: .regular)
+
+        /// Arabic verse text — uses Amiri if available, system otherwise
+        static let arabicVerse      = amiri(size: 24)
+        /// Arabic large — expanded verse display
+        static let arabicLarge      = amiri(size: 28)
+        /// Arabic hero — section heroes
+        static let arabicHero       = amiri(size: 32)
+        /// Arabic display — large decorative text
+        static let arabicDisplay    = amiri(size: 40)
+        /// Bismillah — opening formula
+        static let arabicBismillah  = amiri(size: 22)
+        /// Arabic bold — emphasis, headers
+        static let arabicBold       = amiriBold(size: 22)
+
         static let surahTitle       = Font.system(size: 15, weight: .semibold, design: .default)
         static let verseNumber      = Font.system(size: 11, weight: .medium, design: .rounded)
         static let pageNumber       = Font.system(size: 12, weight: .medium, design: .rounded)
 
-        // ── Transliteration (serif italic) ───────────────────
-        static let transliteration   = Font.system(size: 15, weight: .regular, design: .serif)
-        static let transliterationSm = Font.system(size: 13, weight: .regular, design: .serif)
-        static let transliterationLg = Font.system(size: 17, weight: .regular, design: .serif)
+        // ── Transliteration (Cormorant italic) ──────────────
+        static let transliteration   = cormorant(size: 15, weight: "Italic")
+        static let transliterationSm = cormorant(size: 13, weight: "Italic")
+        static let transliterationLg = cormorant(size: 17, weight: "Italic")
 
-        // ── Uthmanic Script ──────────────────────────────────
-        /// Returns a Font for KFGQPC Uthmanic Script if available, system Arabic otherwise.
-        static func arabicUthmanic(size: CGFloat) -> Font {
-            if let _ = UIFont(name: "KFGQPCUthmanicScriptHAFS", size: size) {
-                return .custom("KFGQPCUthmanicScriptHAFS", size: size)
+        // ── Font Factories ──────────────────────────────────
+
+        /// Cormorant Garamond with system serif fallback.
+        static func cormorant(size: CGFloat, weight: String = "Regular") -> Font {
+            let name = "CormorantGaramond-\(weight)"
+            if UIFont(name: name, size: size) != nil {
+                return .custom(name, size: size)
+            }
+            // Fallback to system serif
+            let w: Font.Weight = switch weight {
+            case "Bold": .bold
+            case "SemiBold": .semibold
+            case "MediumItalic", "Italic": .regular
+            default: .regular
+            }
+            return .system(size: size, weight: w, design: .serif)
+        }
+
+        /// Amiri Arabic with system fallback.
+        static func amiri(size: CGFloat) -> Font {
+            if UIFont(name: "Amiri", size: size) != nil {
+                return .custom("Amiri", size: size)
             }
             return .system(size: size, weight: .regular)
+        }
+
+        /// Amiri Bold Arabic with system fallback.
+        private static func amiriBold(size: CGFloat) -> Font {
+            if UIFont(name: "Amiri-Bold", size: size) != nil {
+                return .custom("Amiri-Bold", size: size)
+            }
+            return .system(size: size, weight: .bold)
+        }
+
+        /// Returns a Font for KFGQPC Uthmanic Script if available,
+        /// Amiri if available, system Arabic otherwise.
+        static func arabicUthmanic(size: CGFloat) -> Font {
+            if UIFont(name: "KFGQPCUthmanicScriptHAFS", size: size) != nil {
+                return .custom("KFGQPCUthmanicScriptHAFS", size: size)
+            }
+            return amiri(size: size)
         }
 
         // ── Line Spacing Presets ─────────────────────────────
@@ -262,6 +354,16 @@ extension DS {
         static let accentGlow = ShadowToken(
             color: SwiftUI.Color(.dsAccent).opacity(0.25), radius: 12, y: 4
         )
+        
+        // ── PREMIUM OVERHAUL SHADOWS ────────────────────────
+        /// Ultra-premium diffuse multi-layered shadow for main cards
+        static let premiumCard = ShadowToken(
+            color: .black.opacity(0.06), radius: 20, y: 8
+        )
+        /// Deep ambient shadow for immersive modal depth
+        static let deepAmbient = ShadowToken(
+            color: .black.opacity(0.12), radius: 32, y: 16
+        )
     }
 }
 
@@ -293,10 +395,24 @@ struct DSGlassModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(material, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            // Premium glass gradient border reflection
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(DS.Color.glassBorder, lineWidth: 0.5)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                DS.Color.glassBorder.opacity(0.8),
+                                DS.Color.glassBorder.opacity(0.1),
+                                DS.Color.glassBorder.opacity(0.4)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
             )
+            // Ambient interior shadow for deeper glass illusion
+            .shadow(color: .white.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
 
@@ -463,5 +579,14 @@ extension UIColor {
         traits.userInterfaceStyle == .dark
             ? UIColor(red: 1, green: 1, blue: 1, alpha: 0.10)
             : UIColor(red: 1, green: 1, blue: 1, alpha: 0.70)
+    }
+
+    // ── Immersive ──────────────────────────────────────
+
+    /// Deep surface for immersive screens (dhikr, mushaf reader)
+    static let surfaceImmersive = UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0x08/255, green: 0x09/255, blue: 0x0C/255, alpha: 1)   // #08090C
+            : UIColor(red: 0xF2/255, green: 0xF0/255, blue: 0xEB/255, alpha: 1)   // #F2F0EB
     }
 }

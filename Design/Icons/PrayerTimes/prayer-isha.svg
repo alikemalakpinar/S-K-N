@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Isha: Night, crescent moon with star -->
+  <line x1="2" y1="20" x2="22" y2="20" stroke="#B08D3E" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+  <!-- Crescent moon -->
+  <path d="M15 6C15 9.3 12.3 12 9 12C7.8 12 6.7 11.6 5.8 11C7 12.8 9.1 14 11.5 14C15 14 17.8 11.2 17.8 7.7C17.8 5.8 17 4.1 15.7 3C15.9 3.9 16 4.9 15 6Z" fill="#B08D3E" opacity="0.6" stroke="#B08D3E" stroke-width="1"/>
+  <!-- Single star -->
+  <path d="M6 7L6.4 8.2L7.6 8.2L6.6 8.9L7 10.1L6 9.4L5 10.1L5.4 8.9L4.4 8.2L5.6 8.2Z" fill="#B08D3E" opacity="0.4"/>
+  <!-- Tiny star -->
+  <circle cx="8" cy="5" r="0.5" fill="#B08D3E" opacity="0.25"/>
+</svg>

@@ -88,6 +88,7 @@ struct MushafReaderView: View {
     @Binding var isImmersive: Bool
     @Environment(\.modelContext) private var modelContext
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.tabBarVisible) private var tabBarVisible
 
     @State private var showPagePicker = false
     @State private var showReadingSettings = false
@@ -98,6 +99,7 @@ struct MushafReaderView: View {
     @State private var saveTask: Task<Void, Never>?
     @State private var pageLogTask: Task<Void, Never>?
     @State private var didLoadPrefs = false
+    @State private var showBookmarkToast = false
 
     var body: some View {
         ZStack {
@@ -122,6 +124,19 @@ struct MushafReaderView: View {
                 withAnimation(reduceMotion ? nil : DS.Motion.standard) { isImmersive.toggle() }
             }
 
+            // Reading progress bar at top
+            VStack(spacing: 0) {
+                GeometryReader { geo in
+                    Rectangle()
+                        .fill(readingTheme.accent.opacity(0.6))
+                        .frame(width: geo.size.width * readingProgress, height: 2)
+                        .animation(DS.Motion.standard, value: viewModel.currentPage)
+                }
+                .frame(height: 2)
+                Spacer()
+            }
+            .allowsHitTesting(false)
+
             // Floating bottom bar
             if !isImmersive {
                 VStack {
@@ -129,6 +144,16 @@ struct MushafReaderView: View {
                     bottomBar
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+            }
+
+            // Bookmark toast
+            if showBookmarkToast {
+                VStack {
+                    DSToast("Sayfa kaydedildi", icon: "bookmark.fill")
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    Spacer()
+                }
+                .padding(.top, DS.Space.x2)
             }
         }
         .sheet(isPresented: $showPagePicker) {
@@ -165,11 +190,18 @@ struct MushafReaderView: View {
         .onChange(of: arabicFontScale) { _, _ in persistReadingPrefs() }
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
+            tabBarVisible.wrappedValue = false
             loadReadingPrefs()
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
+            tabBarVisible.wrappedValue = true
         }
+    }
+
+    private var readingProgress: CGFloat {
+        guard viewModel.totalPages > 0 else { return 0 }
+        return CGFloat(viewModel.currentPage) / CGFloat(viewModel.totalPages)
     }
 
     // MARK: - Preference Persistence
@@ -215,6 +247,17 @@ struct MushafReaderView: View {
                     surahName: surahInfo?.name ?? "",
                     context: modelContext
                 )
+                showBookmarkToastBriefly()
+            }
+        }
+    }
+
+    private func showBookmarkToastBriefly() {
+        withAnimation(DS.Motion.standard) { showBookmarkToast = true }
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            await MainActor.run {
+                withAnimation(DS.Motion.standard) { showBookmarkToast = false }
             }
         }
     }
@@ -232,6 +275,21 @@ struct MushafReaderView: View {
                 toggleChip(label: "Meal", active: $showTranslation)
 
                 Spacer()
+
+                // Bookmark button
+                Button {
+                    DS.Haptic.mediumTap()
+                    saveCurrentPosition(page: viewModel.currentPage)
+                } label: {
+                    Image(systemName: "bookmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(DS.Color.accent)
+                        .frame(width: 44, height: 44)
+                        .background(
+                            Circle().fill(DS.Color.accentSoft)
+                        )
+                }
+                .accessibilityLabel("Yer imi kaydet")
 
                 // Reading settings button
                 Button {
@@ -270,12 +328,18 @@ struct MushafReaderView: View {
                 .accessibilityLabel("Sayfa Seç, Sayfa \(viewModel.currentPage), Cüz \(viewModel.currentJuzNumber)")
             }
             .padding(.horizontal, DS.Space.lg)
-            .padding(.vertical, DS.Space.xs)
+            .padding(.vertical, DS.Space.sm)
             .background(
-                Rectangle()
+                Capsule(style: .continuous)
                     .fill(.ultraThinMaterial)
-                    .shadow(color: .black.opacity(0.05), radius: 8, y: -2)
+                    .overlay(
+                        Capsule(style: .continuous)
+                            .stroke(DS.Color.glassBorder, lineWidth: 0.5)
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
             )
+            .padding(.horizontal, DS.Space.md)
+            .padding(.bottom, DS.Space.sm)
         }
     }
 
@@ -310,131 +374,117 @@ struct SKNReadingSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: DS.Space.x2) {
-                // Theme selection
-                VStack(alignment: .leading, spacing: DS.Space.md) {
-                    Text("TEMA")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(DS.Color.textSecondary)
-                        .tracking(2)
+        VStack(spacing: 0) {
+            DSSheetHeader("Okuma Ayarları", onDismiss: { dismiss() })
 
-                    HStack(spacing: DS.Space.md) {
-                        ForEach(ReadingTheme.allCases) { t in
-                            Button {
-                                withAnimation(DS.Motion.tap) { theme = t }
-                                DS.Haptic.selection()
-                            } label: {
-                                VStack(spacing: DS.Space.sm) {
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .fill(t.background)
-                                        .frame(height: 60)
-                                        .overlay(
-                                            Text("بسم")
-                                                .font(.system(size: 20))
-                                                .foregroundStyle(t.textPrimary)
-                                        )
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                                .stroke(theme == t ? DS.Color.accent : DS.Color.hairline, lineWidth: theme == t ? 2 : 0.5)
-                                        )
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: DS.Space.x2) {
+                    // Theme selection
+                    VStack(alignment: .leading, spacing: DS.Space.md) {
+                        DSFormSectionHeader("Tema")
 
-                                    Text(t.rawValue)
-                                        .font(.system(size: 12, weight: theme == t ? .bold : .medium))
-                                        .foregroundStyle(theme == t ? DS.Color.accent : DS.Color.textSecondary)
+                        HStack(spacing: DS.Space.md) {
+                            ForEach(ReadingTheme.allCases) { t in
+                                Button {
+                                    withAnimation(DS.Motion.tap) { theme = t }
+                                    DS.Haptic.selection()
+                                } label: {
+                                    VStack(spacing: DS.Space.sm) {
+                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            .fill(t.background)
+                                            .frame(height: 60)
+                                            .overlay(
+                                                Text("بسم")
+                                                    .font(DS.Typography.arabicVerse)
+                                                    .foregroundStyle(t.textPrimary)
+                                            )
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                                    .stroke(theme == t ? DS.Color.accent : DS.Color.hairline, lineWidth: theme == t ? 2 : 0.5)
+                                            )
+
+                                        Text(t.rawValue)
+                                            .font(.system(size: 12, weight: theme == t ? .bold : .medium))
+                                            .foregroundStyle(theme == t ? DS.Color.accent : DS.Color.textSecondary)
+                                    }
                                 }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("\(t.rawValue) tema")
+                                .accessibilityAddTraits(theme == t ? .isSelected : [])
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("\(t.rawValue) tema")
-                            .accessibilityAddTraits(theme == t ? .isSelected : [])
                         }
                     }
-                }
 
-                // Font size slider
-                VStack(alignment: .leading, spacing: DS.Space.md) {
-                    HStack {
-                        Text("YAZI BOYUTU")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(DS.Color.textSecondary)
-                            .tracking(2)
-                        Spacer()
-                        Text("\(Int(fontScale * 100))%")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundStyle(DS.Color.accent)
-                    }
-
-                    HStack(spacing: DS.Space.md) {
-                        Image(systemName: "textformat.size.smaller")
-                            .font(.system(size: 12))
-                            .foregroundStyle(DS.Color.textSecondary)
-
-                        Slider(value: $fontScale, in: 0.7...1.5, step: 0.05)
-                            .tint(DS.Color.accent)
-                            .accessibilityLabel("Yazı boyutu")
-                            .accessibilityValue("Yüzde \(Int(fontScale * 100))")
-
-                        Image(systemName: "textformat.size.larger")
-                            .font(.system(size: 16))
-                            .foregroundStyle(DS.Color.textSecondary)
-                    }
-
-                    // Preview
-                    Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
-                        .font(.system(size: 24 * fontScale, weight: .regular))
-                        .foregroundStyle(DS.Color.textPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, DS.Space.md)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(DS.Color.backgroundSecondary)
-                        )
-                }
-
-                // Content toggles
-                VStack(spacing: DS.Space.md) {
-                    Toggle(isOn: $showTransliteration) {
-                        Label {
-                            Text("Okunuş")
-                                .font(.system(size: 15, weight: .medium))
-                        } icon: {
-                            Image(systemName: "text.word.spacing")
-                                .font(.system(size: 13))
+                    // Font size slider
+                    VStack(alignment: .leading, spacing: DS.Space.md) {
+                        HStack {
+                            DSFormSectionHeader("Yazı Boyutu")
+                            Spacer()
+                            Text("\(Int(fontScale * 100))%")
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
                                 .foregroundStyle(DS.Color.accent)
                         }
-                    }
-                    .tint(DS.Color.accent)
 
-                    Toggle(isOn: $showTranslation) {
-                        Label {
-                            Text("Meal")
-                                .font(.system(size: 15, weight: .medium))
-                        } icon: {
-                            Image(systemName: "text.book.closed")
-                                .font(.system(size: 13))
-                                .foregroundStyle(DS.Color.accent)
+                        HStack(spacing: DS.Space.md) {
+                            Image(systemName: "textformat.size.smaller")
+                                .font(.system(size: 12))
+                                .foregroundStyle(DS.Color.textSecondary)
+
+                            Slider(value: $fontScale, in: 0.7...1.5, step: 0.05)
+                                .tint(DS.Color.accent)
+                                .accessibilityLabel("Yazı boyutu")
+                                .accessibilityValue("Yüzde \(Int(fontScale * 100))")
+
+                            Image(systemName: "textformat.size.larger")
+                                .font(.system(size: 16))
+                                .foregroundStyle(DS.Color.textSecondary)
                         }
-                    }
-                    .tint(DS.Color.accent)
-                }
 
-                Spacer()
-            }
-            .padding(.horizontal, DS.Space.lg)
-            .padding(.top, DS.Space.lg)
-            .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Okuma Ayarları")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Tamam") { dismiss() }
-                        .foregroundStyle(DS.Color.accent)
-                        .fontWeight(.medium)
+                        // Preview
+                        Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
+                            .font(DS.Typography.amiri(size: 24 * fontScale))
+                            .foregroundStyle(DS.Color.textPrimary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, DS.Space.md)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(DS.Color.backgroundSecondary)
+                            )
+                    }
+
+                    // Content toggles
+                    VStack(spacing: DS.Space.md) {
+                        Toggle(isOn: $showTransliteration) {
+                            Label {
+                                Text("Okunuş")
+                                    .font(DS.Typography.body)
+                            } icon: {
+                                Image(systemName: "text.word.spacing")
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(DS.Color.accent)
+                            }
+                        }
+                        .tint(DS.Color.accent)
+
+                        Toggle(isOn: $showTranslation) {
+                            Label {
+                                Text("Meal")
+                                    .font(DS.Typography.body)
+                            } icon: {
+                                Image(systemName: "text.book.closed")
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(DS.Color.accent)
+                            }
+                        }
+                        .tint(DS.Color.accent)
+                    }
                 }
+                .padding(.horizontal, DS.Space.lg)
+                .padding(.top, DS.Space.md)
             }
         }
+        .background(DS.Color.backgroundPrimary)
         .presentationDetents([.medium])
-        .presentationDragIndicator(.visible)
         .presentationCornerRadius(24)
     }
 }
@@ -537,7 +587,7 @@ private struct PagePickerSheet: View {
                     }
                     Spacer()
                     Text(surah.nameArabic)
-                        .font(.system(size: 20, weight: .regular))
+                        .font(DS.Typography.amiri(size: 20))
                         .foregroundStyle(DS.Color.textPrimary)
                 }
                 .padding(.vertical, DS.Space.xs)

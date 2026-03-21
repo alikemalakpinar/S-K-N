@@ -54,13 +54,13 @@ final class DashboardViewModel {
     private static func currentGreeting() -> String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 4..<7:   return "Hayırlı Sabahlar"
-        case 7..<12:  return "Günaydın"
-        case 12..<14: return "Hayırlı Öğleler"
-        case 14..<17: return "İyi Günler"
-        case 17..<20: return "Hayırlı Akşamlar"
-        case 20..<23: return "İyi Geceler"
-        default:      return "Hayırlı Geceler"
+        case 4..<7:   return L10n.Dashboard.greetingMorningEarly
+        case 7..<12:  return L10n.Dashboard.greetingMorning
+        case 12..<14: return L10n.Dashboard.greetingNoon
+        case 14..<17: return L10n.Dashboard.greetingAfternoon
+        case 17..<20: return L10n.Dashboard.greetingEvening
+        case 20..<23: return L10n.Dashboard.greetingNight
+        default:      return L10n.Dashboard.greetingLateNight
         }
     }
 
@@ -151,7 +151,7 @@ final class DashboardViewModel {
                 // Update Live Activity if running
                 await updateLiveActivityIfNeeded(today: today, currentPrayer: next)
             } else {
-                nextPrayerName = "Yatsı"
+                nextPrayerName = L10n.Prayer.isha
                 nextPrayerTime = today.isha
             }
         } catch {
@@ -194,12 +194,12 @@ final class DashboardViewModel {
         guard container.liveActivityManager.isLiveActivityActive else { return }
 
         let allPrayers: [(String, Date)] = [
-            ("Sabah", today.fajr),
-            ("Güneş", today.sunrise),
-            ("Öğle", today.dhuhr),
-            ("İkindi", today.asr),
-            ("Akşam", today.maghrib),
-            ("Yatsı", today.isha)
+            (L10n.Prayer.fajr, today.fajr),
+            (L10n.Prayer.sunrise, today.sunrise),
+            (L10n.Prayer.dhuhr, today.dhuhr),
+            (L10n.Prayer.asr, today.asr),
+            (L10n.Prayer.maghrib, today.maghrib),
+            (L10n.Prayer.isha, today.isha)
         ]
 
         let now = Date()

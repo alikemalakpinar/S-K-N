@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- SÜKÛN Tab: Qibla - Compass with Kaaba Center -->
+  <circle cx="12" cy="12" r="9.5" stroke="#B08D3E" stroke-width="1.5"/>
+  <!-- Cardinal markers -->
+  <line x1="12" y1="2" x2="12" y2="4.5" stroke="#B08D3E" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="12" y1="19.5" x2="12" y2="22" stroke="#B08D3E" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
+  <line x1="2" y1="12" x2="4.5" y2="12" stroke="#B08D3E" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
+  <line x1="19.5" y1="12" x2="22" y2="12" stroke="#B08D3E" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
+  <!-- Kaaba-inspired square at center -->
+  <rect x="9.5" y="9.5" width="5" height="5" rx="0.5" stroke="#B08D3E" stroke-width="1.2" fill="#B08D3E" fill-opacity="0.08"/>
+  <!-- Needle pointing to Qibla (north) -->
+  <path d="M12 4.5L13.2 10L12 9L10.8 10Z" fill="#B08D3E" fill-opacity="0.8"/>
+  <path d="M12 19.5L13.2 14L12 15L10.8 14Z" fill="#B08D3E" fill-opacity="0.25"/>
+</svg>

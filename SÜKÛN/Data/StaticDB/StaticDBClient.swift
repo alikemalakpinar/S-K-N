@@ -18,6 +18,8 @@ enum StaticDBError: LocalizedError {
 protocol StaticDBClientProtocol: Sendable {
     func searchVerses(query: String, limit: Int) async throws -> [VerseDTO]
     func searchDuas(query: String, limit: Int) async throws -> [DuaDTO]
+    func duaCategories() async throws -> [String]
+    func duasByCategory(category: String) async throws -> [DuaDTO]
     func allSurahs() async throws -> [SurahDTO]
     func verses(forSurah surahId: Int) async throws -> [VerseDTO]
     func versesForPage(page: Int) async throws -> [VerseDTO]
@@ -33,6 +35,12 @@ final class NoopStaticDBClient: StaticDBClientProtocol, Sendable {
         throw StaticDBError.databaseNotFound
     }
     func searchDuas(query: String, limit: Int) async throws -> [DuaDTO] {
+        throw StaticDBError.databaseNotFound
+    }
+    func duaCategories() async throws -> [String] {
+        throw StaticDBError.databaseNotFound
+    }
+    func duasByCategory(category: String) async throws -> [DuaDTO] {
         throw StaticDBError.databaseNotFound
     }
     func allSurahs() async throws -> [SurahDTO] {
@@ -108,6 +116,37 @@ final class StaticDBClient: StaticDBClientProtocol, Sendable {
                 LIMIT ?
                 """
             let rows = try Row.fetchAll(db, sql: sql, arguments: [sanitized + "*", limit])
+            return rows.map { row in
+                DuaDTO(
+                    id: row["id"],
+                    title: row["title"],
+                    textArabic: row["text_arabic"],
+                    textTranslation: row["text_translation"],
+                    textTransliteration: row["text_transliteration"],
+                    category: row["category"],
+                    source: row["source"]
+                )
+            }
+        }
+    }
+
+    // MARK: - Dua Browse
+
+    func duaCategories() async throws -> [String] {
+        try await dbQueue.read { db in
+            let sql = "SELECT DISTINCT category FROM duas ORDER BY category"
+            let rows = try Row.fetchAll(db, sql: sql)
+            return rows.compactMap { $0["category"] as? String }
+        }
+    }
+
+    func duasByCategory(category: String) async throws -> [DuaDTO] {
+        try await dbQueue.read { db in
+            let sql = """
+                SELECT id, title, text_arabic, text_translation, text_transliteration, category, source
+                FROM duas WHERE category = ? ORDER BY id
+                """
+            let rows = try Row.fetchAll(db, sql: sql, arguments: [category])
             return rows.map { row in
                 DuaDTO(
                     id: row["id"],

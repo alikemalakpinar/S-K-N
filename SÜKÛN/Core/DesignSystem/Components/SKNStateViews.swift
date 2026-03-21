@@ -22,12 +22,18 @@ import SwiftUI
 /// ```
 struct SKNLoadingState: View {
     var message: String = "Yükleniyor..."
+    var useSkeleton: Bool = false
 
     var body: some View {
         VStack(spacing: DS.Space.lg) {
-            ProgressView()
-                .tint(DS.Color.accent)
-                .controlSize(.regular)
+            if useSkeleton {
+                SkeletonShimmerGroup(rows: 3)
+                    .frame(maxWidth: 260)
+            } else {
+                ProgressView()
+                    .tint(DS.Color.accent)
+                    .controlSize(.regular)
+            }
 
             Text(message)
                 .font(DS.Typography.caption)
@@ -60,26 +66,37 @@ struct SKNEmptyState: View {
     var action: (() -> Void)?
     var actionLabel: String?
 
+    @State private var floating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
-        VStack(spacing: DS.Space.lg) {
+        VStack(spacing: DS.Space.xl) {
             ZStack {
                 Circle()
                     .fill(DS.Color.accentSoft)
-                    .frame(width: 80, height: 80)
+                    .frame(width: 88, height: 88)
                 Image(systemName: icon)
-                    .font(.system(size: 32))
+                    .font(.system(size: 32, weight: .light))
                     .foregroundStyle(DS.Color.accent)
+            }
+            .offset(y: floating ? -6 : 0)
+            .animation(
+                reduceMotion ? nil : .easeInOut(duration: 2.5).repeatForever(autoreverses: true),
+                value: floating
+            )
+            .onAppear {
+                if !reduceMotion { floating = true }
             }
 
             VStack(spacing: DS.Space.sm) {
                 Text(title)
-                    .font(DS.Typography.headline)
+                    .font(DS.Typography.displayBody)
                     .foregroundStyle(DS.Color.textPrimary)
                     .multilineTextAlignment(.center)
 
                 if let message {
                     Text(message)
-                        .font(DS.Typography.caption)
+                        .font(DS.Typography.footnote)
                         .foregroundStyle(DS.Color.textSecondary)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
@@ -88,19 +105,10 @@ struct SKNEmptyState: View {
             .padding(.horizontal, DS.Space.x2)
 
             if let action, let actionLabel {
-                Button {
-                    DS.Haptic.softTap()
+                DSButton(actionLabel, style: .secondary, size: .medium) {
                     action()
-                } label: {
-                    Text(actionLabel)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, DS.Space.x2)
-                        .padding(.vertical, DS.Space.md)
-                        .background(
-                            Capsule().fill(DS.Color.accent)
-                        )
                 }
+                .padding(.horizontal, DS.Space.x4)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -127,24 +135,35 @@ struct SKNErrorState: View {
     var message: String
     var retryAction: (() -> Void)?
 
+    @State private var floating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
-        VStack(spacing: DS.Space.lg) {
+        VStack(spacing: DS.Space.xl) {
             ZStack {
                 Circle()
                     .fill(Color.red.opacity(0.08))
-                    .frame(width: 80, height: 80)
+                    .frame(width: 88, height: 88)
                 Image(systemName: icon)
-                    .font(.system(size: 32))
+                    .font(.system(size: 32, weight: .light))
                     .foregroundStyle(.red.opacity(0.7))
+            }
+            .offset(y: floating ? -6 : 0)
+            .animation(
+                reduceMotion ? nil : .easeInOut(duration: 2.5).repeatForever(autoreverses: true),
+                value: floating
+            )
+            .onAppear {
+                if !reduceMotion { floating = true }
             }
 
             VStack(spacing: DS.Space.sm) {
                 Text(title)
-                    .font(DS.Typography.headline)
+                    .font(DS.Typography.displayBody)
                     .foregroundStyle(DS.Color.textPrimary)
 
                 Text(message)
-                    .font(DS.Typography.caption)
+                    .font(DS.Typography.footnote)
                     .foregroundStyle(DS.Color.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
@@ -152,23 +171,40 @@ struct SKNErrorState: View {
             .padding(.horizontal, DS.Space.x2)
 
             if let retryAction {
-                Button {
-                    DS.Haptic.softTap()
+                DSButton("Tekrar Dene", icon: "arrow.clockwise", style: .secondary, size: .medium) {
                     retryAction()
-                } label: {
-                    Label("Tekrar Dene", systemImage: "arrow.clockwise")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, DS.Space.x2)
-                        .padding(.vertical, DS.Space.md)
-                        .background(
-                            Capsule().fill(DS.Color.accent)
-                        )
                 }
+                .padding(.horizontal, DS.Space.x4)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title). \(message)")
     }
+}
+
+// MARK: - Previews
+
+#Preview("SKNLoadingState") {
+    SKNLoadingState()
+        .background(DS.Color.backgroundPrimary)
+}
+
+#Preview("SKNEmptyState") {
+    SKNEmptyState(
+        icon: "book.closed",
+        title: "Henüz Kayıt Yok",
+        message: "Okumaya başladığınızda burada görünecek.",
+        action: {},
+        actionLabel: "Başla"
+    )
+    .background(DS.Color.backgroundPrimary)
+}
+
+#Preview("SKNErrorState") {
+    SKNErrorState(
+        message: "Veriler yüklenemedi. Lütfen tekrar deneyin.",
+        retryAction: {}
+    )
+    .background(DS.Color.backgroundPrimary)
 }
