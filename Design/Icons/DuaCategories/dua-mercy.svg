@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Olive branch - Mercy Dua -->
+  <!-- Secondary: leaf fills -->
+  <ellipse cx="8" cy="11" rx="2.2" ry="1.2" transform="rotate(-30 8 11)" fill="#B08D3E" opacity="0.25"/>
+  <ellipse cx="11" cy="8.5" rx="2.2" ry="1.2" transform="rotate(-45 11 8.5)" fill="#B08D3E" opacity="0.3"/>
+  <ellipse cx="14.5" cy="6.5" rx="2" ry="1.1" transform="rotate(-50 14.5 6.5)" fill="#B08D3E" opacity="0.35"/>
+  <ellipse cx="6" cy="14" rx="2.2" ry="1.2" transform="rotate(-20 6 14)" fill="#B08D3E" opacity="0.2"/>
+  <!-- Opposite side leaves -->
+  <ellipse cx="10" cy="13" rx="2.2" ry="1.2" transform="rotate(30 10 13)" fill="#B08D3E" opacity="0.2"/>
+  <ellipse cx="13" cy="10" rx="2" ry="1.1" transform="rotate(20 13 10)" fill="#B08D3E" opacity="0.25"/>
+  <ellipse cx="16" cy="7.5" rx="1.8" ry="1" transform="rotate(15 16 7.5)" fill="#B08D3E" opacity="0.3"/>
+  <!-- Primary: main branch stem -->
+  <path d="M3 18C5 15 8 12 12 9C15 7 18 5 20 4" stroke="#B08D3E" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Leaf outlines -->
+  <ellipse cx="8" cy="11" rx="2.2" ry="1.2" transform="rotate(-30 8 11)" stroke="#B08D3E" stroke-width="1"/>
+  <ellipse cx="11" cy="8.5" rx="2.2" ry="1.2" transform="rotate(-45 11 8.5)" stroke="#B08D3E" stroke-width="1"/>
+  <ellipse cx="14.5" cy="6.5" rx="2" ry="1.1" transform="rotate(-50 14.5 6.5)" stroke="#B08D3E" stroke-width="1"/>
+  <ellipse cx="6" cy="14" rx="2.2" ry="1.2" transform="rotate(-20 6 14)" stroke="#B08D3E" stroke-width="1"/>
+  <ellipse cx="10" cy="13" rx="2.2" ry="1.2" transform="rotate(30 10 13)" stroke="#B08D3E" stroke-width="1"/>
+  <ellipse cx="13" cy="10" rx="2" ry="1.1" transform="rotate(20 13 10)" stroke="#B08D3E" stroke-width="1"/>
+  <ellipse cx="16" cy="7.5" rx="1.8" ry="1" transform="rotate(15 16 7.5)" stroke="#B08D3E" stroke-width="1"/>
+  <!-- Tip leaf -->
+  <path d="M19 4.5C19.5 3.5 20.5 3 21 3.5C21 4.5 20 5 19 4.5Z" fill="#B08D3E" opacity="0.4" stroke="#B08D3E" stroke-width="0.8"/>
+</svg>

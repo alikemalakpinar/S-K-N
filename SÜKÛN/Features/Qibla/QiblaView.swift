@@ -4,6 +4,8 @@ struct QiblaView: View {
     @State private var viewModel = QiblaViewModel()
     @State private var glowPulse = false
     @State private var appeared = false
+    @State private var lockRingScale: CGFloat = 0.5
+    @State private var lockRingOpacity: Double = 0
 
     // Compass geometry
     private let compassSize: CGFloat = 280
@@ -14,6 +16,19 @@ struct QiblaView: View {
                 DS.Color.backgroundPrimary.ignoresSafeArea()
 
                 // Green ambient glow when locked
+                // Lock celebration rings
+                ZStack {
+                    Circle()
+                        .stroke(DS.Color.success.opacity(lockRingOpacity), lineWidth: 2)
+                        .scaleEffect(lockRingScale)
+                        .frame(width: 80, height: 80)
+                    Circle()
+                        .stroke(DS.Color.success.opacity(lockRingOpacity * 0.6), lineWidth: 1.5)
+                        .scaleEffect(lockRingScale * 0.8)
+                        .frame(width: 120, height: 120)
+                }
+                .allowsHitTesting(false)
+
                 if viewModel.isLockedOnQibla {
                     RadialGradient(
                         colors: [
@@ -39,7 +54,7 @@ struct QiblaView: View {
                                 Image(systemName: "location.fill")
                                     .font(.system(size: 9))
                                 Text(viewModel.locationName)
-                                    .font(.system(size: 13, weight: .medium))
+                                    .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
                             }
                             .foregroundStyle(DS.Color.textSecondary)
                             .padding(.bottom, DS.Space.x3)
@@ -88,7 +103,7 @@ struct QiblaView: View {
                 }
                 .padding(.horizontal, DS.Space.lg)
             }
-            .navigationTitle("Kıble")
+            .navigationTitle(L10n.Qibla.title)
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 viewModel.start()
@@ -105,6 +120,13 @@ struct QiblaView: View {
                     // Start glow pulse
                     withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
                         glowPulse = true
+                    }
+                    // Lock celebration expanding rings
+                    lockRingScale = 0.5
+                    lockRingOpacity = 0.7
+                    withAnimation(.easeOut(duration: 1.0)) {
+                        lockRingScale = 3.5
+                        lockRingOpacity = 0
                     }
                 }
             }
@@ -123,7 +145,7 @@ struct QiblaView: View {
     private var qiblaIndicator: some View {
         VStack(spacing: 6) {
             Image(systemName: "arrow.down")
-                .font(.system(size: 16, weight: .bold))
+                .font(DS.Typography.alongSans(size: 16, weight: "Bold"))
                 .foregroundStyle(viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
                 .animation(DS.Motion.standard, value: viewModel.isLockedOnQibla)
 
@@ -250,7 +272,7 @@ struct QiblaView: View {
 
             // Needle tip — diamond
             Image(systemName: "diamond.fill")
-                .font(.system(size: 10))
+                .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
                 .foregroundStyle(viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
                 .offset(y: -needleLength - 2)
         }
@@ -269,8 +291,8 @@ struct QiblaView: View {
                 .contentTransition(.numericText())
                 .animation(DS.Motion.countdown, value: Int(viewModel.qiblaDirection))
 
-            Text("Kıble Yönü")
-                .font(.system(size: 12, weight: .semibold))
+            Text(L10n.Qibla.direction)
+                .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
                 .tracking(2)
                 .textCase(.uppercase)
@@ -285,7 +307,7 @@ struct QiblaView: View {
                 HStack(spacing: DS.Space.sm) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 16))
-                    Text("Kıbleye Dönüksünüz")
+                    Text(L10n.Qibla.lockedOn)
                         .font(.system(size: 14, weight: .semibold))
                 }
                 .foregroundStyle(DS.Color.success)
@@ -302,13 +324,13 @@ struct QiblaView: View {
                 .transition(.scale(scale: 0.9).combined(with: .opacity))
             } else {
                 let absAngle = Int(abs(viewModel.rotationAngle))
-                let direction = viewModel.rotationAngle > 0 ? "sağa" : "sola"
+                let direction = viewModel.rotationAngle > 0 ? L10n.Qibla.right : L10n.Qibla.left
 
                 HStack(spacing: DS.Space.sm) {
                     Image(systemName: viewModel.rotationAngle > 0
                           ? "arrow.turn.right.up"
                           : "arrow.turn.left.up")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                     Text("\(absAngle)° \(direction)")
                         .font(.system(size: 14, weight: .semibold))
                         .contentTransition(.numericText())
@@ -343,43 +365,33 @@ struct QiblaView: View {
 
     private var loadingView: some View {
         VStack(spacing: DS.Space.lg) {
-            ProgressView()
-                .tint(DS.Color.accent)
-                .scaleEffect(1.2)
-            Text("Konum alınıyor...")
-                .font(.system(size: 15, weight: .medium))
+            DSSkeleton.circle(size: 48)
+            Text(L10n.Qibla.locationLoading)
+                .font(DS.Typography.bodyMedium)
                 .foregroundStyle(DS.Color.textSecondary)
         }
     }
 
     private var errorView: some View {
-        VStack(spacing: DS.Space.lg) {
-            Image(systemName: "location.slash.fill")
-                .font(.system(size: 44))
-                .foregroundStyle(DS.Color.textSecondary)
-            Text(viewModel.errorMessage ?? "Konum alınamadı")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(DS.Color.textSecondary)
-                .multilineTextAlignment(.center)
-        }
+        SKNErrorState(
+            icon: "location.slash.fill",
+            message: viewModel.errorMessage ?? L10n.Qibla.locationFailed
+        )
     }
 
     // MARK: - Calibration Banner
 
     private var calibrationBanner: some View {
-        HStack(spacing: DS.Space.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 13))
-                .foregroundStyle(DS.Color.warning)
-            Text("Pusula kalibrasyonu gerekiyor. Telefonunuzu 8 şeklinde hareket ettirin.")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(DS.Color.textSecondary)
-        }
-        .padding(DS.Space.md)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .fill(DS.Color.cardElevated)
-                .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
+        DSAlert(
+            L10n.Qibla.calibrationNeeded,
+            title: L10n.Qibla.calibrationTitle,
+            variant: .warning
         )
     }
+}
+
+// MARK: - Preview
+
+#Preview("Qibla") {
+    QiblaView()
 }

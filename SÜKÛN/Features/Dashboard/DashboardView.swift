@@ -5,6 +5,7 @@ import CoreLocation
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel: DashboardViewModel
+    @State private var scrollOffset: CGFloat = 0
     var onOpenRehber: (() -> Void)?
     var onResumeReading: ((Int) -> Void)?
     private let container: DependencyContainer
@@ -20,14 +21,26 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Greeting + location header
+                    // Scroll offset tracker
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: ScrollOffsetPreferenceKey.self,
+                            value: -geo.frame(in: .named("dashScroll")).minY
+                        )
+                    }
+                    .frame(height: 0)
+
+                    // Greeting + location header — fades on scroll
                     greetingHeader
                         .padding(.top, DS.Space.lg)
                         .padding(.horizontal, DS.Space.lg)
+                        .opacity(max(0, 1.0 - scrollOffset / 120))
+                        .offset(y: min(0, -scrollOffset * 0.15))
 
-                    // Giant typographic countdown — THE HERO
+                    // Giant typographic countdown — THE HERO — parallax compress
                     countdownHero
                         .padding(.top, DS.Space.md)
+                        .scaleEffect(max(0.92, 1.0 - scrollOffset / 2000), anchor: .top)
 
                     // Prayer checklist
                     prayerChecklist
@@ -53,25 +66,44 @@ struct DashboardView: View {
                         .padding(.horizontal, DS.Space.lg)
                         .dsAppear(loaded: viewModel.isDashboardLoaded, index: 2)
 
-                    Spacer(minLength: DS.Space.x4 + 60)
+                    Spacer(minLength: DS.Space.x4 + 80)
                 }
             }
-            .background(DS.Color.backgroundPrimary)
+            .coordinateSpace(name: "dashScroll")
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                scrollOffset = max(0, value)
+            }
+            // TITANIUM UPGRADE: Boids Flocking + Fluid Canvas Particles (120FPS)
+            .background(FluidBackgroundView())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("Sükûn")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(DS.Color.textPrimary)
-                        .tracking(-0.3)
+                ToolbarItem(placement: .topBarLeading) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(L10n.Dashboard.title)
+                            .font(DS.Typography.displayBody)
+                            .foregroundStyle(DS.Color.textPrimary)
+                        Text(Self.hijriDateString)
+                            .font(DS.Typography.captionSm)
+                            .foregroundStyle(DS.Color.textSecondary)
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        SettingsView(container: container)
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(DS.Color.textSecondary)
+                    HStack(spacing: DS.Space.md) {
+                        NavigationLink {
+                            ProfileView(container: container)
+                        } label: {
+                            Image(systemName: "person.circle")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundStyle(DS.Color.accent)
+                        }
+
+                        NavigationLink {
+                            SettingsView(container: container)
+                        } label: {
+                            Image(systemName: "gearshape")
+                                .font(DS.Typography.listTitle)
+                                .foregroundStyle(DS.Color.textSecondary)
+                        }
                     }
                 }
             }
@@ -122,19 +154,18 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: DS.Space.xs) {
             HStack(spacing: DS.Space.sm) {
                 Image(systemName: viewModel.greetingIcon)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(DS.Typography.bodyMedium)
                     .foregroundStyle(DS.Color.accent)
                     .symbolEffect(.pulse, options: .repeating.speed(0.3))
 
                 Text(viewModel.greeting)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
 
-            Text(viewModel.locationName.isEmpty ? "Konum alınıyor..." : viewModel.locationName)
-                .font(.system(size: 28, weight: .black))
+            Text(viewModel.locationName.isEmpty ? L10n.Dashboard.locationLoading : viewModel.locationName)
+                .font(DS.Typography.displayTitle)
                 .foregroundStyle(DS.Color.textPrimary)
-                .tracking(-0.8)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -158,24 +189,24 @@ struct DashboardView: View {
 
                     countdownBand(
                         value: String(format: "%02d", hours),
-                        label: "SAAT",
+                        label: L10n.Common.hour,
                         opacity: 0.08
                     )
                     countdownBand(
                         value: String(format: "%02d", minutes),
-                        label: "DAKİKA",
+                        label: L10n.Common.minute,
                         opacity: 0.25
                     )
                     countdownBand(
                         value: String(format: "%02d", seconds),
-                        label: "SANİYE",
+                        label: L10n.Common.second,
                         opacity: 0.90
                     )
 
                     // Prayer info row
                     HStack(alignment: .firstTextBaseline) {
                         Text(viewModel.nextPrayerName.uppercased())
-                            .font(.system(size: 12, weight: .bold))
+                            .font(DS.Typography.alongSans(size: 12, weight: "Bold"))
                             .foregroundStyle(DS.Color.textPrimary.opacity(0.4))
                             .tracking(4)
 
@@ -189,9 +220,9 @@ struct DashboardView: View {
                     .padding(.top, DS.Space.lg)
 
                 } else {
-                    countdownBand(value: "--", label: "SAAT", opacity: 0.08)
-                    countdownBand(value: "--", label: "DAKİKA", opacity: 0.25)
-                    countdownBand(value: "--", label: "SANİYE", opacity: 0.90)
+                    countdownBand(value: "--", label: L10n.Common.hour, opacity: 0.08)
+                    countdownBand(value: "--", label: L10n.Common.minute, opacity: 0.25)
+                    countdownBand(value: "--", label: L10n.Common.second, opacity: 0.90)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -203,8 +234,9 @@ struct DashboardView: View {
     private func countdownBand(value: String, label: String, opacity: Double) -> some View {
         ZStack {
             Text(value)
-                .font(.system(size: 260, weight: .black).width(.condensed))
-                .foregroundStyle(DS.Color.textPrimary.opacity(opacity))
+                .font(.system(size: 260, weight: .bold).width(.compressed)) // Peak Apple UI width
+                .foregroundStyle(.ultraThinMaterial) // Apple Vision Pro Glass Typography
+                .blendMode(.overlay) // Melts into the fluid background
                 .tracking(-12)
                 .lineLimit(1)
                 .fixedSize()
@@ -215,7 +247,7 @@ struct DashboardView: View {
                 HStack {
                     Spacer()
                     Text(label)
-                        .font(.system(size: 10, weight: .bold))
+                        .font(DS.Typography.chipLabel)
                         .foregroundStyle(DS.Color.textPrimary.opacity(max(0.15, opacity * 0.4)))
                         .tracking(2)
                         .padding(.top, DS.Space.sm)
@@ -239,10 +271,7 @@ struct DashboardView: View {
     private var prayerChecklist: some View {
         VStack(alignment: .leading, spacing: DS.Space.lg) {
             HStack {
-                Text("GÜNÜN NAMAZLARI")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(DS.Color.textSecondary)
-                    .tracking(3)
+                DSFormSectionHeader(L10n.Dashboard.todayPrayers)
 
                 Spacer()
 
@@ -253,28 +282,32 @@ struct DashboardView: View {
 
             if let log = viewModel.todayLog {
                 HStack(spacing: 0) {
-                    PrayerPill(name: "Sabah", status: log.fajr) { togglePrayer("fajr") }
+                    PrayerPill(name: L10n.Prayer.fajr, status: log.fajr) { togglePrayer("fajr") }
                     Spacer()
-                    PrayerPill(name: "Öğle", status: log.dhuhr) { togglePrayer("dhuhr") }
+                    PrayerPill(name: L10n.Prayer.dhuhr, status: log.dhuhr) { togglePrayer("dhuhr") }
                     Spacer()
-                    PrayerPill(name: "İkindi", status: log.asr) { togglePrayer("asr") }
+                    PrayerPill(name: L10n.Prayer.asr, status: log.asr) { togglePrayer("asr") }
                     Spacer()
-                    PrayerPill(name: "Akşam", status: log.maghrib) { togglePrayer("maghrib") }
+                    PrayerPill(name: L10n.Prayer.maghrib, status: log.maghrib) { togglePrayer("maghrib") }
                     Spacer()
-                    PrayerPill(name: "Yatsı", status: log.isha) { togglePrayer("isha") }
+                    PrayerPill(name: L10n.Prayer.isha, status: log.isha) { togglePrayer("isha") }
                 }
             } else {
+                // Skeleton placeholders while loading
                 HStack(spacing: 0) {
-                    PrayerPill(name: "Sabah", status: .notLogged) {}
-                    Spacer()
-                    PrayerPill(name: "Öğle", status: .notLogged) {}
-                    Spacer()
-                    PrayerPill(name: "İkindi", status: .notLogged) {}
-                    Spacer()
-                    PrayerPill(name: "Akşam", status: .notLogged) {}
-                    Spacer()
-                    PrayerPill(name: "Yatsı", status: .notLogged) {}
+                    ForEach(0..<5, id: \.self) { i in
+                        VStack(spacing: DS.Space.sm) {
+                            Circle()
+                                .fill(DS.Color.hairline)
+                                .frame(width: 48, height: 48)
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(DS.Color.hairline)
+                                .frame(width: 32, height: 10)
+                        }
+                        if i < 4 { Spacer() }
+                    }
                 }
+                .redacted(reason: .placeholder)
             }
         }
     }
@@ -330,115 +363,106 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             HStack {
                 Image(systemName: "book.fill")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
                     .foregroundStyle(DS.Color.accent)
+                    .frame(width: 28, height: 28)
+                    .background(
+                        RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous)
+                            .fill(DS.Color.accentSoft)
+                    )
                 Spacer()
                 Image(systemName: "arrow.right")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Bold"))
                     .foregroundStyle(DS.Color.accent.opacity(0.5))
+                    .symbolEffect(.bounce, options: .repeating.speed(0.3))
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("KALDIĞIN YER")
-                    .font(.system(size: 9, weight: .bold))
+                Text(L10n.Dashboard.whereYouLeft)
+                    .font(DS.Typography.alongSans(size: 9, weight: "Bold"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1.5)
                 Text(position.surahNameTurkish)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DS.Typography.alongSans(size: 15, weight: "SemiBold"))
                     .foregroundStyle(DS.Color.textPrimary)
                     .lineLimit(1)
                 Text("Sayfa \(position.mushafPage)")
-                    .font(.system(size: 12, weight: .regular))
+                    .font(DS.Typography.alongSans(size: 12, weight: "Regular"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }
         .frame(width: 160)
         .padding(DS.Space.lg)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Color.glassBorder, lineWidth: 0.5)
-        )
+        .dsGlass(.thin, cornerRadius: DS.Radius.lg)
+        .dsShadow(DS.Shadow.premiumCard)
     }
 
     private var dailyProgressWidget: some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             HStack {
                 Image(systemName: "chart.bar.fill")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(DS.Color.accent)
+                    .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
+                    .foregroundStyle(DS.Color.success)
+                    .frame(width: 28, height: 28)
+                    .background(
+                        RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous)
+                            .fill(DS.Color.success.opacity(0.1))
+                    )
                 Spacer()
                 Text("\(Int(viewModel.quranProgressPercent * 100))%")
                     .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(DS.Color.accent)
+                    .foregroundStyle(DS.Color.success)
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("BUGÜN")
-                    .font(.system(size: 9, weight: .bold))
+                Text(L10n.Dashboard.today)
+                    .font(DS.Typography.alongSans(size: 9, weight: "Bold"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1.5)
                 Text("\(viewModel.pagesReadToday)/\(viewModel.dailyPageGoal) sayfa")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DS.Typography.alongSans(size: 15, weight: "SemiBold"))
                     .foregroundStyle(DS.Color.textPrimary)
 
-                // Mini progress bar
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(DS.Color.hairline).frame(height: 4)
-                        Capsule().fill(DS.Color.accent).frame(
-                            width: geo.size.width * min(1.0, Double(viewModel.pagesReadToday) / Double(max(1, viewModel.dailyPageGoal))),
-                            height: 4
-                        )
-                    }
-                }
-                .frame(height: 4)
+                DSProgressBar(
+                    min(1.0, Double(viewModel.pagesReadToday) / Double(max(1, viewModel.dailyPageGoal))),
+                    height: 4
+                )
             }
         }
         .frame(width: 160)
         .padding(DS.Space.lg)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Color.glassBorder, lineWidth: 0.5)
-        )
+        .dsGlass(.thin, cornerRadius: DS.Radius.lg)
+        .dsShadow(DS.Shadow.premiumCard)
     }
 
     private var streakWidget: some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
-            Image(systemName: "leaf.fill")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(DS.Color.accent)
+            Image(systemName: "flame.fill")
+                .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
+                .foregroundStyle(DS.Color.warning)
+                .frame(width: 28, height: 28)
+                .background(
+                    RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous)
+                        .fill(DS.Color.warning.opacity(0.1))
+                )
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("DEVAMLILIK")
-                    .font(.system(size: 9, weight: .bold))
+                Text(L10n.Dashboard.continuity)
+                    .font(DS.Typography.alongSans(size: 9, weight: "Bold"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1.5)
                 Text("\(viewModel.readingStreakDays)")
                     .font(.system(size: 32, weight: .black, design: .rounded))
                     .foregroundStyle(DS.Color.textPrimary)
-                Text("gün")
-                    .font(.system(size: 12, weight: .medium))
+                Text(L10n.Common.day)
+                    .font(DS.Typography.alongSans(size: 12, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }
         .frame(width: 120)
         .padding(DS.Space.lg)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Color.glassBorder, lineWidth: 0.5)
-        )
+        .dsGlass(.thin, cornerRadius: DS.Radius.lg)
+        .dsShadow(DS.Shadow.premiumCard)
     }
 
     // MARK: - Verse of the Day
@@ -446,51 +470,55 @@ struct DashboardView: View {
     @ViewBuilder
     private var verseOfTheDayCard: some View {
         if let verse = viewModel.verseOfTheDay {
-            VStack(alignment: .leading, spacing: DS.Space.md) {
-                HStack {
-                    Label {
-                        Text("GÜNÜN AYETİ")
-                            .font(.system(size: 11, weight: .semibold))
-                            .tracking(2)
-                    } icon: {
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 10))
+            Button {
+                DS.Haptic.softTap()
+                onResumeReading?(verse.pageNumber)
+            } label: {
+                VStack(alignment: .leading, spacing: DS.Space.md) {
+                    HStack {
+                        Label {
+                            Text(L10n.Dashboard.verseOfDay)
+                                .font(DS.Typography.alongSans(size: 11, weight: "SemiBold"))
+                                .tracking(2)
+                        } icon: {
+                            Image(systemName: "sparkles")
+                                .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
+                        }
+                        .foregroundStyle(DS.Color.accent)
+
+                        Spacer()
+
+                        HStack(spacing: DS.Space.xs) {
+                            Text("\(verse.surahId):\(verse.verseNumber)")
+                                .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
+                                .foregroundStyle(DS.Color.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundStyle(DS.Color.accent.opacity(0.5))
+                        }
                     }
-                    .foregroundStyle(DS.Color.accent)
 
-                    Spacer()
+                    Text(verse.textArabic)
+                        .font(DS.Typography.arabicVerse)
+                        .multilineTextAlignment(.trailing)
+                        .lineSpacing(DS.Typography.LineSpacing.arabic)
+                        .foregroundStyle(DS.Color.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
 
-                    Text("\(verse.surahId):\(verse.verseNumber)")
-                        .font(.system(size: 11, weight: .medium))
+                    Text(verse.textTranslation)
+                        .font(DS.Typography.footnote)
                         .foregroundStyle(DS.Color.textSecondary)
+                        .lineSpacing(DS.Typography.LineSpacing.body)
+
+                    Text("— \(viewModel.verseOfTheDaySurahName)")
+                        .font(DS.Typography.serifSource)
+                        .foregroundStyle(DS.Color.accent.opacity(0.7))
                 }
-
-                Text(verse.textArabic)
-                    .font(.system(size: 26, weight: .regular))
-                    .multilineTextAlignment(.trailing)
-                    .lineSpacing(14)
-                    .foregroundStyle(DS.Color.textPrimary)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-
-                Text(verse.textTranslation)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundStyle(DS.Color.textSecondary)
-                    .lineSpacing(5)
-
-                Text("— \(viewModel.verseOfTheDaySurahName)")
-                    .font(.system(size: 13, weight: .medium, design: .serif))
-                    .italic()
-                    .foregroundStyle(DS.Color.accent.opacity(0.7))
+                .padding(DS.Space.lg)
+                .dsGlass(.thin, cornerRadius: DS.Radius.lg)
+                .dsShadow(DS.Shadow.premiumCard)
             }
-            .padding(DS.Space.lg)
-            .background(
-                RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                    .fill(DS.Color.quranCard)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                    .stroke(DS.Color.ornamentLine, lineWidth: 0.5)
-            )
+            .buttonStyle(WidgetButtonStyle())
         }
     }
 
@@ -500,14 +528,14 @@ struct DashboardView: View {
         VStack(spacing: DS.Space.md) {
             HStack(spacing: DS.Space.md) {
                 Button { onOpenRehber?() } label: {
-                    quickActionCard(icon: "book.pages", title: "Rehber", subtitle: "Temel bilgiler")
+                    quickActionCard(icon: "book.pages", title: L10n.Dashboard.guide, subtitle: L10n.Dashboard.guideSubtitle, tint: DS.Color.accent)
                 }
                 .buttonStyle(WidgetButtonStyle())
 
                 NavigationLink {
                     KazaView()
                 } label: {
-                    quickActionCard(icon: "arrow.counterclockwise.circle.fill", title: "Kaza", subtitle: "Kaza takibi")
+                    quickActionCard(icon: "arrow.counterclockwise.circle.fill", title: L10n.Dashboard.kaza, subtitle: L10n.Dashboard.kazaSubtitle, tint: DS.Color.warning)
                 }
             }
 
@@ -515,40 +543,54 @@ struct DashboardView: View {
                 NavigationLink {
                     DuasView(container: container)
                 } label: {
-                    quickActionCard(icon: "hands.sparkles.fill", title: "Dualar", subtitle: "Dua ara")
+                    quickActionCard(icon: "hands.sparkles.fill", title: L10n.Dashboard.duas, subtitle: L10n.Dashboard.duasSubtitle, tint: DS.Color.success)
                 }
 
                 NavigationLink {
                     TrackerView(container: container)
                 } label: {
-                    quickActionCard(icon: "chart.bar.fill", title: "Takip", subtitle: "İstatistikler")
+                    quickActionCard(icon: "chart.bar.fill", title: L10n.Dashboard.tracker, subtitle: L10n.Dashboard.trackerSubtitle, tint: DS.Color.accent)
                 }
             }
         }
     }
 
-    private func quickActionCard(icon: String, title: String, subtitle: String) -> some View {
+    private func quickActionCard(icon: String, title: String, subtitle: String, tint: SwiftUI.Color) -> some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             Image(systemName: icon)
-                .font(.system(size: 22, weight: .medium))
-                .foregroundStyle(DS.Color.accent)
+                .font(DS.Typography.listTitle)
+                .foregroundStyle(tint)
+                .frame(width: 36, height: 36)
+                .background(
+                    RoundedRectangle(cornerRadius: DS.Radius.sm + 2, style: .continuous)
+                        .fill(tint.opacity(0.1))
+                )
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DS.Typography.displayBody)
                     .foregroundStyle(DS.Color.textPrimary)
                 Text(subtitle)
-                    .font(.system(size: 12, weight: .regular))
+                    .font(DS.Typography.caption)
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DS.Space.lg)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(DS.Color.cardElevated)
-                .shadow(color: .black.opacity(0.03), radius: 6, y: 2)
-        )
+        .dsGlass(.regular, cornerRadius: DS.Radius.lg)
+        .dsShadow(DS.Shadow.premiumCard)
+    }
+}
+
+// MARK: - Hijri Date Helper
+
+extension DashboardView {
+    static var hijriDateString: String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .islamicUmmAlQura)
+        formatter.locale = Locale(identifier: "tr")
+        formatter.dateFormat = "d MMMM yyyy"
+        return formatter.string(from: Date())
     }
 }
 
@@ -574,30 +616,43 @@ private struct PrayerPill: View {
         Button { onTap() } label: {
             VStack(spacing: DS.Space.sm) {
                 ZStack {
-                    Circle()
-                        .fill(isPrayed ? DS.Color.accent : DS.Color.cardElevated)
-                        .frame(width: 48, height: 48)
-                        .shadow(color: .black.opacity(isPrayed ? 0.06 : 0.03), radius: 4, y: 1)
-
                     if isPrayed {
+                        Circle()
+                            .fill(LinearGradient(colors: [DS.Color.accent, DS.Color.accent.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .frame(width: 48, height: 48)
+                            // Premium glowing aura
+                            .shadow(color: DS.Color.accent.opacity(0.5), radius: 10, y: 5)
+                        
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(.white)
+                            // Premium fluid bounce
+                            .symbolEffect(.bounce, value: isPrayed)
                     } else {
                         Circle()
-                            .stroke(DS.Color.hairline, lineWidth: 1.5)
+                            .fill(DS.Color.glassFill)
                             .frame(width: 48, height: 48)
+                            .overlay(
+                                Circle()
+                                    .stroke(DS.Color.hairline, lineWidth: 1.5)
+                            )
                     }
                 }
 
                 Text(name)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Bold"))
                     .foregroundStyle(isPrayed ? DS.Color.accent : DS.Color.textSecondary)
             }
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.impact(flexibility: .soft), trigger: isPrayed)
-        .accessibilityLabel("\(name) namazı, \(isPrayed ? "kılındı" : "kılınmadı")")
+        .accessibilityLabel(L10n.Dashboard.prayerAccessibility(name: name, isPrayed: isPrayed))
         .accessibilityAddTraits(.isToggle)
     }
+}
+
+// MARK: - Preview
+
+#Preview("Dashboard") {
+    DSPreview { c in DashboardView(container: c) }
 }

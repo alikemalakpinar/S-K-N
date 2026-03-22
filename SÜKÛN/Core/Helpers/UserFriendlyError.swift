@@ -1,6 +1,6 @@
 import Foundation
 
-/// Maps technical errors to user-friendly Turkish messages.
+/// Maps technical errors to user-friendly localized messages.
 enum UserFriendlyError {
 
     static func message(from error: Error) -> String {
@@ -8,36 +8,36 @@ enum UserFriendlyError {
 
         // Location errors
         if error is LocationError {
-            return "Konum erişimi sağlanamadı. Lütfen Ayarlar'dan konum iznini etkinleştirin."
+            return L10n.Error.locationDenied
         }
 
         // SQLite / GRDB / Database errors
         if desc.contains("sqlite") || desc.contains("database") || desc.contains("grdb") {
-            return "Veritabanına erişilemedi. Lütfen uygulamayı yeniden başlatın."
+            return L10n.Error.databaseFailed
         }
 
         // Network errors
         if desc.contains("network") || desc.contains("internet") || desc.contains("offline")
             || desc.contains("urlsession") || desc.contains("timed out") || desc.contains("not connected") {
-            return "İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin."
+            return L10n.Error.noInternet
         }
 
         // File not found
         if desc.contains("no such file") || desc.contains("not found") || desc.contains("does not exist") {
-            return "İstenen veri bulunamadı."
+            return L10n.Error.notFound
         }
 
         // Prayer calculation
         if desc.contains("prayer") || desc.contains("calculation") {
-            return "Namaz vakitleri hesaplanamadı. Lütfen konum ve ayarları kontrol edin."
+            return L10n.Error.prayerCalcFailed
         }
 
         // Decoding / parsing
         if desc.contains("decod") || desc.contains("pars") || desc.contains("json") {
-            return "Veri okunamadı. Lütfen uygulamayı güncelleyin."
+            return L10n.Error.decodingFailed
         }
 
         // Generic fallback
-        return "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
+        return L10n.Error.genericError
     }
 }

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!--
+    Seamless tileable hexagonal Islamic geometric pattern.
+    Flat-top hexagons with inner triangular/star subdivisions.
+    Tiles seamlessly when repeated.
+    Gold #B08D3E, 0.5px stroke, no fill.
+
+    Layout: flat-top hexagons
+    Hex width (flat-to-flat) w = 100, radius R = w/sqrt(3) = 57.74
+    But to fit nicely in 200x200 with seamless tiling:
+    Using flat-top hex with w=100 (vertex-to-vertex=115.47)
+    Row height = 75 (1.5 * R where R=50 for pointy-top)
+
+    Simpler approach: pointy-top hexagons
+    R = 50 (center to vertex)
+    r = 43.30 (center to edge = R*sqrt(3)/2)
+    Horizontal spacing = 2*r = 86.60
+    Vertical spacing = 1.5*R = 75
+    Offset every other row by r = 43.30
+
+    For 200x200 tile: not perfectly commensurate with hex grid.
+    Use compromise: scale so vertical period = 200.
+
+    Better: Use R=66.67 so 3*R = 200 (3 rows fit exactly)
+    Row spacing = 1.5*R = 100
+    r = R*sqrt(3)/2 = 57.74
+    Horizontal spacing = 2*r = 115.47
+    Not great for 200 width.
+
+    Pragmatic approach: R=50, accept that the tile wraps
+    with the hex grid, using enough copies to fill 200x200
+    and letting edge hexagons wrap via the repeat.
+  -->
+  <defs>
+    <style>
+      .h { fill: none; stroke: #B08D3E; stroke-width: 0.5; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <!-- Pointy-top hexagon, R=40 -->
+    <g id="hx">
+      <!-- Outer hexagon -->
+      <polygon points="0,-40 34.64,-20 34.64,20 0,40 -34.64,20 -34.64,-20"/>
+      <!-- Inner hexagon R=24 -->
+      <polygon points="0,-24 20.78,-12 20.78,12 0,24 -20.78,12 -20.78,-12"/>
+      <!-- Radial lines connecting inner to outer vertices -->
+      <line x1="0" y1="-24" x2="0" y2="-40"/>
+      <line x1="20.78" y1="-12" x2="34.64" y2="-20"/>
+      <line x1="20.78" y1="12" x2="34.64" y2="20"/>
+      <line x1="0" y1="24" x2="0" y2="40"/>
+      <line x1="-20.78" y1="12" x2="-34.64" y2="20"/>
+      <line x1="-20.78" y1="-12" x2="-34.64" y2="-20"/>
+      <!-- Inner 6-pointed star (hexagram) -->
+      <line x1="0" y1="-24" x2="20.78" y2="12"/>
+      <line x1="20.78" y1="12" x2="-20.78" y2="12"/>
+      <line x1="-20.78" y1="12" x2="0" y2="-24"/>
+      <line x1="0" y1="24" x2="20.78" y2="-12"/>
+      <line x1="20.78" y1="-12" x2="-20.78" y2="-12"/>
+      <line x1="-20.78" y1="-12" x2="0" y2="24"/>
+    </g>
+  </defs>
+  <g class="h">
+    <!-- Row 0: y=0 -->
+    <use href="#hx" x="0" y="0"/>
+    <use href="#hx" x="69.28" y="0"/>
+    <use href="#hx" x="138.56" y="0"/>
+    <use href="#hx" x="207.85" y="0"/>
+
+    <!-- Row 1: y=60, offset x by 34.64 -->
+    <use href="#hx" x="-34.64" y="60"/>
+    <use href="#hx" x="34.64" y="60"/>
+    <use href="#hx" x="103.92" y="60"/>
+    <use href="#hx" x="173.21" y="60"/>
+
+    <!-- Row 2: y=120 -->
+    <use href="#hx" x="0" y="120"/>
+    <use href="#hx" x="69.28" y="120"/>
+    <use href="#hx" x="138.56" y="120"/>
+    <use href="#hx" x="207.85" y="120"/>
+
+    <!-- Row 3: y=180, offset -->
+    <use href="#hx" x="-34.64" y="180"/>
+    <use href="#hx" x="34.64" y="180"/>
+    <use href="#hx" x="103.92" y="180"/>
+    <use href="#hx" x="173.21" y="180"/>
+
+    <!-- Row -1: y=-60, offset (for top edge wrapping) -->
+    <use href="#hx" x="-34.64" y="-60"/>
+    <use href="#hx" x="34.64" y="-60"/>
+    <use href="#hx" x="103.92" y="-60"/>
+    <use href="#hx" x="173.21" y="-60"/>
+  </g>
+</svg>

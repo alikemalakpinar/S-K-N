@@ -1,0 +1,267 @@
+/* ──────────────────────────────────────────────
+   SÜKÛN — Localizable.strings (Türkçe)
+   ────────────────────────────────────────────── */
+
+/* ── Tab Bar ─────────────────────────────────── */
+"tab.home" = "Ana Sayfa";
+"tab.prayer" = "Namaz";
+"tab.quran" = "Kur'an";
+"tab.qibla" = "Kıble";
+"tab.dhikr" = "Zikir";
+
+/* ── Prayer Names ────────────────────────────── */
+"prayer.fajr" = "Sabah";
+"prayer.sunrise" = "Güneş";
+"prayer.dhuhr" = "Öğle";
+"prayer.asr" = "İkindi";
+"prayer.maghrib" = "Akşam";
+"prayer.isha" = "Yatsı";
+
+/* ── Common ──────────────────────────────────── */
+"common.hour" = "SAAT";
+"common.minute" = "DAKİKA";
+"common.second" = "SANİYE";
+"common.day" = "gün";
+"common.namaz" = "namaz";
+"common.next" = "SONRAKİ";
+"common.loading" = "Yükleniyor...";
+"common.minuteAbbrev" = "dk";
+
+/* ── Dashboard ───────────────────────────────── */
+"dashboard.title" = "Sükûn";
+"dashboard.locationLoading" = "Konum alınıyor...";
+"dashboard.todayPrayers" = "Günün Namazları";
+"dashboard.whereYouLeft" = "KALDIĞIN YER";
+"dashboard.today" = "BUGÜN";
+"dashboard.continuity" = "DEVAMLILIK";
+"dashboard.verseOfDay" = "GÜNÜN AYETİ";
+"dashboard.guide" = "Rehber";
+"dashboard.guideSubtitle" = "Temel bilgiler";
+"dashboard.kaza" = "Kaza";
+"dashboard.kazaSubtitle" = "Kaza takibi";
+"dashboard.duas" = "Dualar";
+"dashboard.duasSubtitle" = "Dua ara";
+"dashboard.tracker" = "Takip";
+"dashboard.trackerSubtitle" = "İstatistikler";
+"dashboard.greeting.morningEarly" = "Hayırlı Sabahlar";
+"dashboard.greeting.morning" = "Günaydın";
+"dashboard.greeting.noon" = "Hayırlı Öğleler";
+"dashboard.greeting.afternoon" = "İyi Günler";
+"dashboard.greeting.evening" = "Hayırlı Akşamlar";
+"dashboard.greeting.night" = "İyi Geceler";
+"dashboard.greeting.lateNight" = "Hayırlı Geceler";
+
+/* ── Prayer Times ────────────────────────────── */
+"prayerTimes.title" = "Namaz Vakitleri";
+"prayerTimes.today" = "Bugün";
+"prayerTimes.upcoming" = "Yaklaşan";
+"prayerTimes.noData" = "Veri Yok";
+"prayerTimes.locationRequired" = "Konum erişimi sağlandığında namaz vakitleri görünecektir.";
+"prayerTimes.hijriDate" = "Hicri Tarih";
+"prayerTimes.remaining" = "kaldı";
+
+/* ── Quran ───────────────────────────────────── */
+"quran.title" = "Kur'an";
+"quran.searchPrompt" = "Ayet ara...";
+"quran.noResults" = "Sonuç Bulunamadı";
+"quran.dbMissing" = "Kur'an veritabanı (sukun_static.sqlite) uygulamada bulunamadı.";
+"quran.readingArabic" = "Arapça";
+"quran.readingTransliteration" = "Okunuş";
+"quran.readingTranslation" = "Meal";
+"quran.readingAll" = "Tümü";
+"quran.readingSettings" = "Okuma Ayarları";
+"quran.selectPage" = "Sayfa Seç";
+"quran.theme" = "Tema";
+"quran.fontSize" = "Yazı Boyutu";
+"quran.transliteration" = "Okunuş";
+"quran.bismillahTranslation" = "Rahmân ve Rahîm olan Allah'ın adıyla";
+"quran.tapToDetail" = "Ayrıntıları görmek için dokunun";
+
+/* ── Qibla ───────────────────────────────────── */
+"qibla.title" = "Kıble";
+"qibla.direction" = "Kıble Yönü";
+"qibla.lockedOn" = "Kıbleye Dönüksünüz";
+"qibla.locationLoading" = "Konum alınıyor...";
+"qibla.locationFailed" = "Konum alınamadı";
+"qibla.calibrationNeeded" = "Telefonunuzu 8 şeklinde hareket ettirin.";
+"qibla.calibrationTitle" = "Kalibrasyon Gerekli";
+"qibla.right" = "sağa";
+"qibla.left" = "sola";
+
+/* ── Dhikr ───────────────────────────────────── */
+"dhikr.tapOrSwipe" = "Dokun veya Aşağı Kaydır";
+"dhikr.selectDhikr" = "Zikir Seç";
+"dhikr.history" = "Zikir Geçmişi";
+"dhikr.reset" = "Sıfırla";
+"dhikr.tourComplete" = "Tur Tamamlandı!";
+"dhikr.noHistoryTitle" = "Kayıt Yok";
+"dhikr.noHistoryMessage" = "Zikir oturumlarınız burada görünecek.";
+"dhikr.todayTotal" = "Bugün Toplam";
+"dhikr.subhanallahDesc" = "Allah'ı tüm eksikliklerden tenzih ederim";
+"dhikr.alhamdulillahDesc" = "Hamd Allah'a mahsustur";
+"dhikr.allahuAkbarDesc" = "Allah en büyüktür";
+
+/* ── Kaza ────────────────────────────────────── */
+"kaza.title" = "Kaza Takibi";
+"kaza.totalKaza" = "Toplam Kaza";
+"kaza.infoTitle" = "Bilgilendirme";
+"kaza.infoMessage" = "Kaza namazlarınızı buradan takip edebilirsiniz. Her kıldığınız kaza namazından sonra ilgili namaz sayısını bir azaltın.";
+"kaza.loadFailed" = "Kaza verileri yüklenemedi.";
+
+/* ── Settings ────────────────────────────────── */
+"settings.title" = "Ayarlar";
+"settings.calculationMethod" = "Hesaplama Yöntemi";
+"settings.method" = "Yöntem";
+"settings.asrSchool" = "İkindi Mezhebi";
+"settings.shafii" = "Şâfiî";
+"settings.hanafi" = "Hanefî";
+"settings.manualOffsets" = "Manuel Düzeltmeler";
+"settings.notifications" = "Bildirimler";
+"settings.alertBefore" = "Önceden uyar";
+"settings.liveActivity" = "Canlı Etkinlik";
+"settings.requestNotification" = "Bildirim İzni İste";
+"settings.appearance" = "Görünüm";
+"settings.themeLabel" = "Tema";
+"settings.themeSystem" = "Sistem";
+"settings.themeLight" = "Açık";
+"settings.themeDark" = "Koyu";
+"settings.fontSizeLabel" = "Yazı Boyutu";
+"settings.other" = "Diğer";
+"settings.about" = "Hakkında";
+"settings.prayerSettings" = "Namaz Ayarları";
+"settings.prayerSettingsSubtitle" = "Hesaplama yöntemi ve düzeltmeler";
+"settings.notificationsSubtitle" = "Vakit bildirimleri ve canlı etkinlik";
+"settings.appearanceSubtitle" = "Tema ve yazı boyutu";
+"settings.version" = "Sürüm";
+
+/* ── About ───────────────────────────────────── */
+"about.title" = "Hakkında";
+"about.quranTextTitle" = "Kur'an Metni";
+"about.quranDataInfo" = "Kur'an-ı Kerim metni yerel SQLite veritabanında saklanmaktadır. Orijinal Arapça Osmanlı hattı metni değiştirilmemiştir.";
+"about.translationTitle" = "Meal";
+"about.translationInfo" = "Türkçe meal: Diyanet İşleri Başkanlığı çevirisi kullanılmaktadır.";
+"about.openSourceTitle" = "Açık Kaynak Kütüphaneler";
+"about.grdbDetail" = "Swift için SQLite araç seti — MIT Lisansı";
+"about.adhanDetail" = "Namaz vakti hesaplama — MIT Lisansı";
+
+/* ── Rehber ──────────────────────────────────── */
+"rehber.title" = "Rehber";
+"rehber.lettersTitle" = "Harfler ve Sesler";
+"rehber.lettersSubtitle" = "Arap alfabesinin temel harfleri ve sesleri.";
+"rehber.abdestTitle" = "Arınma Adımları";
+"rehber.abdestSubtitle" = "Abdest alınışı, adım adım.";
+"rehber.namazTitle" = "Namazın Anatomisi";
+"rehber.namazSubtitle" = "Namaz kılınışı, duruş ve okunuşlarıyla.";
+"rehber.abdestNavTitle" = "Arınma Adımları";
+"rehber.namazNavTitle" = "Namazın Anatomisi";
+"rehber.readingMode" = "Okuma Modu";
+"rehber.initialForm" = "Başta";
+
+/* ── Duas ────────────────────────────────────── */
+"duas.title" = "Dualar";
+"duas.searchPrompt" = "Dua ara...";
+"duas.dbMissing" = "Dua veritabanı uygulamada bulunamadı.";
+"duas.searchHint" = "Aramak için bir kelime yazın.";
+"duas.categories" = "Kategoriler";
+"duas.allDuas" = "Tüm Dualar";
+"duas.noResults" = "Sonuç Bulunamadı";
+
+/* ── Profile ─────────────────────────────────── */
+"profile.title" = "Profilim";
+"profile.myJourney" = "Yolculuğum";
+"profile.hatimProgress" = "Hatim İlerlemesi";
+"profile.readingStreak" = "Okuma Serisi";
+"profile.days" = "gün";
+"profile.pagesRead" = "Okunan Sayfa";
+"profile.totalDhikr" = "Toplam Zikir";
+"profile.todayPrayers" = "Bugünün Namazları";
+"profile.quickLinks" = "Kısayollar";
+"profile.settings" = "Ayarlar";
+"profile.tracker" = "İstatistikler";
+"profile.bookmarks" = "Yer İmleri";
+"profile.noStreak" = "Henüz seri yok";
+"profile.startReading" = "Okumaya başlayın!";
+
+/* ── Journey ─────────────────────────────────── */
+"journey.title" = "Yolculuk";
+"journey.pagesReadTitle" = "OKUNAN SAYFA";
+"journey.streak" = "Seri";
+"journey.dhikrTotal" = "Zikir";
+"journey.prayersWeek" = "Namaz (7g)";
+"journey.hatimJourney" = "Hatim Yolculuğu";
+"journey.pagesComplete" = "Tamamlanan";
+"journey.pagesRemaining" = "Kalan";
+"journey.juzComplete" = "Cüz";
+"journey.weeklyActivity" = "HAFTALIK AKTİVİTE";
+"journey.legendPrayer" = "Namaz";
+"journey.legendReading" = "Okuma";
+"journey.legendDhikr" = "Zikir";
+"journey.milestones" = "KİLOMETRE TAŞLARI";
+"journey.milestoneFirstJuz" = "İlk Cüz";
+"journey.milestoneQuarterHatim" = "Çeyrek Hatim";
+"journey.milestoneHalfHatim" = "Yarı Hatim";
+"journey.milestoneWeekStreak" = "Haftalık Seri";
+"journey.milestoneMonthStreak" = "Aylık Seri";
+"journey.milestoneDhikr1000" = "Bin Zikir";
+
+/* ── Bookmarks ───────────────────────────────── */
+"bookmarks.title" = "Yer İmleri";
+"bookmarks.emptyTitle" = "Henüz Yer İmi Yok";
+"bookmarks.emptyMessage" = "Kaydettiğiniz sayfalar, ayetler ve dualar burada görünecek.";
+"bookmarks.verse" = "Ayet";
+"bookmarks.dua" = "Dua";
+"bookmarks.page" = "Sayfa";
+
+/* ── Tracker ─────────────────────────────────── */
+"tracker.title" = "Takip";
+"tracker.dhikr" = "Zikir";
+"tracker.minutesReading" = "dk Okuma";
+"tracker.activeDay" = "Aktif Gün";
+"tracker.weeklyDhikr" = "HAFTALIK ZİKİR";
+"tracker.noWeeklyDhikr" = "Henüz bu hafta zikir kaydı yok";
+"tracker.reading" = "OKUMA";
+"tracker.noReadingLog" = "Henüz okuma kaydı yok";
+"tracker.dhikrSessions" = "ZİKİR SEANSLARI";
+"tracker.noDhikrSession" = "Henüz zikir seansı yok";
+"tracker.dayMon" = "Pzt";
+"tracker.dayTue" = "Sal";
+"tracker.dayWed" = "Çar";
+"tracker.dayThu" = "Per";
+"tracker.dayFri" = "Cum";
+"tracker.daySat" = "Cmt";
+"tracker.daySun" = "Paz";
+
+/* ── Onboarding ──────────────────────────────── */
+"onboarding.appName" = "Sükûn";
+"onboarding.subtitle" = "Huzurlu bir ibadet deneyimi";
+"onboarding.locationTitle" = "Konum Erişimi";
+"onboarding.locationBody" = "Namaz vakitlerini ve kıble yönünü\ndoğru hesaplayabilmemiz için\nkonumunuza ihtiyacımız var.";
+"onboarding.locationGranted" = "Konum izni verildi";
+"onboarding.notificationTitle" = "Bildirimler";
+"onboarding.notificationBody" = "Namaz vakti geldiğinde\nsizi haberdar edelim.";
+"onboarding.notificationGranted" = "Bildirim izni verildi";
+"onboarding.readyTitle" = "Hazırsınız!";
+"onboarding.readyBody" = "Sükûn ile huzurlu bir\nibadet deneyimine başlayın.";
+"onboarding.start" = "Başlayalım";
+"onboarding.continue" = "Devam";
+"onboarding.grantLocation" = "Konum İzni Ver";
+"onboarding.enableNotifications" = "Bildirimleri Aç";
+"onboarding.enterApp" = "Uygulamaya Gir";
+
+/* ── Errors ──────────────────────────────────── */
+"error.locationDenied" = "Konum erişimi sağlanamadı. Lütfen Ayarlar'dan konum iznini etkinleştirin.";
+"error.databaseFailed" = "Veritabanına erişilemedi. Lütfen uygulamayı yeniden başlatın.";
+"error.noInternet" = "İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.";
+"error.notFound" = "İstenen veri bulunamadı.";
+"error.prayerCalcFailed" = "Namaz vakitleri hesaplanamadı. Lütfen konum ve ayarları kontrol edin.";
+"error.decodingFailed" = "Veri okunamadı. Lütfen uygulamayı güncelleyin.";
+"error.generic" = "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.";
+"error.compassUnavailable" = "Bu cihazda pusula kullanılamıyor.";
+"error.abdestLoadFailed" = "Abdest verileri yüklenemedi.";
+"error.namazLoadFailed" = "Namaz verileri yüklenemedi.";
+"error.elifbaLoadFailed" = "Elifba verileri yüklenemedi.";
+"error.liveActivityDisabled" = "Canlı Etkinlikler cihaz ayarlarında devre dışı.";
+
+/* ── State Views ─────────────────────────────── */
+"state.defaultLoading" = "Yükleniyor...";
+"state.defaultError" = "Bir Hata Oluştu";

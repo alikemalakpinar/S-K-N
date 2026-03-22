@@ -8,12 +8,47 @@ final class DuasViewModel {
     var errorMessage: String?
     var isStaticDBMissing = false
 
+    // Category browsing
+    var categories: [String] = []
+    var selectedCategory: String?
+    var categoryDuas: [DuaDTO] = []
+    var isCategoryLoading = false
+
     private let container: DependencyContainer
     private var searchTask: Task<Void, Never>?
 
     init(container: DependencyContainer) {
         self.container = container
         self.isStaticDBMissing = !container.isStaticDBAvailable
+    }
+
+    func loadCategories() {
+        guard categories.isEmpty else { return }
+        Task {
+            do {
+                categories = try await container.duaRepository.categories()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    func selectCategory(_ category: String) {
+        selectedCategory = category
+        isCategoryLoading = true
+        Task {
+            defer { isCategoryLoading = false }
+            do {
+                categoryDuas = try await container.duaRepository.duasByCategory(category: category)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    func clearCategory() {
+        selectedCategory = nil
+        categoryDuas = []
     }
 
     func search() {

@@ -55,7 +55,7 @@ struct TrackerView: View {
                 .padding(.bottom, DS.Space.x4)
             }
             .background(DS.Color.backgroundPrimary)
-            .navigationTitle("Takip")
+            .navigationTitle(L10n.Tracker.title)
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 viewModel.loadRecentActivity(context: modelContext)
@@ -101,19 +101,19 @@ struct TrackerView: View {
                 ringLabel(
                     color: DS.Color.accent,
                     value: "\(totalDhikr)",
-                    label: "Zikir",
+                    label: L10n.Tracker.dhikr,
                     target: "/ 500"
                 )
                 ringLabel(
                     color: DS.Color.success,
                     value: "\(totalReadingMinutes)",
-                    label: "dk Okuma",
+                    label: L10n.Tracker.minutesReading,
                     target: "/ 60"
                 )
                 ringLabel(
                     color: .cyan,
                     value: "\(activeDays)",
-                    label: "Aktif Gün",
+                    label: L10n.Tracker.activeDay,
                     target: "/ 7"
                 )
             }
@@ -143,7 +143,7 @@ struct TrackerView: View {
                         .foregroundStyle(DS.Color.textTertiary)
                 }
                 Text(label)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }
@@ -153,7 +153,7 @@ struct TrackerView: View {
 
     private var weeklyDhikrChart: some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
-            Text("HAFTALIK ZİKİR")
+            Text(L10n.Tracker.weeklyDhikr)
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
                 .tracking(2)
@@ -161,7 +161,7 @@ struct TrackerView: View {
             let dailyData = weeklyDhikrData()
 
             if dailyData.allSatisfy({ $0.count == 0 }) {
-                emptyState("Henüz bu hafta zikir kaydı yok", icon: "chart.bar")
+                emptyState(L10n.Tracker.noWeeklyDhikr, icon: "chart.bar")
             } else {
                 Chart {
                     ForEach(dailyData, id: \.day) { item in
@@ -217,7 +217,7 @@ struct TrackerView: View {
     private func weeklyDhikrData() -> [DayCount] {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
-        let dayLabels = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+        let dayLabels = L10n.Tracker.weekDays
 
         return (0..<7).map { offset in
             let day = cal.date(byAdding: .day, value: -(6 - offset), to: today) ?? today
@@ -237,20 +237,20 @@ struct TrackerView: View {
     private var readingSection: some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             HStack {
-                Text("OKUMA")
+                Text(L10n.Tracker.reading)
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(2)
                 Spacer()
                 if !viewModel.recentReadingLogs.isEmpty {
-                    Text("\(viewModel.recentReadingLogs.count) kayıt")
+                    Text(L10n.Tracker.logCount(viewModel.recentReadingLogs.count))
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(DS.Color.textTertiary)
                 }
             }
 
             if viewModel.recentReadingLogs.isEmpty {
-                emptyState("Henüz okuma kaydı yok", icon: "book.closed")
+                emptyState(L10n.Tracker.noReadingLog, icon: "book.closed")
             } else {
                 ForEach(viewModel.recentReadingLogs, id: \.date) { log in
                     HStack(spacing: DS.Space.md) {
@@ -261,7 +261,7 @@ struct TrackerView: View {
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text("Sure \(log.surahId): \(log.fromVerse)–\(log.toVerse)")
-                                .font(.system(size: 15, weight: .medium))
+                                .font(DS.Typography.bodyMedium)
                                 .foregroundStyle(DS.Color.textPrimary)
                             Text(log.date, format: .dateTime.month(.abbreviated).day().hour().minute())
                                 .font(.system(size: 11))
@@ -297,20 +297,20 @@ struct TrackerView: View {
     private var dhikrSection: some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             HStack {
-                Text("ZİKİR SEANSLARI")
+                Text(L10n.Tracker.dhikrSessions)
                     .font(DS.Typography.sectionHead)
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(2)
                 Spacer()
                 if !viewModel.recentSessions.isEmpty {
-                    Text("\(viewModel.recentSessions.count) seans")
+                    Text(L10n.Tracker.sessionCount(viewModel.recentSessions.count))
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(DS.Color.textTertiary)
                 }
             }
 
             if viewModel.recentSessions.isEmpty {
-                emptyState("Henüz zikir seansı yok", icon: "circle.dashed")
+                emptyState(L10n.Tracker.noDhikrSession, icon: "circle.dashed")
             } else {
                 ForEach(viewModel.recentSessions, id: \.date) { session in
                     HStack(spacing: DS.Space.md) {
@@ -327,7 +327,7 @@ struct TrackerView: View {
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(session.presetTitle.isEmpty ? "Zikir" : session.presetTitle)
-                                .font(.system(size: 14, weight: .medium))
+                                .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                                 .foregroundStyle(DS.Color.textPrimary)
                             Text(session.date, format: .dateTime.month(.abbreviated).day().hour().minute())
                                 .font(.system(size: 11))
@@ -383,6 +383,7 @@ private struct ActivityRingTracker: View {
     var size: CGFloat = 120
 
     @State private var animatedProgress: Double = 0
+    @State private var breathing = false
 
     var body: some View {
         ZStack {
@@ -390,6 +391,18 @@ private struct ActivityRingTracker: View {
             Circle()
                 .stroke(color.opacity(0.12), lineWidth: lineWidth)
                 .frame(width: size, height: size)
+
+            // Breathing glow behind progress arc
+            Circle()
+                .trim(from: 0, to: animatedProgress)
+                .stroke(
+                    color.opacity(breathing ? 0.15 : 0.05),
+                    style: StrokeStyle(lineWidth: lineWidth + 6, lineCap: .round)
+                )
+                .frame(width: size, height: size)
+                .rotationEffect(.degrees(-90))
+                .blur(radius: 3)
+                .scaleEffect(breathing ? 1.02 : 1.0)
 
             // Progress arc
             Circle()
@@ -411,7 +424,7 @@ private struct ActivityRingTracker: View {
                 Circle()
                     .fill(color)
                     .frame(width: lineWidth, height: lineWidth)
-                    .shadow(color: color.opacity(0.6), radius: 4)
+                    .shadow(color: color.opacity(breathing ? 0.8 : 0.5), radius: breathing ? 6 : 3)
                     .offset(y: -size / 2)
                     .rotationEffect(.degrees(360 * animatedProgress - 90))
             }
@@ -420,6 +433,9 @@ private struct ActivityRingTracker: View {
             withAnimation(.spring(response: 1.0, dampingFraction: 0.75).delay(0.3)) {
                 animatedProgress = progress
             }
+            withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+                breathing = true
+            }
         }
         .onChange(of: progress) { _, newVal in
             withAnimation(DS.Motion.standard) {
@@ -427,4 +443,10 @@ private struct ActivityRingTracker: View {
             }
         }
     }
+}
+
+// MARK: - Preview
+
+#Preview("Tracker") {
+    DSPreview { c in TrackerView(container: c) }
 }

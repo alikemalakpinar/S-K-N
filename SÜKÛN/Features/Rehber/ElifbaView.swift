@@ -18,10 +18,9 @@ struct ElifbaView: View {
                     .padding(DS.Space.lg)
                 }
             } else {
-                ContentUnavailableView(
-                    "İçerik Bulunamadı",
-                    systemImage: "doc.text",
-                    description: Text("Elifba verileri yüklenemedi.")
+                SKNErrorState(
+                    icon: "doc.text",
+                    message: "Elifba verileri yüklenemedi."
                 )
             }
         }
@@ -40,7 +39,7 @@ struct ElifbaView: View {
         } label: {
             VStack(spacing: DS.Space.sm) {
                 Text(letter.symbol)
-                    .font(.system(size: 36, weight: .regular))
+                    .font(DS.Typography.arabicHero)
                     .foregroundStyle(DS.Color.accent)
 
                 Text(letter.name)
@@ -59,38 +58,40 @@ struct ElifbaView: View {
 
 struct LetterDetailSheet: View {
     let letter: ElifbaLetter
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: DS.Space.xl) {
-            Text(letter.symbol)
-                .font(.system(size: 64, weight: .regular))
-                .foregroundStyle(DS.Color.accent)
+        VStack(spacing: 0) {
+            DSSheetHeader(letter.name, onDismiss: { dismiss() })
 
-            Text(letter.name)
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(DS.Color.textPrimary)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: DS.Space.xl) {
+                    Text(letter.symbol)
+                        .font(DS.Typography.arabicDisplay)
+                        .foregroundStyle(DS.Color.accent)
+                        .padding(.top, DS.Space.lg)
 
-            Hairline()
+                    // Forms
+                    HStack(spacing: DS.Space.x2) {
+                        formColumn("Başta", letter.forms.initial)
+                        formColumn("Ortada", letter.forms.medial)
+                        formColumn("Sonda", letter.forms.final)
+                    }
+                    .padding(.horizontal, DS.Space.lg)
 
-            // Forms
-            HStack(spacing: DS.Space.x2) {
-                formColumn("Başta", letter.forms.initial)
-                formColumn("Ortada", letter.forms.medial)
-                formColumn("Sonda", letter.forms.final)
+                    Hairline()
+                        .padding(.horizontal, DS.Space.lg)
+
+                    Text(letter.description)
+                        .font(DS.Typography.body)
+                        .foregroundStyle(DS.Color.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, DS.Space.lg)
+
+                    Spacer(minLength: DS.Space.x2)
+                }
             }
-
-            Hairline()
-
-            Text(letter.description)
-                .font(DS.Typography.body)
-                .foregroundStyle(DS.Color.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, DS.Space.lg)
-
-            Spacer()
         }
-        .padding(.top, DS.Space.x2)
-        .frame(maxWidth: .infinity)
         .background(DS.Color.backgroundPrimary)
     }
 
@@ -100,7 +101,7 @@ struct LetterDetailSheet: View {
                 .font(DS.Typography.captionSm)
                 .foregroundStyle(DS.Color.textSecondary)
             Text(form)
-                .font(.system(size: 28, weight: .regular))
+                .font(DS.Typography.arabicLarge)
                 .foregroundStyle(DS.Color.textPrimary)
         }
         .frame(maxWidth: .infinity)

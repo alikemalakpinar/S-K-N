@@ -15,10 +15,9 @@ struct AbdestView: View {
                     .padding(DS.Space.lg)
                 }
             } else {
-                ContentUnavailableView(
-                    "İçerik Bulunamadı",
-                    systemImage: "doc.text",
-                    description: Text("Abdest verileri yüklenemedi.")
+                SKNErrorState(
+                    icon: "doc.text",
+                    message: "Abdest verileri yüklenemedi."
                 )
             }
         }

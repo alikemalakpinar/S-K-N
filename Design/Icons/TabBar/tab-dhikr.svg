@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- SÜKÛN Tab: Dhikr - Tasbih Ring with Tassel -->
+  <!-- Main bead ring -->
+  <circle cx="12" cy="11" r="8" stroke="#B08D3E" stroke-width="1.5" stroke-dasharray="2.8 2.2" stroke-linecap="round"/>
+  <!-- Central accent bead at top -->
+  <circle cx="12" cy="3" r="1.5" fill="#B08D3E" fill-opacity="0.15" stroke="#B08D3E" stroke-width="1"/>
+  <!-- Tassel -->
+  <line x1="12" y1="4.5" x2="12" y2="1" stroke="#B08D3E" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+  <path d="M10.5 0.5L12 1.5L13.5 0.5" stroke="#B08D3E" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+  <!-- Inner glow dot -->
+  <circle cx="12" cy="11" r="1" fill="#B08D3E" fill-opacity="0.15"/>
+</svg>

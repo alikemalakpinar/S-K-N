@@ -31,6 +31,18 @@ struct DSCard<Content: View>: View {
                 case .elevated:
                     RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
                         .fill(DS.Color.cardElevated)
+                        .overlay(
+                            // Top-edge light catch — simulates ambient light reflection
+                            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.08), .clear, .clear],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    ),
+                                    lineWidth: 0.5
+                                )
+                        )
                         .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
                 case .glass(let material):
                     RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
@@ -42,4 +54,34 @@ struct DSCard<Content: View>: View {
                 }
             }
     }
+}
+
+// MARK: - Previews
+
+#Preview("DSCard") {
+    VStack(spacing: DS.Space.lg) {
+        DSCard {
+            VStack(alignment: .leading, spacing: DS.Space.sm) {
+                Text("Elevated Card")
+                    .font(DS.Typography.headline)
+                    .foregroundStyle(DS.Color.textPrimary)
+                Text("Default elevated style with shadow.")
+                    .font(DS.Typography.caption)
+                    .foregroundStyle(DS.Color.textSecondary)
+            }
+        }
+
+        DSCard(.glass()) {
+            VStack(alignment: .leading, spacing: DS.Space.sm) {
+                Text("Glass Card")
+                    .font(DS.Typography.headline)
+                    .foregroundStyle(DS.Color.textPrimary)
+                Text("Glassmorphic style with thin material.")
+                    .font(DS.Typography.caption)
+                    .foregroundStyle(DS.Color.textSecondary)
+            }
+        }
+    }
+    .padding(DS.Space.lg)
+    .background(DS.Color.backgroundPrimary)
 }

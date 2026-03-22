@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#B08D3E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Prayer bead (main circle) -->
+  <circle cx="60" cy="50" r="16" />
+  <!-- Inner decorative ring on bead -->
+  <circle cx="60" cy="50" r="10" />
+  <!-- String passing through bead - top -->
+  <path d="M60 34 L60 20" />
+  <!-- String gentle curve at top -->
+  <path d="M60 20 Q58 16 60 13 Q62 16 60 20" />
+  <!-- String passing through bead - bottom -->
+  <path d="M60 66 L60 82" />
+  <!-- Tassel threads -->
+  <path d="M60 82 L60 98" />
+  <path d="M60 82 Q56 90 54 98" />
+  <path d="M60 82 Q64 90 66 98" />
+  <!-- Tassel knot -->
+  <circle cx="60" cy="82" r="2.5" />
+  <!-- Small decorative dots along string -->
+  <circle cx="60" cy="25" r="1" fill="#B08D3E" stroke="none" />
+  <circle cx="60" cy="74" r="1" fill="#B08D3E" stroke="none" />
+</svg>

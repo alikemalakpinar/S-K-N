@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Fajr: Sun below horizon, crescent moon above -->
+  <line x1="2" y1="16" x2="22" y2="16" stroke="#B08D3E" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Sun peeking below horizon -->
+  <path d="M8 16C8 13.8 9.8 12 12 12C14.2 12 16 13.8 16 16" stroke="#B08D3E" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+  <!-- Dawn rays -->
+  <line x1="12" y1="10" x2="12" y2="11.5" stroke="#B08D3E" stroke-width="0.8" stroke-linecap="round" opacity="0.3"/>
+  <line x1="8.5" y1="11.5" x2="9.3" y2="12.8" stroke="#B08D3E" stroke-width="0.8" stroke-linecap="round" opacity="0.25"/>
+  <line x1="15.5" y1="11.5" x2="14.7" y2="12.8" stroke="#B08D3E" stroke-width="0.8" stroke-linecap="round" opacity="0.25"/>
+  <!-- Crescent moon -->
+  <path d="M14 5C14 7.2 12.2 9 10 9C9.3 9 8.6 8.8 8 8.5C8.8 9.4 10 10 11.3 10C13.5 10 15.3 8.2 15.3 6C15.3 4.7 14.6 3.5 13.5 2.8C13.8 3.4 14 4.2 14 5Z" fill="#B08D3E" opacity="0.5"/>
+</svg>

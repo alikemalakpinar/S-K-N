@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Ribbon bookmark with small star -->
+  <!-- Secondary: bookmark fill -->
+  <path d="M6 3H18V21L12 17L6 21V3Z" fill="#B08D3E" opacity="0.15"/>
+  <!-- Primary: bookmark outline -->
+  <path d="M6 3H18V21L12 17L6 21V3Z" stroke="#B08D3E" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Small star detail -->
+  <path d="M12 7.5L13.09 9.71L15.5 10.06L13.75 11.77L14.18 14.17L12 13.01L9.82 14.17L10.25 11.77L8.5 10.06L10.91 9.71L12 7.5Z" fill="#B08D3E" opacity="0.4" stroke="#B08D3E" stroke-width="1" stroke-linejoin="round"/>
+</svg>

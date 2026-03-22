@@ -15,3 +15,20 @@ struct AccentUnderline: View {
         .frame(height: 1)
     }
 }
+
+// MARK: - Preview
+
+#Preview("AccentUnderline") {
+    VStack(spacing: DS.Space.xl) {
+        VStack(spacing: DS.Space.sm) {
+            Text("Active").foregroundStyle(DS.Color.textPrimary)
+            AccentUnderline(active: true)
+        }
+        VStack(spacing: DS.Space.sm) {
+            Text("Inactive").foregroundStyle(DS.Color.textSecondary)
+            AccentUnderline(active: false)
+        }
+    }
+    .padding(DS.Space.lg)
+    .background(DS.Color.backgroundPrimary)
+}

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#B08D3E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Left hand - palm up, cupped -->
+  <path d="M28 78 Q26 68 30 58 Q32 52 36 50 L38 48 Q40 46 42 48 L44 50 Q46 46 48 48 L49 52 Q51 48 53 50 L53 56 Q54 50 56 52 L56 58 Q58 62 58 68 L58 72 Q56 78 52 80" />
+  <!-- Left palm detail -->
+  <path d="M34 64 Q40 60 50 62" />
+  <!-- Right hand - palm up, cupped -->
+  <path d="M92 78 Q94 68 90 58 Q88 52 84 50 L82 48 Q80 46 78 48 L76 50 Q74 46 72 48 L71 52 Q69 48 67 50 L67 56 Q66 50 64 52 L64 58 Q62 62 62 68 L62 72 Q64 78 68 80" />
+  <!-- Right palm detail -->
+  <path d="M86 64 Q80 60 70 62" />
+  <!-- Hands meeting at wrists -->
+  <path d="M28 78 Q38 84 52 80" />
+  <path d="M92 78 Q82 84 68 80" />
+  <!-- Radiating dots above (spiritual energy) -->
+  <circle cx="60" cy="28" r="1.5" fill="#B08D3E" stroke="none" />
+  <circle cx="48" cy="32" r="1.2" fill="#B08D3E" stroke="none" />
+  <circle cx="72" cy="32" r="1.2" fill="#B08D3E" stroke="none" />
+  <circle cx="54" cy="22" r="1" fill="#B08D3E" stroke="none" />
+  <circle cx="66" cy="22" r="1" fill="#B08D3E" stroke="none" />
+  <circle cx="42" cy="38" r="0.8" fill="#B08D3E" stroke="none" />
+  <circle cx="78" cy="38" r="0.8" fill="#B08D3E" stroke="none" />
+  <circle cx="60" cy="18" r="0.8" fill="#B08D3E" stroke="none" />
+</svg>

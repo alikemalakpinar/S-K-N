@@ -111,20 +111,47 @@ struct MushafPageView: View {
         return items
     }
 
-    // MARK: - Bismillah
+    // MARK: - Ornamental Bismillah
 
     private var bismillahView: some View {
-        VStack(spacing: DS.Space.sm) {
+        VStack(spacing: DS.Space.md) {
+            // Top ornament
+            HStack(spacing: DS.Space.md) {
+                Rectangle()
+                    .fill(theme.accent.opacity(0.2))
+                    .frame(height: 0.5)
+                Image(systemName: "sparkle")
+                    .font(.system(size: 8))
+                    .foregroundStyle(theme.accent.opacity(0.4))
+                Rectangle()
+                    .fill(theme.accent.opacity(0.2))
+                    .frame(height: 0.5)
+            }
+
             Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ")
-                .font(.system(size: 24 * fontScale, weight: .regular))
+                .font(DS.Typography.arabicBismillah)
                 .foregroundStyle(theme.textPrimary)
                 .frame(maxWidth: .infinity)
 
-            Text("Rahmân ve Rahîm olan Allah'ın adıyla")
-                .font(.system(size: 12, weight: .regular))
+            Text(L10n.Quran.bismillahTranslation)
+                .font(DS.Typography.cormorant(size: 13, weight: "Italic"))
                 .foregroundStyle(theme.textSecondary)
+
+            // Bottom ornament
+            HStack(spacing: DS.Space.md) {
+                Rectangle()
+                    .fill(theme.accent.opacity(0.2))
+                    .frame(height: 0.5)
+                Image(systemName: "sparkle")
+                    .font(.system(size: 8))
+                    .foregroundStyle(theme.accent.opacity(0.4))
+                Rectangle()
+                    .fill(theme.accent.opacity(0.2))
+                    .frame(height: 0.5)
+            }
         }
-        .padding(.vertical, DS.Space.md)
+        .padding(.vertical, DS.Space.lg)
+        .padding(.horizontal, DS.Space.lg)
     }
 
     // MARK: - Verse Card
@@ -148,7 +175,7 @@ struct MushafPageView: View {
             // Arabic text
             let baseSize: CGFloat = showTransliteration || showTranslation ? 24 : 28
             Text(verse.textArabic)
-                .font(.system(size: baseSize * fontScale, weight: .regular))
+                .font(DS.Typography.arabicUthmanic(size: baseSize * fontScale))
                 .foregroundStyle(theme.textPrimary)
                 .multilineTextAlignment(.trailing)
                 .lineSpacing(showTransliteration || showTranslation ? 14 : 20)
@@ -158,8 +185,7 @@ struct MushafPageView: View {
             // Transliteration
             if showTransliteration && !verse.textTransliteration.isEmpty {
                 Text(verse.textTransliteration)
-                    .font(.system(size: 15 * fontScale, weight: .regular, design: .serif))
-                    .italic()
+                    .font(DS.Typography.cormorant(size: 15 * fontScale, weight: "Italic"))
                     .foregroundStyle(theme.accent.opacity(0.7))
                     .multilineTextAlignment(.leading)
                     .lineSpacing(5)
@@ -195,8 +221,8 @@ struct MushafPageView: View {
             selectedVerse = verse
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Ayet \(verse.verseNumber). \(verse.textTranslation)")
-        .accessibilityHint("Ayrıntıları görmek için dokunun")
+        .accessibilityLabel(L10n.Quran.verseAccessibility(verse.verseNumber, translation: verse.textTranslation))
+        .accessibilityHint(L10n.Quran.tapToDetail)
     }
 
     // MARK: - Page Footer
@@ -252,28 +278,27 @@ struct SKNSurahHeader: View {
     var body: some View {
         VStack(spacing: DS.Space.md) {
             Text(surah.nameArabic)
-                .font(.system(size: 36, weight: .regular))
+                .font(DS.Typography.arabicDisplay)
                 .foregroundStyle(DS.Color.textPrimary)
                 .accessibilityLabel(surah.nameTurkish)
 
             Text(surah.nameTurkish)
-                .font(.system(size: 14, weight: .semibold))
+                .font(DS.Typography.displayBody)
                 .foregroundStyle(DS.Color.textSecondary)
-                .tracking(1)
 
             Rectangle()
                 .fill(DS.Color.accent.opacity(0.3))
                 .frame(width: 40, height: 1)
 
             HStack(spacing: DS.Space.md) {
-                Text(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")
-                    .font(.system(size: 11, weight: .medium))
+                Text(L10n.revelationType(surah.revelationType))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
                 Circle()
                     .fill(DS.Color.accent.opacity(0.5))
                     .frame(width: 3, height: 3)
                 Text("\(surah.verseCount) ayet")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }
@@ -298,7 +323,7 @@ struct SKNSurahHeader: View {
                 .stroke(DS.Color.accent.opacity(0.12), lineWidth: 0.5)
         )
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(surah.nameTurkish), \(surah.verseCount) ayet, \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
+        .accessibilityLabel("\(surah.nameTurkish), \(L10n.Common.ayetCount(surah.verseCount)), \(L10n.revelationType(surah.revelationType))")
     }
 }
 
