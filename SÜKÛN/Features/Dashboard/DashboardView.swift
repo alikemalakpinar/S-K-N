@@ -101,7 +101,7 @@ struct DashboardView: View {
                             SettingsView(container: container)
                         } label: {
                             Image(systemName: "gearshape")
-                                .font(.system(size: 16, weight: .medium))
+                                .font(DS.Typography.listTitle)
                                 .foregroundStyle(DS.Color.textSecondary)
                         }
                     }
@@ -154,12 +154,12 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: DS.Space.xs) {
             HStack(spacing: DS.Space.sm) {
                 Image(systemName: viewModel.greetingIcon)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(DS.Typography.bodyMedium)
                     .foregroundStyle(DS.Color.accent)
                     .symbolEffect(.pulse, options: .repeating.speed(0.3))
 
                 Text(viewModel.greeting)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
 
@@ -206,7 +206,7 @@ struct DashboardView: View {
                     // Prayer info row
                     HStack(alignment: .firstTextBaseline) {
                         Text(viewModel.nextPrayerName.uppercased())
-                            .font(.system(size: 12, weight: .bold))
+                            .font(DS.Typography.alongSans(size: 12, weight: "Bold"))
                             .foregroundStyle(DS.Color.textPrimary.opacity(0.4))
                             .tracking(4)
 
@@ -247,7 +247,7 @@ struct DashboardView: View {
                 HStack {
                     Spacer()
                     Text(label)
-                        .font(.system(size: 10, weight: .bold))
+                        .font(DS.Typography.chipLabel)
                         .foregroundStyle(DS.Color.textPrimary.opacity(max(0.15, opacity * 0.4)))
                         .tracking(2)
                         .padding(.top, DS.Space.sm)
@@ -363,7 +363,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             HStack {
                 Image(systemName: "book.fill")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
                     .foregroundStyle(DS.Color.accent)
                     .frame(width: 28, height: 28)
                     .background(
@@ -372,22 +372,22 @@ struct DashboardView: View {
                     )
                 Spacer()
                 Image(systemName: "arrow.right")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Bold"))
                     .foregroundStyle(DS.Color.accent.opacity(0.5))
                     .symbolEffect(.bounce, options: .repeating.speed(0.3))
             }
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(L10n.Dashboard.whereYouLeft)
-                    .font(.system(size: 9, weight: .bold))
+                    .font(DS.Typography.alongSans(size: 9, weight: "Bold"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1.5)
                 Text(position.surahNameTurkish)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DS.Typography.alongSans(size: 15, weight: "SemiBold"))
                     .foregroundStyle(DS.Color.textPrimary)
                     .lineLimit(1)
                 Text("Sayfa \(position.mushafPage)")
-                    .font(.system(size: 12, weight: .regular))
+                    .font(DS.Typography.alongSans(size: 12, weight: "Regular"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }
@@ -401,7 +401,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             HStack {
                 Image(systemName: "chart.bar.fill")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
                     .foregroundStyle(DS.Color.success)
                     .frame(width: 28, height: 28)
                     .background(
@@ -416,11 +416,11 @@ struct DashboardView: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(L10n.Dashboard.today)
-                    .font(.system(size: 9, weight: .bold))
+                    .font(DS.Typography.alongSans(size: 9, weight: "Bold"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1.5)
                 Text("\(viewModel.pagesReadToday)/\(viewModel.dailyPageGoal) sayfa")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DS.Typography.alongSans(size: 15, weight: "SemiBold"))
                     .foregroundStyle(DS.Color.textPrimary)
 
                 DSProgressBar(
@@ -438,7 +438,7 @@ struct DashboardView: View {
     private var streakWidget: some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             Image(systemName: "flame.fill")
-                .font(.system(size: 13, weight: .medium))
+                .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
                 .foregroundStyle(DS.Color.warning)
                 .frame(width: 28, height: 28)
                 .background(
@@ -448,14 +448,14 @@ struct DashboardView: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(L10n.Dashboard.continuity)
-                    .font(.system(size: 9, weight: .bold))
+                    .font(DS.Typography.alongSans(size: 9, weight: "Bold"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(1.5)
                 Text("\(viewModel.readingStreakDays)")
                     .font(.system(size: 32, weight: .black, design: .rounded))
                     .foregroundStyle(DS.Color.textPrimary)
                 Text(L10n.Common.day)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 12, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }
@@ -478,11 +478,11 @@ struct DashboardView: View {
                     HStack {
                         Label {
                             Text(L10n.Dashboard.verseOfDay)
-                                .font(.system(size: 11, weight: .semibold))
+                                .font(DS.Typography.alongSans(size: 11, weight: "SemiBold"))
                                 .tracking(2)
                         } icon: {
                             Image(systemName: "sparkles")
-                                .font(.system(size: 10))
+                                .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
                         }
                         .foregroundStyle(DS.Color.accent)
 
@@ -490,7 +490,7 @@ struct DashboardView: View {
 
                         HStack(spacing: DS.Space.xs) {
                             Text("\(verse.surahId):\(verse.verseNumber)")
-                                .font(.system(size: 11, weight: .medium))
+                                .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
                                 .foregroundStyle(DS.Color.textSecondary)
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 9, weight: .semibold))
@@ -558,7 +558,7 @@ struct DashboardView: View {
     private func quickActionCard(icon: String, title: String, subtitle: String, tint: SwiftUI.Color) -> some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .medium))
+                .font(DS.Typography.listTitle)
                 .foregroundStyle(tint)
                 .frame(width: 36, height: 36)
                 .background(
@@ -640,7 +640,7 @@ private struct PrayerPill: View {
                 }
 
                 Text(name)
-                    .font(.system(size: 11, weight: .bold))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Bold"))
                     .foregroundStyle(isPrayed ? DS.Color.accent : DS.Color.textSecondary)
             }
         }

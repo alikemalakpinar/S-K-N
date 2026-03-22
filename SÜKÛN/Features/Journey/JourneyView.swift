@@ -117,7 +117,7 @@ struct JourneyView: View {
     private func metricPill(icon: String, iconColor: Color, value: Int, label: String, unit: String?) -> some View {
         VStack(spacing: DS.Space.sm) {
             Image(systemName: icon)
-                .font(.system(size: 14, weight: .medium))
+                .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                 .foregroundStyle(iconColor)
                 .frame(width: 28, height: 28)
                 .background(
@@ -154,7 +154,7 @@ struct JourneyView: View {
         VStack(alignment: .leading, spacing: DS.Space.lg) {
             HStack {
                 Image(systemName: "book.fill")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                     .foregroundStyle(DS.Color.accent)
                     .frame(width: 28, height: 28)
                     .background(
@@ -319,14 +319,14 @@ struct JourneyView: View {
                     .frame(width: 40, height: 40)
 
                 Image(systemName: milestone.icon)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(DS.Typography.listTitle)
                     .foregroundStyle(milestone.isAchieved ? color : DS.Color.textTertiary)
             }
 
             // Text
             VStack(alignment: .leading, spacing: 2) {
                 Text(milestone.title)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(DS.Typography.surahTitle)
                     .foregroundStyle(milestone.isAchieved ? DS.Color.textPrimary : DS.Color.textSecondary)
 
                 Text(milestone.subtitle)

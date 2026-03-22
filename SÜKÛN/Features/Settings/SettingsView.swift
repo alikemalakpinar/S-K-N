@@ -68,7 +68,7 @@ struct SettingsView: View {
                     .shadow(color: DS.Color.accent.opacity(0.3), radius: 12, y: 4)
 
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 28, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 28, weight: "Medium"))
                     .foregroundStyle(.white)
             }
 
@@ -155,7 +155,7 @@ struct SettingsView: View {
     private func settingsRow(icon: String, iconColor: Color, title: String, subtitle: String?) -> some View {
         HStack(spacing: DS.Space.md) {
             Image(systemName: icon)
-                .font(.system(size: 15, weight: .medium))
+                .font(DS.Typography.bodyMedium)
                 .foregroundStyle(iconColor)
                 .frame(width: 32, height: 32)
                 .background(
@@ -178,7 +178,7 @@ struct SettingsView: View {
             Spacer(minLength: 0)
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
+                .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textTertiary)
         }
         .padding(.vertical, DS.Space.sm + 2)
@@ -244,7 +244,7 @@ struct SettingsView: View {
         } label: {
             VStack(spacing: DS.Space.sm) {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 20, weight: "Medium"))
                     .foregroundStyle(isSelected ? DS.Color.accent : DS.Color.textSecondary)
 
                 Text(label)

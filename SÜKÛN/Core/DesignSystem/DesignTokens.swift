@@ -183,36 +183,36 @@ extension DS {
         static let giga        = Font.system(size: 72, weight: .heavy, design: .default)
         /// 48pt bold — section heroes
         static let hero        = Font.system(size: 48, weight: .bold, design: .default)
-        /// 28pt bold — screen titles
-        static let title1      = Font.system(size: 28, weight: .bold, design: .default)
-        /// 22pt semibold — card titles
-        static let title2      = Font.system(size: 22, weight: .semibold, design: .default)
-        /// 17pt semibold — section headlines
-        static let headline    = Font.headline
-        /// 12pt semibold — section labels, uppercase trackers
-        static let sectionHead = Font.system(size: 12, weight: .semibold, design: .default)
-        /// 17pt — body text
-        static let body        = Font.body
-        /// 12pt — captions
-        static let caption     = Font.caption
-        /// 11pt — small captions
-        static let captionSm   = Font.caption2
-        /// 9pt medium — micro labels
-        static let micro       = Font.system(size: 9, weight: .medium, design: .default)
+        /// 28pt bold — screen titles (AlongSanss2)
+        static let title1      = alongSans(size: 28, weight: "Bold")
+        /// 22pt semibold — card titles (AlongSanss2)
+        static let title2      = alongSans(size: 22, weight: "SemiBold")
+        /// 17pt semibold — section headlines (AlongSanss2)
+        static let headline    = alongSans(size: 17, weight: "SemiBold")
+        /// 12pt semibold — section labels, uppercase trackers (AlongSanss2)
+        static let sectionHead = alongSans(size: 12, weight: "SemiBold")
+        /// 17pt — body text (AlongSanss2)
+        static let body        = alongSans(size: 17, weight: "Regular")
+        /// 12pt — captions (AlongSanss2)
+        static let caption     = alongSans(size: 12, weight: "Regular")
+        /// 11pt — small captions (AlongSanss2)
+        static let captionSm   = alongSans(size: 11, weight: "Regular")
+        /// 9pt medium — micro labels (AlongSanss2)
+        static let micro       = alongSans(size: 9, weight: "Medium")
 
         // ── UI Labels (buttons, badges, chips) ───────────────
-        /// 17pt semibold — primary button labels
-        static let buttonLabel = Font.system(size: 17, weight: .semibold, design: .default)
-        /// 15pt medium — secondary text, form labels
-        static let bodyMedium  = Font.system(size: 15, weight: .medium, design: .default)
-        /// 16pt medium — list item titles
-        static let listTitle   = Font.system(size: 16, weight: .medium, design: .default)
-        /// 13pt regular — auxiliary info, metadata
-        static let footnote    = Font.system(size: 13, weight: .regular, design: .default)
-        /// 10pt bold — chip labels, uppercase tags
-        static let chipLabel   = Font.system(size: 10, weight: .bold, design: .default)
-        /// 11pt bold — section tracker labels, uppercase
-        static let trackerLabel = Font.system(size: 11, weight: .bold, design: .default)
+        /// 17pt semibold — primary button labels (AlongSanss2)
+        static let buttonLabel = alongSans(size: 17, weight: "SemiBold")
+        /// 15pt medium — secondary text, form labels (AlongSanss2)
+        static let bodyMedium  = alongSans(size: 15, weight: "Medium")
+        /// 16pt medium — list item titles (AlongSanss2)
+        static let listTitle   = alongSans(size: 16, weight: "Medium")
+        /// 13pt regular — auxiliary info, metadata (AlongSanss2)
+        static let footnote    = alongSans(size: 13, weight: "Regular")
+        /// 10pt bold — chip labels, uppercase tags (AlongSanss2)
+        static let chipLabel   = alongSans(size: 10, weight: "Bold")
+        /// 11pt bold — section tracker labels, uppercase (AlongSanss2)
+        static let trackerLabel = alongSans(size: 11, weight: "Bold")
 
         // ── Monospaced (timers, counters) ────────────────────
         static let monoMega    = Font.system(size: 96, weight: .black, design: .monospaced)
@@ -242,7 +242,7 @@ extension DS {
         /// Arabic bold — emphasis, headers
         static let arabicBold       = amiriBold(size: 22)
 
-        static let surahTitle       = Font.system(size: 15, weight: .semibold, design: .default)
+        static let surahTitle       = alongSans(size: 15, weight: "SemiBold")
         static let verseNumber      = Font.system(size: 11, weight: .medium, design: .rounded)
         static let pageNumber       = Font.system(size: 12, weight: .medium, design: .rounded)
 
@@ -267,6 +267,25 @@ extension DS {
             default: .regular
             }
             return .system(size: size, weight: w, design: .serif)
+        }
+
+        /// AlongSanss2 geometric sans-serif with system fallback.
+        /// Used for all UI labels, buttons, navigation, and body text.
+        static func alongSans(size: CGFloat, weight: String = "Regular") -> Font {
+            let name = "AlongSanss2-\(weight)"
+            if UIFont(name: name, size: size) != nil {
+                return .custom(name, size: size, relativeTo: .body)
+            }
+            // Fallback to system default
+            let w: Font.Weight = switch weight {
+            case "Black": .black
+            case "ExtraBold": .heavy
+            case "Bold": .bold
+            case "SemiBold": .semibold
+            case "Medium": .medium
+            default: .regular
+            }
+            return .system(size: size, weight: w, design: .default)
         }
 
         /// Amiri Arabic with system fallback.

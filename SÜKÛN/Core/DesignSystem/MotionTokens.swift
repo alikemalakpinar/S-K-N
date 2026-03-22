@@ -142,6 +142,35 @@ extension DS {
                 : slowReveal.delay(Double(index) * interval)
         }
 
+        // ── GSAP-Inspired Stagger Patterns ────────────────────
+
+        /// Center-out stagger: items in the middle appear first, edges last.
+        /// Inspired by GSAP's `stagger: { from: "center" }` pattern.
+        static func staggerFromCenter(index: Int, total: Int, interval: Double = 0.06) -> Animation {
+            let center = Double(total - 1) / 2.0
+            let distance = abs(Double(index) - center)
+            return reduceMotion
+                ? .easeOut(duration: 0.15)
+                : standard.delay(distance * interval)
+        }
+
+        /// Random stagger: each item gets a deterministic pseudo-random delay.
+        /// Inspired by GSAP's `stagger: { from: "random" }` pattern.
+        static func staggerRandom(seed: Int, maxDelay: Double = 0.4) -> Animation {
+            let pseudoRandom = Double((seed &* 1103515245 &+ 12345) & 0x7FFFFFFF) / Double(0x7FFFFFFF)
+            return reduceMotion
+                ? .easeOut(duration: 0.15)
+                : standard.delay(pseudoRandom * maxDelay)
+        }
+
+        /// Cascade stagger with elastic overshoot — for grid items, celebrations.
+        /// Inspired by GSAP's elastic ease with stagger.
+        static func elasticStagger(index: Int, interval: Double = 0.08) -> Animation {
+            reduceMotion
+                ? .easeOut(duration: 0.15)
+                : .spring(response: 0.55, dampingFraction: 0.60).delay(Double(index) * interval)
+        }
+
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // MARK: Breathing & Immersive
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -241,6 +270,13 @@ extension View {
             )
     }
 
+    /// Scroll-triggered reveal: fades in + slides up when view appears on screen.
+    /// Inspired by GSAP ScrollTrigger's reveal pattern.
+    /// Usage: `.dsScrollReveal(index: 2)` for staggered scroll reveals.
+    func dsScrollReveal(index: Int = 0, interval: Double = 0.08) -> some View {
+        modifier(ScrollRevealModifier(index: index, interval: interval))
+    }
+
     /// PhaseAnimator-driven entrance for cards.
     /// Usage: `.dsPhaseEntrance(trigger: appeared)`
     @ViewBuilder
@@ -306,6 +342,55 @@ struct NumberMorphValues {
     var scale: Double = 1.0
     var offsetY: Double = 0
     var opacity: Double = 1.0
+}
+
+// MARK: - Scroll Reveal Modifier (GSAP ScrollTrigger-Inspired)
+
+/// Animates content into view with a fade + slide when it first appears.
+struct ScrollRevealModifier: ViewModifier {
+    let index: Int
+    let interval: Double
+    @State private var hasAppeared = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(hasAppeared ? 1 : 0)
+            .offset(y: hasAppeared ? 0 : 20)
+            .scaleEffect(hasAppeared ? 1 : 0.96)
+            .onAppear {
+                let delay = Double(index) * interval
+                withAnimation(DS.Motion.slowReveal.delay(delay)) {
+                    hasAppeared = true
+                }
+            }
+    }
+}
+
+// MARK: - Animation Timeline (GSAP Timeline-Inspired)
+
+/// Utility for choreographing sequential animations.
+/// Inspired by GSAP's timeline concept.
+///
+/// Usage:
+/// ```swift
+/// AnimationTimeline.run([
+///     (0.0, { withAnimation(DS.Motion.bouncy) { showIcon = true } }),
+///     (0.2, { withAnimation(DS.Motion.standard) { showTitle = true } }),
+///     (0.4, { withAnimation(DS.Motion.slowReveal) { showSubtitle = true } }),
+/// ])
+/// ```
+enum AnimationTimeline {
+    static func run(_ steps: [(delay: Double, action: () -> Void)]) {
+        for step in steps {
+            if step.delay == 0 {
+                step.action()
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + step.delay) {
+                    step.action()
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Scroll Offset Preference Key

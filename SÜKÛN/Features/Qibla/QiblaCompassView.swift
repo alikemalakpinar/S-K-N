@@ -28,7 +28,7 @@ public struct QiblaCompassView: View {
                     
                     if let error = engine.errorStatus {
                         Text(error)
-                            .font(.system(size: 13, weight: .medium))
+                            .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
                             .foregroundStyle(DS.Color.warning)
                             .multilineTextAlignment(.center)
                             .padding()
@@ -150,7 +150,7 @@ private struct KaabaPointer: View {
                 .scaleEffect(pulse ? 1.05 : 1.0)
             
             Text("KÂBE")
-                .font(.system(size: 10, weight: .bold))
+                .font(DS.Typography.chipLabel)
                 .tracking(2)
                 .foregroundStyle(DS.Color.accent)
         }

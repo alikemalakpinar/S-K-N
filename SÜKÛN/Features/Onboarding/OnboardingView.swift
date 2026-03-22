@@ -86,7 +86,7 @@ struct OnboardingView: View {
                         .frame(width: 100, height: 100)
 
                     Image(systemName: "moon.stars.fill")
-                        .font(.system(size: 48))
+                        .font(DS.Typography.alongSans(size: 48, weight: "Regular"))
                         .foregroundStyle(DS.Color.accent)
                         .offset(y: iconFloating ? -4 : 4)
                         .animation(
@@ -140,7 +140,7 @@ struct OnboardingView: View {
                     .fill(DS.Color.accentSoft)
                     .frame(width: 120, height: 120)
                 Image(systemName: "location.fill")
-                    .font(.system(size: 48))
+                    .font(DS.Typography.alongSans(size: 48, weight: "Regular"))
                     .foregroundStyle(DS.Color.accent)
                     .offset(y: iconFloating ? -3 : 3)
                     .animation(
@@ -162,7 +162,7 @@ struct OnboardingView: View {
             Spacer().frame(height: DS.Space.md)
 
             Text("Namaz vakitlerini ve kıble yönünü\ndoğru hesaplayabilmemiz için\nkonumunuza ihtiyacımız var.")
-                .font(.system(size: 16, weight: .regular))
+                .font(DS.Typography.alongSans(size: 16, weight: "Regular"))
                 .foregroundStyle(DS.Color.textSecondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
@@ -171,8 +171,8 @@ struct OnboardingView: View {
 
             if locationGranted {
                 Label("Konum izni verildi", systemImage: "checkmark.circle.fill")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(.green)
+                    .font(DS.Typography.bodyMedium)
+                    .foregroundStyle(DS.Color.success)
                     .transition(.scale.combined(with: .opacity))
             }
 
@@ -194,7 +194,7 @@ struct OnboardingView: View {
                     .fill(DS.Color.accentSoft)
                     .frame(width: 120, height: 120)
                 Image(systemName: "bell.badge.fill")
-                    .font(.system(size: 48))
+                    .font(DS.Typography.alongSans(size: 48, weight: "Regular"))
                     .foregroundStyle(DS.Color.accent)
                     .offset(y: iconFloating ? -3 : 3)
                     .animation(
@@ -216,7 +216,7 @@ struct OnboardingView: View {
             Spacer().frame(height: DS.Space.md)
 
             Text("Namaz vakti geldiğinde\nsizi haberdar edelim.")
-                .font(.system(size: 16, weight: .regular))
+                .font(DS.Typography.alongSans(size: 16, weight: "Regular"))
                 .foregroundStyle(DS.Color.textSecondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
@@ -225,8 +225,8 @@ struct OnboardingView: View {
 
             if notificationGranted {
                 Label("Bildirim izni verildi", systemImage: "checkmark.circle.fill")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(.green)
+                    .font(DS.Typography.bodyMedium)
+                    .foregroundStyle(DS.Color.success)
                     .transition(.scale.combined(with: .opacity))
             }
 
@@ -260,7 +260,7 @@ struct OnboardingView: View {
                     .frame(width: 120, height: 120)
 
                 Image(systemName: "sparkles")
-                    .font(.system(size: 48))
+                    .font(DS.Typography.alongSans(size: 48, weight: "Regular"))
                     .foregroundStyle(DS.Color.accent)
                     .symbolEffect(.bounce, options: .repeating.speed(0.3))
             }
@@ -278,7 +278,7 @@ struct OnboardingView: View {
             Spacer().frame(height: DS.Space.md)
 
             Text("Sükûn ile huzurlu bir\nibadet deneyimine başlayın.")
-                .font(.system(size: 16, weight: .regular))
+                .font(DS.Typography.alongSans(size: 16, weight: "Regular"))
                 .foregroundStyle(DS.Color.textSecondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)

@@ -137,10 +137,10 @@ struct DhikrView: View {
             Button { showPresetPicker = true } label: {
                 HStack(spacing: 6) {
                     Text("Zikirmatik")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(DS.Typography.surahTitle)
                         .foregroundStyle(DS.Color.textPrimary)
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(DS.Typography.alongSans(size: 9, weight: "Bold"))
                         .foregroundStyle(DS.Color.textSecondary)
                 }
             }
@@ -151,7 +151,7 @@ struct DhikrView: View {
             if viewModel.todayTotalCount > 0 {
                 HStack(spacing: 4) {
                     Image(systemName: "heart.fill")
-                        .font(.system(size: 10))
+                        .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
                         .foregroundStyle(DS.Color.accent)
                     Text("\(viewModel.todayTotalCount)")
                         .font(.system(size: 12, weight: .semibold, design: .monospaced))
@@ -311,7 +311,7 @@ struct DhikrView: View {
                 }
             } label: {
                 Image(systemName: "arrow.counterclockwise")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .frame(width: 44, height: 44)
                     .background(Circle().fill(DS.Color.cardElevated))
@@ -331,7 +331,7 @@ struct DhikrView: View {
 
                     if tourCount > 0 {
                         Text("\(tourCount) tur")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(DS.Typography.chipLabel)
                             .foregroundStyle(DS.Color.accent)
                     }
                 }
@@ -343,7 +343,7 @@ struct DhikrView: View {
             // Preset switch
             Button { showPresetPicker = true } label: {
                 Image(systemName: "list.bullet")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .frame(width: 44, height: 44)
                     .background(Circle().fill(DS.Color.cardElevated))
@@ -365,7 +365,7 @@ struct DhikrView: View {
                     .fill(DS.Color.accent.opacity(0.06))
                     .frame(width: 100, height: 100)
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 48))
+                    .font(DS.Typography.alongSans(size: 48, weight: "Regular"))
                     .foregroundStyle(DS.Color.accent)
                     .symbolEffect(.bounce, value: tourCount)
             }

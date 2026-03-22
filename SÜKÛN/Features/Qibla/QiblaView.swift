@@ -54,7 +54,7 @@ struct QiblaView: View {
                                 Image(systemName: "location.fill")
                                     .font(.system(size: 9))
                                 Text(viewModel.locationName)
-                                    .font(.system(size: 13, weight: .medium))
+                                    .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
                             }
                             .foregroundStyle(DS.Color.textSecondary)
                             .padding(.bottom, DS.Space.x3)
@@ -145,7 +145,7 @@ struct QiblaView: View {
     private var qiblaIndicator: some View {
         VStack(spacing: 6) {
             Image(systemName: "arrow.down")
-                .font(.system(size: 16, weight: .bold))
+                .font(DS.Typography.alongSans(size: 16, weight: "Bold"))
                 .foregroundStyle(viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
                 .animation(DS.Motion.standard, value: viewModel.isLockedOnQibla)
 
@@ -272,7 +272,7 @@ struct QiblaView: View {
 
             // Needle tip — diamond
             Image(systemName: "diamond.fill")
-                .font(.system(size: 10))
+                .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
                 .foregroundStyle(viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
                 .offset(y: -needleLength - 2)
         }
@@ -292,7 +292,7 @@ struct QiblaView: View {
                 .animation(DS.Motion.countdown, value: Int(viewModel.qiblaDirection))
 
             Text(L10n.Qibla.direction)
-                .font(.system(size: 12, weight: .semibold))
+                .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
                 .tracking(2)
                 .textCase(.uppercase)
@@ -330,7 +330,7 @@ struct QiblaView: View {
                     Image(systemName: viewModel.rotationAngle > 0
                           ? "arrow.turn.right.up"
                           : "arrow.turn.left.up")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                     Text("\(absAngle)° \(direction)")
                         .font(.system(size: 14, weight: .semibold))
                         .contentTransition(.numericText())
@@ -367,7 +367,7 @@ struct QiblaView: View {
         VStack(spacing: DS.Space.lg) {
             DSSkeleton.circle(size: 48)
             Text(L10n.Qibla.locationLoading)
-                .font(.system(size: 15, weight: .medium))
+                .font(DS.Typography.bodyMedium)
                 .foregroundStyle(DS.Color.textSecondary)
         }
     }

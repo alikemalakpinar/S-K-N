@@ -18,35 +18,28 @@ struct RootView: View {
     ]
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             // Tab content — all views stay alive to preserve NavigationStack state
-            ZStack {
-                DashboardView(container: container, onOpenRehber: openRehber, onResumeReading: resumeReading)
-                    .opacity(selectedTab == 0 ? 1 : 0)
-                    .allowsHitTesting(selectedTab == 0)
-
-                PrayerTimesView(container: container)
-                    .opacity(selectedTab == 1 ? 1 : 0)
-                    .allowsHitTesting(selectedTab == 1)
-
-                QuranView(container: container, selectedSegment: $quranSegment, resumePage: $resumePage, showRehber: $showRehber)
-                    .opacity(selectedTab == 2 ? 1 : 0)
-                    .allowsHitTesting(selectedTab == 2)
-
-                QiblaCompassView()
-                    .opacity(selectedTab == 3 ? 1 : 0)
-                    .allowsHitTesting(selectedTab == 3)
-
-                TasbihPhysicsView()
-                    .opacity(selectedTab == 4 ? 1 : 0)
-                    .allowsHitTesting(selectedTab == 4)
-                
-                SpiritualJourneyView()
-                    .opacity(selectedTab == 5 ? 1 : 0)
-                    .allowsHitTesting(selectedTab == 5)
+            Group {
+                switch selectedTab {
+                case 0:
+                    DashboardView(container: container, onOpenRehber: openRehber, onResumeReading: resumeReading)
+                case 1:
+                    PrayerTimesView(container: container)
+                case 2:
+                    QuranView(container: container, selectedSegment: $quranSegment, resumePage: $resumePage, showRehber: $showRehber)
+                case 3:
+                    QiblaCompassView()
+                case 4:
+                    TasbihPhysicsView()
+                case 5:
+                    SpiritualJourneyView()
+                default:
+                    DashboardView(container: container, onOpenRehber: openRehber, onResumeReading: resumeReading)
+                }
             }
-
-            // Custom floating tab bar
+        }
+        .safeAreaInset(edge: .bottom) {
             SKNTabBar(tabs: tabs, selectedTab: $selectedTab, isVisible: $tabBarVisible)
         }
         .ignoresSafeArea(.keyboard)

@@ -292,13 +292,13 @@ struct SKNSurahHeader: View {
 
             HStack(spacing: DS.Space.md) {
                 Text(L10n.revelationType(surah.revelationType))
-                    .font(.system(size: 11, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
                 Circle()
                     .fill(DS.Color.accent.opacity(0.5))
                     .frame(width: 3, height: 3)
                 Text("\(surah.verseCount) ayet")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }

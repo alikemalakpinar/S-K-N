@@ -60,7 +60,7 @@ struct ProfileView: View {
                     .frame(width: 88, height: 88)
 
                 Image(systemName: "person.fill")
-                    .font(.system(size: 36, weight: .light))
+                    .font(DS.Typography.alongSans(size: 36, weight: "Regular"))
                     .foregroundStyle(DS.Color.accent)
             }
 
@@ -92,7 +92,7 @@ struct ProfileView: View {
             VStack(alignment: .leading, spacing: DS.Space.md) {
                 HStack {
                     Image(systemName: "book.fill")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                         .foregroundStyle(DS.Color.accent)
                         .frame(width: 28, height: 28)
                         .background(
@@ -157,7 +157,7 @@ struct ProfileView: View {
     private func statCard(icon: String, iconColor: Color, value: String, label: String, unit: String?) -> some View {
         VStack(spacing: DS.Space.sm) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .medium))
+                .font(DS.Typography.listTitle)
                 .foregroundStyle(iconColor)
                 .frame(width: 32, height: 32)
                 .background(
@@ -244,7 +244,7 @@ struct ProfileView: View {
                     .frame(width: 32, height: 32)
 
                 Image(systemName: pillIcon(status))
-                    .font(.system(size: 12, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 12, weight: "Medium"))
                     .foregroundStyle(pillColor(status))
             }
 
@@ -258,7 +258,7 @@ struct ProfileView: View {
     private func pillColor(_ status: PrayerStatus) -> Color {
         switch status {
         case .prayed: DS.Color.success
-        case .missed: .red
+        case .missed: Color(hex: 0xE05C4D)
         case .late: DS.Color.warning
         case .notLogged: DS.Color.textTertiary.opacity(0.5)
         }
@@ -339,7 +339,7 @@ struct ProfileView: View {
     private func quickLinkRow(icon: String, iconColor: Color, title: String) -> some View {
         HStack(spacing: DS.Space.md) {
             Image(systemName: icon)
-                .font(.system(size: 14, weight: .medium))
+                .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                 .foregroundStyle(iconColor)
                 .frame(width: 30, height: 30)
                 .background(
@@ -354,7 +354,7 @@ struct ProfileView: View {
             Spacer(minLength: 0)
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
+                .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textTertiary)
         }
         .padding(.vertical, DS.Space.sm)

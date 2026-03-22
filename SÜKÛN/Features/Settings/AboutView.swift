@@ -82,7 +82,7 @@ struct AboutView: View {
             }
             Spacer()
             Image(systemName: "arrow.up.right")
-                .font(.system(size: 11, weight: .medium))
+                .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
                 .foregroundStyle(DS.Color.accent)
         }
         .padding(.vertical, DS.Space.xs)

@@ -89,19 +89,36 @@ struct SkeletonShimmer: View {
             .overlay(
                 GeometryReader { geo in
                     if !reduceMotion {
-                        LinearGradient(
-                            colors: [
-                                .clear,
-                                DS.Color.textTertiary.opacity(0.08),
-                                DS.Color.textTertiary.opacity(0.15),
-                                DS.Color.textTertiary.opacity(0.08),
-                                .clear
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                        .frame(width: geo.size.width * 0.6)
-                        .offset(x: phase * geo.size.width)
+                        // Dual-wave shimmer with branded gold tint
+                        ZStack {
+                            LinearGradient(
+                                colors: [
+                                    .clear,
+                                    DS.Color.accent.opacity(0.04),
+                                    DS.Color.accent.opacity(0.10),
+                                    DS.Color.accent.opacity(0.04),
+                                    .clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .frame(width: geo.size.width * 0.5)
+                            .offset(x: phase * geo.size.width)
+
+                            LinearGradient(
+                                colors: [
+                                    .clear,
+                                    .white.opacity(0.06),
+                                    .white.opacity(0.12),
+                                    .white.opacity(0.06),
+                                    .clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .frame(width: geo.size.width * 0.4)
+                            .offset(x: phase * geo.size.width * 0.85)
+                        }
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))

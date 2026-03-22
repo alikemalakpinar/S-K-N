@@ -143,7 +143,7 @@ struct TrackerView: View {
                         .foregroundStyle(DS.Color.textTertiary)
                 }
                 Text(label)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 11, weight: "Medium"))
                     .foregroundStyle(DS.Color.textSecondary)
             }
         }
@@ -261,7 +261,7 @@ struct TrackerView: View {
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text("Sure \(log.surahId): \(log.fromVerse)–\(log.toVerse)")
-                                .font(.system(size: 15, weight: .medium))
+                                .font(DS.Typography.bodyMedium)
                                 .foregroundStyle(DS.Color.textPrimary)
                             Text(log.date, format: .dateTime.month(.abbreviated).day().hour().minute())
                                 .font(.system(size: 11))
@@ -327,7 +327,7 @@ struct TrackerView: View {
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(session.presetTitle.isEmpty ? "Zikir" : session.presetTitle)
-                                .font(.system(size: 14, weight: .medium))
+                                .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                                 .foregroundStyle(DS.Color.textPrimary)
                             Text(session.date, format: .dateTime.month(.abbreviated).day().hour().minute())
                                 .font(.system(size: 11))

@@ -57,7 +57,7 @@ struct VerseDetailSheet: View {
                     .font(DS.Typography.captionSm)
             } icon: {
                 Image(systemName: "book.pages")
-                    .font(.system(size: 10))
+                    .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
             }
             .foregroundStyle(DS.Color.textSecondary)
 
@@ -147,7 +147,7 @@ struct VerseDetailSheet: View {
                     sectionLabel("Tefsir", icon: "book.pages.fill")
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(DS.Typography.alongSans(size: 12, weight: "Medium"))
                         .foregroundStyle(DS.Color.accent)
                         .rotationEffect(.degrees(showTefsir ? 180 : 0))
                 }

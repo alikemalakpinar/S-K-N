@@ -1,12 +1,15 @@
 import SwiftUI
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SKNTabBar — Custom Floating Tab Bar
+// SKNTabBar — Premium Floating Tab Bar
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //
-//  A floating capsule tab bar with matched-geometry sliding
-//  indicator, bouncy spring transitions, and automatic hiding
-//  in immersive modes (e.g., Mushaf reader, Dhikr session).
+//  A floating capsule tab bar with:
+//  - Matched-geometry sliding indicator with accent glow
+//  - Bouncy spring transitions and haptic feedback
+//  - Badge support for notification dots
+//  - Auto-hide in immersive modes
+//  - AlongSanss2 typography
 //
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -29,6 +32,7 @@ struct SKNTab: Identifiable, Hashable {
     let id: Int
     let icon: String
     let label: String
+    var badge: Int = 0
 }
 
 // MARK: - SKNTabBar
@@ -54,7 +58,11 @@ struct SKNTabBar: View {
                     Capsule(style: .continuous)
                         .stroke(
                             LinearGradient(
-                                colors: [DS.Color.glassBorder.opacity(0.8), DS.Color.glassBorder.opacity(0.2)],
+                                colors: [
+                                    DS.Color.glassBorder.opacity(0.8),
+                                    DS.Color.glassBorder.opacity(0.1),
+                                    DS.Color.glassBorder.opacity(0.4)
+                                ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -62,9 +70,9 @@ struct SKNTabBar: View {
                         )
                 )
                 .shadow(color: DS.Color.accent.opacity(0.12), radius: 24, y: 12)
-                .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+                .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
         }
-        .padding(.horizontal, DS.Space.x2)
+        .padding(.horizontal, DS.Space.xl)
         .padding(.bottom, DS.Space.sm)
         .offset(y: isVisible ? 0 : 100)
         .opacity(isVisible ? 1 : 0)
@@ -82,14 +90,26 @@ struct SKNTabBar: View {
             }
         } label: {
             VStack(spacing: 3) {
-                Image(systemName: tab.icon)
-                    .font(.system(size: isSelected ? 18 : 17, weight: isSelected ? .semibold : .regular))
-                    .foregroundStyle(isSelected ? DS.Color.accent : DS.Color.textTertiary)
-                    .scaleEffect(isSelected ? 1.1 : 1.0)
-                    .animation(DS.Motion.bouncy, value: isSelected)
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: tab.icon)
+                        .font(.system(size: isSelected ? 18 : 17, weight: isSelected ? .semibold : .regular))
+                        .foregroundStyle(isSelected ? DS.Color.accent : DS.Color.textTertiary)
+                        .scaleEffect(isSelected ? 1.1 : 1.0)
+                        .animation(DS.Motion.bouncy, value: isSelected)
+                        .symbolEffect(.bounce.byLayer, value: isSelected)
+
+                    // Badge dot
+                    if tab.badge > 0 {
+                        Circle()
+                            .fill(DS.Color.accent)
+                            .frame(width: 6, height: 6)
+                            .offset(x: 3, y: -2)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
 
                 Text(tab.label)
-                    .font(.system(size: 10, weight: isSelected ? .semibold : .regular))
+                    .font(DS.Typography.alongSans(size: 10, weight: isSelected ? "SemiBold" : "Regular"))
                     .foregroundStyle(isSelected ? DS.Color.accent : DS.Color.textTertiary)
                     .lineLimit(1)
             }
@@ -97,16 +117,24 @@ struct SKNTabBar: View {
             .padding(.vertical, DS.Space.sm)
             .background {
                 if isSelected {
-                    Capsule(style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [DS.Color.accentSoft, DS.Color.accentSoft.opacity(0.5)],
-                                startPoint: .top,
-                                endPoint: .bottom
+                    ZStack {
+                        // Soft glow behind active tab
+                        Capsule(style: .continuous)
+                            .fill(DS.Color.accent.opacity(0.06))
+                            .blur(radius: 12)
+
+                        // Active indicator pill
+                        Capsule(style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [DS.Color.accentSoft, DS.Color.accentSoft.opacity(0.4)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
                             )
-                        )
-                        .shadow(color: DS.Color.accent.opacity(0.2), radius: 8, y: 4)
-                        .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
+                            .shadow(color: DS.Color.accent.opacity(0.2), radius: 10, y: 4)
+                    }
+                    .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
                 }
             }
         }
@@ -127,7 +155,7 @@ struct SKNTabBar: View {
             SKNTab(id: 0, icon: "house.fill", label: "Ana"),
             SKNTab(id: 1, icon: "clock.fill", label: "Vakit"),
             SKNTab(id: 2, icon: "book.fill", label: "Kuran"),
-            SKNTab(id: 3, icon: "location.north.fill", label: "Kıble"),
+            SKNTab(id: 3, icon: "location.north.fill", label: "Kible"),
             SKNTab(id: 4, icon: "circle.circle.fill", label: "Zikir"),
             SKNTab(id: 5, icon: "chart.xyaxis.line", label: "Analiz"),
         ]

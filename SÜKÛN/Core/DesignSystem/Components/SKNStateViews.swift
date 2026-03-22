@@ -30,9 +30,8 @@ struct SKNLoadingState: View {
                 SkeletonShimmerGroup(rows: 3)
                     .frame(maxWidth: 260)
             } else {
-                ProgressView()
-                    .tint(DS.Color.accent)
-                    .controlSize(.regular)
+                SKNLottieView.looping("loading-spin", speed: 1.2)
+                    .frame(width: 48, height: 48)
             }
 
             Text(message)
@@ -65,19 +64,28 @@ struct SKNEmptyState: View {
     var message: String?
     var action: (() -> Void)?
     var actionLabel: String?
+    /// Optional Lottie animation name to replace the SF Symbol icon
+    var lottieAnimation: String?
 
     @State private var floating = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: DS.Space.xl) {
-            ZStack {
-                Circle()
-                    .fill(DS.Color.accentSoft)
-                    .frame(width: 88, height: 88)
-                Image(systemName: icon)
-                    .font(.system(size: 32, weight: .light))
-                    .foregroundStyle(DS.Color.accent)
+            Group {
+                if let lottieAnimation {
+                    SKNLottieView.looping(lottieAnimation, speed: 0.8)
+                        .frame(width: 120, height: 120)
+                } else {
+                    ZStack {
+                        Circle()
+                            .fill(DS.Color.accentSoft)
+                            .frame(width: 88, height: 88)
+                        Image(systemName: icon)
+                            .font(.system(size: 32, weight: .light))
+                            .foregroundStyle(DS.Color.accent)
+                    }
+                }
             }
             .offset(y: floating ? -6 : 0)
             .animation(

@@ -43,7 +43,7 @@ struct BookmarksView: View {
     private func bookmarkRow(_ bookmark: Bookmark, index: Int) -> some View {
         HStack(spacing: DS.Space.md) {
             Image(systemName: iconFor(bookmark.type))
-                .font(.system(size: 14, weight: .medium))
+                .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                 .foregroundStyle(colorFor(bookmark.type))
                 .frame(width: 32, height: 32)
                 .background(

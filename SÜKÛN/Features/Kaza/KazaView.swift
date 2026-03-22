@@ -78,7 +78,7 @@ struct KazaView: View {
                         .animation(DS.Motion.countdown, value: viewModel.kazaPrayer?.totalCount)
 
                     Text(L10n.Common.namaz)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(DS.Typography.alongSans(size: 13, weight: "Medium"))
                         .foregroundStyle(DS.Color.textSecondary)
                 }
             }
@@ -125,12 +125,12 @@ struct KazaView: View {
 
     private func ringColor(for index: Int) -> Color {
         let colors: [Color] = [
-            .red,
-            .orange,
+            Color(hex: 0xE05C4D),
+            DS.Color.warning,
             DS.Color.accent,
             DS.Color.success,
-            .cyan,
-            .purple
+            Color(hex: 0x5BA8C8),
+            Color(hex: 0x8B6FB0)
         ]
         return colors[index % colors.count]
     }

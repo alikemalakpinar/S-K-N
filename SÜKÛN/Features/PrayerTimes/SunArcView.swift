@@ -90,7 +90,7 @@ struct SunArcView: View {
             HStack {
                 HStack(spacing: DS.Space.xs) {
                     Image(systemName: "sunrise.fill")
-                        .font(.system(size: 10))
+                        .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
                         .foregroundStyle(DS.Color.accent.opacity(0.6))
                     Text(sunrise, format: .dateTime.hour().minute())
                         .font(.system(size: 12, weight: .medium, design: .monospaced))
@@ -104,7 +104,7 @@ struct SunArcView: View {
                         .font(.system(size: 12, weight: .medium, design: .monospaced))
                         .foregroundStyle(DS.Color.textSecondary)
                     Image(systemName: "sunset.fill")
-                        .font(.system(size: 10))
+                        .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
                         .foregroundStyle(DS.Color.accent.opacity(0.6))
                 }
             }

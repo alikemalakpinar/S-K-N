@@ -11,6 +11,12 @@
 		<string>CormorantGaramond-MediumItalic.ttf</string>
 		<string>Amiri-Regular.ttf</string>
 		<string>Amiri-Bold.ttf</string>
+		<string>AlongSanss2-Regular.otf</string>
+		<string>AlongSanss2-Medium.otf</string>
+		<string>AlongSanss2-SemiBold.otf</string>
+		<string>AlongSanss2-Bold.otf</string>
+		<string>AlongSanss2-ExtraBold.otf</string>
+		<string>AlongSanss2-Black.otf</string>
 	</array>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Sükun, hassas 3D Kıble hesaplaması için konumunuza ihtiyaç duyar.</string>

@@ -313,7 +313,7 @@ struct MushafReaderView: View {
                 } label: {
                     HStack(spacing: DS.Space.xs) {
                         Text("Cüz \(viewModel.currentJuzNumber)")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(DS.Typography.chipLabel)
                             .foregroundStyle(DS.Color.accent)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -349,7 +349,7 @@ struct MushafReaderView: View {
             DS.Haptic.selection()
         } label: {
             Text(label)
-                .font(.system(size: 12, weight: .semibold))
+                .font(DS.Typography.sectionHead)
                 .foregroundStyle(active.wrappedValue ? .white : DS.Color.textSecondary)
                 .padding(.horizontal, DS.Space.md)
                 .padding(.vertical, 10)
@@ -579,7 +579,7 @@ private struct PagePickerSheet: View {
                     }
                     VStack(alignment: .leading, spacing: 2) {
                         Text(surah.nameTurkish)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(DS.Typography.listTitle)
                             .foregroundStyle(DS.Color.textPrimary)
                         Text("\(surah.verseCount) ayet \u{2022} \(surah.revelationType == "Meccan" ? "Mekki" : "Medeni")")
                             .font(DS.Typography.captionSm)

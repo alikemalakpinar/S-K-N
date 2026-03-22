@@ -22,7 +22,7 @@ public struct SpiritualJourneyView: View {
                         .tracking(3)
                     
                     Text("Son 30 Günün Yankısı")
-                        .font(.system(size: 28, weight: .bold))
+                        .font(DS.Typography.title1)
                         .foregroundStyle(DS.Color.textPrimary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -64,7 +64,7 @@ public struct SpiritualJourneyView: View {
                         .foregroundStyle(DS.Color.warning.opacity(0.8))
                         .annotation(position: .top, alignment: .leading) {
                             Text("Farz (5)")
-                                .font(.system(size: 10, weight: .bold))
+                                .font(DS.Typography.chipLabel)
                                 .foregroundStyle(DS.Color.warning)
                         }
                     }
@@ -95,13 +95,13 @@ public struct SpiritualJourneyView: View {
                                     .frame(width: 40, height: 40)
                                 
                                 Image(systemName: insight.trend == .upward ? "arrow.up.right" : (insight.trend == .downward ? "arrow.down.right" : "minus"))
-                                    .font(.system(size: 16, weight: .bold))
+                                    .font(DS.Typography.alongSans(size: 16, weight: "Bold"))
                                     .foregroundStyle(insight.trend == .upward ? DS.Color.success : (insight.trend == .downward ? DS.Color.warning : DS.Color.accent))
                             }
                             
                             VStack(alignment: .leading, spacing: DS.Space.xs) {
                                 Text(insight.title)
-                                    .font(.system(size: 16, weight: .bold))
+                                    .font(DS.Typography.alongSans(size: 16, weight: "Bold"))
                                     .foregroundStyle(DS.Color.textPrimary)
                                 
                                 Text(insight.description)
@@ -145,7 +145,7 @@ public struct SpiritualJourneyView: View {
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundStyle(DS.Color.textPrimary)
                 Text(title)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(DS.Typography.alongSans(size: 11, weight: "SemiBold"))
                     .foregroundStyle(DS.Color.textSecondary)
                     .tracking(0.5)
             }

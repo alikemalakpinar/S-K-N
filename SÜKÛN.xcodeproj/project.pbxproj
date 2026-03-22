@@ -11,6 +11,7 @@
 		A493411B808821B04E58D4D8 /* JourneyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0492401AA1FEEAEF428580FA /* JourneyView.swift */; };
 		A99837452F572E0000C9933B /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B9A0B1C22F570D0100C9933B /* GRDB */; };
 		A99837462F572E0000C9933B /* Adhan in Frameworks */ = {isa = PBXBuildFile; productRef = B3D4E5F62F570D0100C9933B /* Adhan */; };
+		A9D8C4CF2F70159F007FEBCB /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = D1F2A3B42F7E0D0100LOTTIE /* Lottie */; };
 		C1AA000D2F580B01E1234AAA /* SukunLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C1AA00012F580B01E1234AAA /* SukunLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -76,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9D8C4CF2F70159F007FEBCB /* Lottie in Frameworks */,
 				A99837462F572E0000C9933B /* Adhan in Frameworks */,
 				A99837452F572E0000C9933B /* GRDB in Frameworks */,
 			);
@@ -135,6 +137,7 @@
 			packageProductDependencies = (
 				B9A0B1C22F570D0100C9933B /* GRDB */,
 				B3D4E5F62F570D0100C9933B /* Adhan */,
+				D1F2A3B42F7E0D0100LOTTIE /* Lottie */,
 			);
 			productName = "SÜKÛN";
 			productReference = A99834F22F570D0100C9933B /* SÜKÛN.app */;
@@ -190,6 +193,7 @@
 			packageReferences = (
 				B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				B5D6E7F82F570D0100C9933B /* XCRemoteSwiftPackageReference "adhan-swift" */,
+				C2E3F4A52F7E0D0100LOTTIE /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A99834F32F570D0100C9933B /* Products */;
@@ -570,6 +574,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		C2E3F4A52F7E0D0100LOTTIE /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -582,6 +594,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B1A2B3C42F570D0100C9933B /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
+		};
+		D1F2A3B42F7E0D0100LOTTIE /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C2E3F4A52F7E0D0100LOTTIE /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

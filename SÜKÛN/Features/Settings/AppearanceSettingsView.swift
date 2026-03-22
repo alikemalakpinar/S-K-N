@@ -20,7 +20,7 @@ struct AppearanceSettingsView: View {
                 DSCard {
                     HStack(spacing: DS.Space.md) {
                         Image(systemName: "textformat.size")
-                            .font(.system(size: 15, weight: .medium))
+                            .font(DS.Typography.bodyMedium)
                             .foregroundStyle(DS.Color.accent)
                             .frame(width: 30, height: 30)
                             .background(
@@ -115,7 +115,7 @@ struct AppearanceSettingsView: View {
 
                 // Icon
                 Image(systemName: icon)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                     .foregroundStyle(isSelected ? DS.Color.accent : DS.Color.textSecondary)
 
                 // Label

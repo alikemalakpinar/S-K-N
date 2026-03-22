@@ -72,7 +72,7 @@ struct DuasView: View {
         } label: {
             VStack(alignment: .leading, spacing: DS.Space.md) {
                 Image(systemName: categoryIcon(for: category))
-                    .font(.system(size: 20, weight: .medium))
+                    .font(DS.Typography.alongSans(size: 20, weight: "Medium"))
                     .foregroundStyle(DS.Color.accent)
                     .frame(width: 40, height: 40)
                     .background(
@@ -117,7 +117,7 @@ struct DuasView: View {
                     } label: {
                         HStack(spacing: DS.Space.xs) {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(DS.Typography.alongSans(size: 13, weight: "SemiBold"))
                             Text(L10n.Duas.categories)
                                 .font(DS.Typography.caption)
                         }

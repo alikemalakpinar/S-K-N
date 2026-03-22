@@ -249,7 +249,7 @@ struct QuranView: View {
                 } label: {
                     HStack(spacing: DS.Space.md) {
                         Image(systemName: "bookmark.fill")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(DS.Typography.alongSans(size: 14, weight: "Medium"))
                             .foregroundStyle(DS.Color.accent)
                             .frame(width: 32, height: 32)
                             .background(
@@ -259,7 +259,7 @@ struct QuranView: View {
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(L10n.Dashboard.whereYouLeft)
-                                .font(.system(size: 9, weight: .bold))
+                                .font(DS.Typography.alongSans(size: 9, weight: "Bold"))
                                 .foregroundStyle(DS.Color.textSecondary)
                                 .tracking(1.5)
                             Text(pos.surahNameTurkish)
@@ -274,7 +274,7 @@ struct QuranView: View {
                                 .font(DS.Typography.captionSm)
                                 .foregroundStyle(DS.Color.textSecondary)
                             Image(systemName: "arrow.right")
-                                .font(.system(size: 11, weight: .bold))
+                                .font(DS.Typography.trackerLabel)
                                 .foregroundStyle(DS.Color.accent)
                         }
                     }
@@ -330,7 +330,7 @@ struct QuranView: View {
                                         .foregroundStyle(DS.Color.accent)
                                 }
                                 Text(verseID)
-                                    .font(.system(size: 13, weight: .semibold))
+                                    .font(DS.Typography.alongSans(size: 13, weight: "SemiBold"))
                                     .foregroundStyle(DS.Color.accent)
                             }
                             Spacer()
