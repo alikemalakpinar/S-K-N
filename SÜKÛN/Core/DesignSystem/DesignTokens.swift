@@ -383,6 +383,75 @@ extension DS {
         static let deepAmbient = ShadowToken(
             color: .black.opacity(0.15), radius: 40, y: 20
         )
+        /// Inner glow — warm gold halo for active/focused cards
+        static let innerGlow = ShadowToken(
+            color: SwiftUI.Color(.dsAccent).opacity(0.15), radius: 20, y: 0
+        )
+        /// Layered depth — combines tight + diffuse shadow for Apple-level depth
+        static let layeredDepth = ShadowToken(
+            color: .black.opacity(0.06), radius: 20, y: 8
+        )
+    }
+}
+
+// MARK: - Premium Gradient Tokens
+
+extension DS {
+    enum Gradient {
+        /// Warm gold shimmer gradient for premium surfaces
+        static let goldShimmer: [SwiftUI.Color] = [
+            SwiftUI.Color(hex: 0xC8A558, opacity: 0.15),
+            SwiftUI.Color(hex: 0xE8D5A0, opacity: 0.08),
+            SwiftUI.Color(hex: 0xB08D3E, opacity: 0.12)
+        ]
+
+        /// Ethereal dawn wash — fajr-inspired pastel gradient
+        static let dawnWash: [SwiftUI.Color] = [
+            SwiftUI.Color(hex: 0xF4C6A5, opacity: 0.20),
+            SwiftUI.Color(hex: 0xF5E6C8, opacity: 0.15),
+            SwiftUI.Color(hex: 0xE8D5B8, opacity: 0.10)
+        ]
+
+        /// Night sky depth gradient for immersive dark modes
+        static let nightSky: [SwiftUI.Color] = [
+            SwiftUI.Color(hex: 0x0A0E1A, opacity: 0.95),
+            SwiftUI.Color(hex: 0x1A2744, opacity: 0.80),
+            SwiftUI.Color(hex: 0x0F2027, opacity: 0.90)
+        ]
+
+        /// Success celebration radial colors
+        static let celebration: [SwiftUI.Color] = [
+            SwiftUI.Color(hex: 0xC8A558, opacity: 0.30),
+            SwiftUI.Color(hex: 0x34A853, opacity: 0.15),
+            .clear
+        ]
+
+        /// Premium card border gradient (light refraction effect)
+        static func cardBorder(opacity: Double = 1.0) -> LinearGradient {
+            LinearGradient(
+                colors: [
+                    SwiftUI.Color.white.opacity(0.25 * opacity),
+                    SwiftUI.Color.white.opacity(0.05 * opacity),
+                    SwiftUI.Color.white.opacity(0.15 * opacity)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+
+        /// Accent glow radial for focus states
+        static func accentRadial(center: UnitPoint = .center) -> RadialGradient {
+            RadialGradient(
+                colors: [
+                    DS.Color.accent.opacity(0.20),
+                    DS.Color.accent.opacity(0.05),
+                    .clear
+                ],
+                center: center,
+                startRadius: 20,
+                endRadius: 200
+            )
+        }
     }
 }
 
@@ -447,6 +516,40 @@ extension View {
     /// Apply a DS shadow preset.
     func dsShadow(_ token: ShadowToken) -> some View {
         shadow(color: token.color, radius: token.radius, y: token.y)
+    }
+
+    /// Apply multi-layered premium shadow (tight contact + diffuse ambient).
+    /// Creates Apple-level depth perception with two shadow layers.
+    func dsPremiumShadow() -> some View {
+        self
+            .shadow(color: .black.opacity(0.03), radius: 1, y: 1)    // Contact shadow
+            .shadow(color: .black.opacity(0.04), radius: 10, y: 4)   // Medium diffuse
+            .shadow(color: .black.opacity(0.03), radius: 30, y: 12)  // Wide ambient
+    }
+
+    /// Apply accent glow halo around element — for active/focused states.
+    func dsAccentGlow(active: Bool = true, radius: CGFloat = 16, opacity: Double = 0.25) -> some View {
+        self
+            .shadow(
+                color: active ? DS.Color.accent.opacity(opacity) : .clear,
+                radius: active ? radius : 0,
+                y: active ? 4 : 0
+            )
+            .animation(DS.Motion.standard, value: active)
+    }
+
+    /// Premium elevated card style — glass + multi-layer shadow + gradient border.
+    func dsPremiumCard(cornerRadius: CGFloat = DS.Radius.lg) -> some View {
+        self
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(DS.Color.cardElevated)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(DS.Gradient.cardBorder(opacity: 0.5), lineWidth: 0.5)
+            )
+            .dsPremiumShadow()
     }
 }
 

@@ -73,66 +73,145 @@ public struct QiblaCompassView: View {
     }
     
     // MARK: - Mathematical Dial Drawings
-    
+
     private var compassDial: some View {
         ZStack {
-            // Main Titanium Bezel
+            // Outer ambient glow ring
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [DS.Color.backgroundSecondary, DS.Color.backgroundPrimary],
+                        colors: [DS.Color.accent.opacity(0.05), .clear],
                         center: .center,
-                        startRadius: 50,
-                        endRadius: 180
+                        startRadius: 150,
+                        endRadius: 200
+                    )
+                )
+                .frame(width: 360, height: 360)
+
+            // Main Titanium Bezel — dual-ring design
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            DS.Color.backgroundSecondary,
+                            DS.Color.backgroundPrimary.opacity(0.95),
+                            DS.Color.backgroundPrimary
+                        ],
+                        center: .center,
+                        startRadius: 30,
+                        endRadius: 170
                     )
                 )
                 .frame(width: 320, height: 320)
                 .overlay(
-                    Circle()
-                        .stroke(
-                            LinearGradient(
-                                colors: [DS.Color.accent, DS.Color.accent.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 3
-                        )
+                    ZStack {
+                        // Inner bezel ring
+                        Circle()
+                            .stroke(DS.Color.hairline.opacity(0.3), lineWidth: 1)
+                            .frame(width: 300, height: 300)
+
+                        // Outer bezel ring — premium gradient
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        DS.Color.accent.opacity(0.6),
+                                        DS.Color.accent.opacity(0.1),
+                                        DS.Color.accent.opacity(0.3),
+                                        DS.Color.accent.opacity(0.05)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 2.5
+                            )
+                    }
                 )
-                .shadow(color: DS.Color.accent.opacity(0.15), radius: 20, y: 10)
-            
-            // 360 Degree Tick Marks
+                .shadow(color: .black.opacity(0.2), radius: 20, y: 10)
+                .shadow(color: DS.Color.accent.opacity(0.1), radius: 30, y: 0)
+
+            // 360 Degree Tick Marks — finer detail
             ForEach(0..<120) { tick in
                 let angle = Double(tick) * 3.0
                 let isMajor = tick % 10 == 0
-                
+                let isMedium = tick % 5 == 0
+
                 Rectangle()
-                    .fill(isMajor ? DS.Color.accent : DS.Color.textTertiary)
-                    .frame(width: isMajor ? 3 : 1, height: isMajor ? 14 : 7)
+                    .fill(
+                        isMajor
+                            ? DS.Color.accent.opacity(0.8)
+                            : isMedium
+                                ? DS.Color.textSecondary.opacity(0.4)
+                                : DS.Color.textTertiary.opacity(0.5)
+                    )
+                    .frame(
+                        width: isMajor ? 2.5 : (isMedium ? 1.5 : 0.8),
+                        height: isMajor ? 16 : (isMedium ? 10 : 5)
+                    )
                     .offset(y: -140)
                     .rotationEffect(.degrees(angle))
             }
-            
-            // Text Directions (N, E, S, W)
-            let directions = [("K", 0.0), ("D", 90.0), ("G", 180.0), ("B", 270.0)]
+
+            // Degree numbers at 30° intervals
+            ForEach(0..<12) { i in
+                let deg = i * 30
+                if deg % 90 != 0 {
+                    Text("\(deg)")
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .foregroundStyle(DS.Color.textTertiary)
+                        .offset(y: -120)
+                        .rotationEffect(.degrees(Double(deg)))
+                }
+            }
+
+            // Cardinal directions — premium typography
+            let directions: [(String, Double, Bool)] = [
+                ("K", 0.0, true), ("D", 90.0, false),
+                ("G", 180.0, false), ("B", 270.0, false)
+            ]
             ForEach(directions, id: \.1) { dir in
                 Text(dir.0)
-                    .font(.system(size: 24, weight: .black))
-                    .foregroundStyle(dir.0 == "K" ? DS.Color.accent : DS.Color.textPrimary)
-                    .offset(y: -110)
+                    .font(.system(size: dir.2 ? 26 : 22, weight: .black, design: .rounded))
+                    .foregroundStyle(
+                        dir.2
+                            ? DS.Color.accent
+                            : DS.Color.textPrimary.opacity(0.7)
+                    )
+                    .shadow(color: dir.2 ? DS.Color.accent.opacity(0.3) : .clear, radius: 6)
+                    .offset(y: -105)
                     .rotationEffect(.degrees(dir.1))
             }
-            
-            // Rotate the entire dial based strictly on mathematical inverse heading
+
+            // Rotate the entire dial
             .rotationEffect(.degrees(-engine.currentHeading))
             .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.8), value: engine.currentHeading)
-            
-            // The Kaaba Arrow (Fixed orientation relative to Qibla angle)
+
+            // Center hub — layered metallic effect
+            ZStack {
+                Circle()
+                    .fill(DS.Color.accent.opacity(0.1))
+                    .frame(width: 20, height: 20)
+                    .blur(radius: 4)
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [DS.Color.accent.opacity(0.6), DS.Color.accent],
+                            center: .topLeading,
+                            startRadius: 0,
+                            endRadius: 6
+                        )
+                    )
+                    .frame(width: 10, height: 10)
+                    .shadow(color: DS.Color.accent.opacity(0.5), radius: 4)
+            }
+
+            // The Kaaba Arrow
             KaabaPointer()
                 .offset(y: -90)
                 .rotationEffect(.degrees(engine.angleToQibla))
                 .animation(.interactiveSpring(response: 0.4, dampingFraction: 0.6), value: engine.angleToQibla)
         }
-        .frame(width: 350, height: 350)
+        .frame(width: 360, height: 360)
     }
 }
 

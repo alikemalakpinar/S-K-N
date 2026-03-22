@@ -234,24 +234,40 @@ struct DashboardView: View {
     private func countdownBand(value: String, label: String, opacity: Double) -> some View {
         ZStack {
             Text(value)
-                .font(.system(size: 260, weight: .bold).width(.compressed)) // Peak Apple UI width
-                .foregroundStyle(.ultraThinMaterial) // Apple Vision Pro Glass Typography
-                .blendMode(.overlay) // Melts into the fluid background
+                .font(.system(size: 260, weight: .bold).width(.compressed))
+                .foregroundStyle(.ultraThinMaterial)
+                .blendMode(.overlay)
                 .tracking(-12)
                 .lineLimit(1)
                 .fixedSize()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, DS.Space.sm)
 
+            // Subtle accent glow behind seconds band
+            if opacity > 0.5 {
+                RadialGradient(
+                    colors: [
+                        DS.Color.accent.opacity(0.04),
+                        .clear
+                    ],
+                    center: .leading,
+                    startRadius: 20,
+                    endRadius: 200
+                )
+                .allowsHitTesting(false)
+            }
+
             VStack {
                 HStack {
                     Spacer()
-                    Text(label)
-                        .font(DS.Typography.chipLabel)
-                        .foregroundStyle(DS.Color.textPrimary.opacity(max(0.15, opacity * 0.4)))
-                        .tracking(2)
-                        .padding(.top, DS.Space.sm)
-                        .padding(.trailing, DS.Space.lg)
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(label)
+                            .font(DS.Typography.chipLabel)
+                            .foregroundStyle(DS.Color.textPrimary.opacity(max(0.15, opacity * 0.4)))
+                            .tracking(2)
+                    }
+                    .padding(.top, DS.Space.sm)
+                    .padding(.trailing, DS.Space.lg)
                 }
                 Spacer()
             }
@@ -260,9 +276,17 @@ struct DashboardView: View {
         .frame(maxWidth: .infinity)
         .clipped()
         .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(DS.Color.textPrimary.opacity(0.06))
-                .frame(height: 1)
+            // Gradient separator instead of flat line
+            LinearGradient(
+                colors: [
+                    DS.Color.accent.opacity(opacity * 0.15),
+                    DS.Color.textPrimary.opacity(0.06),
+                    DS.Color.accent.opacity(opacity * 0.08)
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(height: 1)
         }
     }
 
@@ -483,6 +507,7 @@ struct DashboardView: View {
                         } icon: {
                             Image(systemName: "sparkles")
                                 .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
+                                .symbolEffect(.variableColor.iterative, options: .repeating.speed(0.3))
                         }
                         .foregroundStyle(DS.Color.accent)
 
@@ -498,25 +523,60 @@ struct DashboardView: View {
                         }
                     }
 
+                    // Ornamental divider
+                    HStack(spacing: DS.Space.sm) {
+                        Rectangle().fill(DS.Color.ornamentLine).frame(height: 0.5)
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 5))
+                            .foregroundStyle(DS.Color.ornamentLine)
+                        Rectangle().fill(DS.Color.ornamentLine).frame(height: 0.5)
+                    }
+                    .padding(.vertical, DS.Space.xs)
+
                     Text(verse.textArabic)
                         .font(DS.Typography.arabicVerse)
                         .multilineTextAlignment(.trailing)
                         .lineSpacing(DS.Typography.LineSpacing.arabic)
                         .foregroundStyle(DS.Color.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.vertical, DS.Space.sm)
 
                     Text(verse.textTranslation)
                         .font(DS.Typography.footnote)
                         .foregroundStyle(DS.Color.textSecondary)
                         .lineSpacing(DS.Typography.LineSpacing.body)
 
-                    Text("— \(viewModel.verseOfTheDaySurahName)")
-                        .font(DS.Typography.serifSource)
-                        .foregroundStyle(DS.Color.accent.opacity(0.7))
+                    HStack {
+                        Text("— \(viewModel.verseOfTheDaySurahName)")
+                            .font(DS.Typography.serifSource)
+                            .foregroundStyle(DS.Color.accent.opacity(0.7))
+                        Spacer()
+                        Image(systemName: "arrow.right.circle")
+                            .font(.system(size: 14))
+                            .foregroundStyle(DS.Color.accent.opacity(0.4))
+                    }
                 }
                 .padding(DS.Space.lg)
-                .dsGlass(.thin, cornerRadius: DS.Radius.lg)
-                .dsShadow(DS.Shadow.premiumCard)
+                .background(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                            .fill(DS.Color.quranCard)
+                        // Subtle parchment texture overlay
+                        RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: DS.Gradient.goldShimmer,
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                        .stroke(DS.Color.ornamentLine, lineWidth: 0.5)
+                )
+                .dsPremiumShadow()
             }
             .buttonStyle(WidgetButtonStyle())
         }
@@ -557,14 +617,22 @@ struct DashboardView: View {
 
     private func quickActionCard(icon: String, title: String, subtitle: String, tint: SwiftUI.Color) -> some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
-            Image(systemName: icon)
-                .font(DS.Typography.listTitle)
-                .foregroundStyle(tint)
-                .frame(width: 36, height: 36)
-                .background(
-                    RoundedRectangle(cornerRadius: DS.Radius.sm + 2, style: .continuous)
-                        .fill(tint.opacity(0.1))
-                )
+            ZStack {
+                // Ambient glow behind icon
+                Circle()
+                    .fill(tint.opacity(0.08))
+                    .frame(width: 48, height: 48)
+                    .blur(radius: 8)
+
+                Image(systemName: icon)
+                    .font(DS.Typography.listTitle)
+                    .foregroundStyle(tint)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        RoundedRectangle(cornerRadius: DS.Radius.sm + 2, style: .continuous)
+                            .fill(tint.opacity(0.1))
+                    )
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -573,12 +641,22 @@ struct DashboardView: View {
                 Text(subtitle)
                     .font(DS.Typography.caption)
                     .foregroundStyle(DS.Color.textSecondary)
+                    .lineLimit(2)
+            }
+
+            Spacer(minLength: 0)
+
+            // Subtle arrow indicator
+            HStack {
+                Spacer()
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(tint.opacity(0.4))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DS.Space.lg)
-        .dsGlass(.regular, cornerRadius: DS.Radius.lg)
-        .dsShadow(DS.Shadow.premiumCard)
+        .dsPremiumCard(cornerRadius: DS.Radius.lg)
     }
 }
 
@@ -617,16 +695,25 @@ private struct PrayerPill: View {
             VStack(spacing: DS.Space.sm) {
                 ZStack {
                     if isPrayed {
+                        // Outer glow ring
                         Circle()
-                            .fill(LinearGradient(colors: [DS.Color.accent, DS.Color.accent.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .fill(DS.Color.accent.opacity(0.08))
+                            .frame(width: 56, height: 56)
+
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [DS.Color.accent, DS.Color.accent.opacity(0.75)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                             .frame(width: 48, height: 48)
-                            // Premium glowing aura
-                            .shadow(color: DS.Color.accent.opacity(0.5), radius: 10, y: 5)
-                        
+                            .shadow(color: DS.Color.accent.opacity(0.45), radius: 12, y: 5)
+
                         Image(systemName: "checkmark")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(.white)
-                            // Premium fluid bounce
                             .symbolEffect(.bounce, value: isPrayed)
                     } else {
                         Circle()
@@ -634,13 +721,25 @@ private struct PrayerPill: View {
                             .frame(width: 48, height: 48)
                             .overlay(
                                 Circle()
-                                    .stroke(DS.Color.hairline, lineWidth: 1.5)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [DS.Color.hairline, DS.Color.hairline.opacity(0.5)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1.5
+                                    )
                             )
+
+                        // Subtle plus icon hint
+                        Image(systemName: "plus")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(DS.Color.textTertiary)
                     }
                 }
 
                 Text(name)
-                    .font(DS.Typography.alongSans(size: 11, weight: "Bold"))
+                    .font(DS.Typography.alongSans(size: 11, weight: isPrayed ? "Bold" : "Medium"))
                     .foregroundStyle(isPrayed ? DS.Color.accent : DS.Color.textSecondary)
             }
         }

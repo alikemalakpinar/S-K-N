@@ -172,6 +172,40 @@ extension DS {
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MARK: Premium Transitions
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /// Dramatic hero entrance — oversized elements scaling in with cinematic weight.
+        /// For splash screens, achievement celebrations, milestone moments.
+        static var dramaticEntrance: Animation {
+            reduceMotion
+                ? .easeOut(duration: 0.25)
+                : .spring(response: 0.70, dampingFraction: 0.72, blendDuration: 0.15)
+        }
+
+        /// Silk smooth — ultra-refined easing for premium UI transitions.
+        /// Feels like high-end physical materials sliding into place.
+        static var silk: Animation {
+            reduceMotion
+                ? .easeOut(duration: 0.18)
+                : .spring(response: 0.45, dampingFraction: 0.92, blendDuration: 0.08)
+        }
+
+        /// Magnetic snap — for elements locking into position (Qibla, grid alignment).
+        static var magneticSnap: Animation {
+            reduceMotion
+                ? .easeOut(duration: 0.12)
+                : .spring(response: 0.22, dampingFraction: 0.78, blendDuration: 0)
+        }
+
+        /// Celebration bounce — exaggerated for goal reached, milestone, achievement.
+        static var celebration: Animation {
+            reduceMotion
+                ? .easeOut(duration: 0.25)
+                : .spring(response: 0.55, dampingFraction: 0.55, blendDuration: 0)
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // MARK: Breathing & Immersive
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -239,6 +273,18 @@ extension DS {
                 removal: .move(edge: .leading).combined(with: .opacity)
             )
         }
+
+        /// Blur dissolve — premium frosted glass reveal effect.
+        static var blurDissolve: AnyTransition {
+            .opacity
+            .combined(with: .scale(scale: 1.02))
+        }
+
+        /// Hero zoom — dramatic entrance for full-screen modals.
+        static var heroZoom: AnyTransition {
+            .scale(scale: 0.88)
+            .combined(with: .opacity)
+        }
     }
 }
 
@@ -266,6 +312,22 @@ extension View {
         scaleEffect(active ? scale : 1.0)
             .animation(
                 active ? DS.Motion.breathing(duration: duration) : .default,
+                value: active
+            )
+    }
+
+    /// Shimmer highlight effect — sweeping light across surfaces for premium feel.
+    func dsShimmer(active: Bool) -> some View {
+        modifier(ShimmerHighlightModifier(active: active))
+    }
+
+    /// Float animation — gentle vertical hover for featured elements.
+    func dsFloat(active: Bool, amplitude: CGFloat = 6, duration: Double = 3.0) -> some View {
+        offset(y: active ? -amplitude : amplitude)
+            .animation(
+                active
+                    ? .easeInOut(duration: duration).repeatForever(autoreverses: true)
+                    : .default,
                 value: active
             )
     }
@@ -390,6 +452,47 @@ enum AnimationTimeline {
                 }
             }
         }
+    }
+}
+
+// MARK: - Shimmer Highlight Modifier
+
+/// Sweeping light highlight effect for premium card surfaces.
+struct ShimmerHighlightModifier: ViewModifier {
+    let active: Bool
+    @State private var phase: CGFloat = -1
+
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                if active && !UIAccessibility.isReduceMotionEnabled {
+                    GeometryReader { geo in
+                        LinearGradient(
+                            colors: [
+                                .clear,
+                                .white.opacity(0.08),
+                                .white.opacity(0.15),
+                                .white.opacity(0.08),
+                                .clear
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        .frame(width: geo.size.width * 0.6)
+                        .offset(x: phase * geo.size.width * 1.5)
+                        .onAppear {
+                            withAnimation(
+                                .easeInOut(duration: 2.5)
+                                .repeatForever(autoreverses: false)
+                            ) {
+                                phase = 1
+                            }
+                        }
+                    }
+                    .clipped()
+                    .allowsHitTesting(false)
+                }
+            }
     }
 }
 

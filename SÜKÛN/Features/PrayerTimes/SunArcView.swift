@@ -32,6 +32,21 @@ struct SunArcView: View {
                 let h = arcHeight
 
                 ZStack {
+                    // Ambient glow behind arc area
+                    if isDaytime {
+                        RadialGradient(
+                            colors: [
+                                DS.Color.accent.opacity(0.06),
+                                .clear
+                            ],
+                            center: UnitPoint(x: dayProgress, y: 0.3),
+                            startRadius: 10,
+                            endRadius: 120
+                        )
+                        .frame(height: h)
+                        .allowsHitTesting(false)
+                    }
+
                     // Track arc (dashed)
                     ArcShape()
                         .stroke(
@@ -40,13 +55,27 @@ struct SunArcView: View {
                         )
                         .frame(height: h)
 
-                    // Filled arc up to current time
+                    // Glow trail behind filled arc
                     if isDaytime {
                         ArcShape()
                             .trim(from: 0, to: dayProgress)
                             .stroke(
+                                DS.Color.accent.opacity(0.15),
+                                lineWidth: 10
+                            )
+                            .blur(radius: 6)
+                            .frame(height: h)
+
+                        // Filled arc up to current time — multi-stop gradient
+                        ArcShape()
+                            .trim(from: 0, to: dayProgress)
+                            .stroke(
                                 LinearGradient(
-                                    colors: [DS.Color.accent.opacity(0.3), DS.Color.accent],
+                                    colors: [
+                                        DS.Color.accent.opacity(0.2),
+                                        DS.Color.accent.opacity(0.6),
+                                        DS.Color.accent
+                                    ],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 ),
@@ -55,33 +84,74 @@ struct SunArcView: View {
                             .frame(height: h)
                     }
 
-                    // Prayer markers
+                    // Prayer markers with labels
                     ForEach(prayerMarkers, id: \.0) { label, time in
                         let progress = markerProgress(for: time)
                         if progress >= 0, progress <= 1 {
                             let point = arcPoint(progress: progress, width: w, height: h)
+
+                            // Marker dot
                             Circle()
-                                .fill(DS.Color.textTertiary)
-                                .frame(width: 5, height: 5)
+                                .fill(DS.Color.accent.opacity(0.4))
+                                .frame(width: 6, height: 6)
+                                .overlay(
+                                    Circle()
+                                        .stroke(DS.Color.accent.opacity(0.2), lineWidth: 1)
+                                )
                                 .position(point)
+
+                            // Marker label
+                            Text(label)
+                                .font(.system(size: 8, weight: .bold, design: .rounded))
+                                .foregroundStyle(DS.Color.textSecondary.opacity(0.6))
+                                .position(
+                                    CGPoint(
+                                        x: point.x,
+                                        y: min(point.y + 12, h - 2)
+                                    )
+                                )
                         }
                     }
 
-                    // Sun indicator
+                    // Sun indicator with glow halo
                     if isDaytime {
                         let sunPoint = arcPoint(progress: dayProgress, width: w, height: h)
+
+                        // Outer glow
                         Circle()
-                            .fill(DS.Color.accent)
+                            .fill(DS.Color.accent.opacity(0.15))
+                            .frame(width: 28, height: 28)
+                            .blur(radius: 6)
+                            .position(sunPoint)
+
+                        // Sun body
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [DS.Color.accent, DS.Color.accent.opacity(0.8)],
+                                    center: .center,
+                                    startRadius: 0,
+                                    endRadius: 7
+                                )
+                            )
                             .frame(width: 14, height: 14)
-                            .shadow(color: DS.Color.accent.opacity(0.4), radius: 6)
+                            .shadow(color: DS.Color.accent.opacity(0.5), radius: 8)
                             .position(sunPoint)
                     }
 
-                    // Horizon line
-                    Rectangle()
-                        .fill(DS.Color.hairline)
-                        .frame(height: 1)
-                        .offset(y: h / 2 - 0.5)
+                    // Horizon line with gradient fade
+                    LinearGradient(
+                        colors: [
+                            DS.Color.hairline.opacity(0),
+                            DS.Color.hairline,
+                            DS.Color.hairline,
+                            DS.Color.hairline.opacity(0)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(height: 1)
+                    .offset(y: h / 2 - 0.5)
                 }
             }
             .frame(height: arcHeight)
@@ -90,12 +160,26 @@ struct SunArcView: View {
             HStack {
                 HStack(spacing: DS.Space.xs) {
                     Image(systemName: "sunrise.fill")
-                        .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
-                        .foregroundStyle(DS.Color.accent.opacity(0.6))
+                        .font(.system(size: 11))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [DS.Color.accent, DS.Color.warning.opacity(0.7)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                     Text(sunrise, format: .dateTime.hour().minute())
                         .font(.system(size: 12, weight: .medium, design: .monospaced))
                         .foregroundStyle(DS.Color.textSecondary)
                 }
+
+                Spacer()
+
+                // Day duration
+                let dayDuration = sunset.timeIntervalSince(sunrise) / 3600
+                Text(String(format: "%.0fsa %02ddk", dayDuration, Int(dayDuration.truncatingRemainder(dividingBy: 1) * 60)))
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .foregroundStyle(DS.Color.textTertiary)
 
                 Spacer()
 
@@ -104,8 +188,14 @@ struct SunArcView: View {
                         .font(.system(size: 12, weight: .medium, design: .monospaced))
                         .foregroundStyle(DS.Color.textSecondary)
                     Image(systemName: "sunset.fill")
-                        .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
-                        .foregroundStyle(DS.Color.accent.opacity(0.6))
+                        .font(.system(size: 11))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [DS.Color.warning, DS.Color.accent.opacity(0.5)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                 }
             }
         }

@@ -242,27 +242,59 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Celebration icon with scale bounce
+            // Grand celebration — multi-ring ripple
             ZStack {
-                // Expanding celebration ring
+                // Outer pulsing rings
+                ForEach(0..<3, id: \.self) { i in
+                    Circle()
+                        .stroke(
+                            DS.Color.accent.opacity(0.12 - Double(i) * 0.03),
+                            lineWidth: 1
+                        )
+                        .frame(
+                            width: CGFloat(140 + i * 30),
+                            height: CGFloat(140 + i * 30)
+                        )
+                        .scaleEffect(iconFloating ? 1.1 : 0.9)
+                        .opacity(iconFloating ? 0.3 : 0.7)
+                        .animation(
+                            .easeInOut(duration: 2.0 + Double(i) * 0.3)
+                                .repeatForever(autoreverses: true),
+                            value: iconFloating
+                        )
+                }
+
+                // Ambient glow
                 Circle()
-                    .stroke(DS.Color.accent.opacity(0.15), lineWidth: 1.5)
-                    .frame(width: 160, height: 160)
-                    .scaleEffect(iconFloating ? 1.1 : 0.9)
-                    .opacity(iconFloating ? 0.3 : 0.8)
-                    .animation(
-                        .easeInOut(duration: 2.0).repeatForever(autoreverses: true),
-                        value: iconFloating
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                DS.Color.accent.opacity(0.15),
+                                DS.Color.accent.opacity(0.05),
+                                .clear
+                            ],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 70
+                        )
                     )
+                    .frame(width: 140, height: 140)
 
                 Circle()
                     .fill(DS.Color.accentSoft)
                     .frame(width: 120, height: 120)
 
                 Image(systemName: "sparkles")
-                    .font(DS.Typography.alongSans(size: 48, weight: "Regular"))
-                    .foregroundStyle(DS.Color.accent)
+                    .font(.system(size: 48))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [DS.Color.accent, DS.Color.accent.opacity(0.7)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
                     .symbolEffect(.bounce, options: .repeating.speed(0.3))
+                    .shadow(color: DS.Color.accent.opacity(0.3), radius: 12)
             }
             .transition(.asymmetric(
                 insertion: .scale(scale: 0.5).combined(with: .opacity),
@@ -283,10 +315,32 @@ struct OnboardingView: View {
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
 
+            Spacer().frame(height: DS.Space.lg)
+
+            // Feature highlights
+            HStack(spacing: DS.Space.xl) {
+                featureIcon("clock.fill", label: "Vakitler")
+                featureIcon("book.fill", label: "Kur'an")
+                featureIcon("location.north.fill", label: "Kıble")
+                featureIcon("circle.circle.fill", label: "Zikir")
+            }
+            .foregroundStyle(DS.Color.textTertiary)
+
             Spacer()
             Spacer()
         }
         .padding(.horizontal, DS.Space.x2)
+    }
+
+    private func featureIcon(_ icon: String, label: String) -> some View {
+        VStack(spacing: DS.Space.xs) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundStyle(DS.Color.accent.opacity(0.5))
+            Text(label)
+                .font(DS.Typography.micro)
+                .foregroundStyle(DS.Color.textSecondary)
+        }
     }
 
     // MARK: - Bottom Button

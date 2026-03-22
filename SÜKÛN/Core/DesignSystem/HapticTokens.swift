@@ -170,5 +170,28 @@ extension DS {
         static func longPressProgress(intensity: CGFloat) {
             mediumEngine.impactOccurred(intensity: min(1.0, intensity))
         }
+
+        /// Celebration cascade — ascending four-pulse celebration pattern.
+        /// For major milestones like completing a Hatim, 1000 dhikr, etc.
+        static func celebrationCascade() {
+            lightEngine.impactOccurred(intensity: 0.3)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                mediumEngine.impactOccurred(intensity: 0.5)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                heavyEngine.impactOccurred(intensity: 0.8)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.30) {
+                notificationEngine.notificationOccurred(.success)
+            }
+        }
+
+        /// Gentle heartbeat — warm double-pulse for intimate spiritual moments.
+        static func heartbeat() {
+            mediumEngine.impactOccurred(intensity: 0.6)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                heavyEngine.impactOccurred(intensity: 0.8)
+            }
+        }
     }
 }

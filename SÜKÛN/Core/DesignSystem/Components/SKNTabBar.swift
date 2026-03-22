@@ -60,8 +60,9 @@ struct SKNTabBar: View {
                             LinearGradient(
                                 colors: [
                                     DS.Color.glassBorder.opacity(0.8),
-                                    DS.Color.glassBorder.opacity(0.1),
-                                    DS.Color.glassBorder.opacity(0.4)
+                                    DS.Color.glassBorder.opacity(0.05),
+                                    DS.Color.glassBorder.opacity(0.3),
+                                    DS.Color.glassBorder.opacity(0.1)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -69,8 +70,10 @@ struct SKNTabBar: View {
                             lineWidth: 0.5
                         )
                 )
-                .shadow(color: DS.Color.accent.opacity(0.12), radius: 24, y: 12)
-                .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
+                // Multi-layered premium shadow
+                .shadow(color: DS.Color.accent.opacity(0.08), radius: 30, y: 15)
+                .shadow(color: .black.opacity(0.06), radius: 12, y: 6)
+                .shadow(color: .black.opacity(0.03), radius: 2, y: 1)
         }
         .padding(.horizontal, DS.Space.xl)
         .padding(.bottom, DS.Space.sm)

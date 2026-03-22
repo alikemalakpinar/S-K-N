@@ -253,15 +253,24 @@ struct QiblaView: View {
 
     private var qiblaNeedle: some View {
         let needleLength = compassSize / 2 - 38
+        let needleColor = viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent
 
         return ZStack {
-            // Needle body — tapered capsule
+            // Glow trail behind needle
+            Capsule()
+                .fill(needleColor.opacity(0.15))
+                .frame(width: 10, height: needleLength)
+                .blur(radius: 6)
+                .offset(y: -needleLength / 2)
+
+            // Needle body — tapered gradient
             Capsule()
                 .fill(
                     LinearGradient(
                         colors: [
-                            (viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent).opacity(0.08),
-                            viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent
+                            needleColor.opacity(0.05),
+                            needleColor.opacity(0.4),
+                            needleColor
                         ],
                         startPoint: .bottom,
                         endPoint: .top
@@ -270,11 +279,23 @@ struct QiblaView: View {
                 .frame(width: 3, height: needleLength)
                 .offset(y: -needleLength / 2)
 
-            // Needle tip — diamond
-            Image(systemName: "diamond.fill")
-                .font(DS.Typography.alongSans(size: 10, weight: "Regular"))
-                .foregroundStyle(viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.accent)
-                .offset(y: -needleLength - 2)
+            // Needle tip — diamond with glow
+            ZStack {
+                Image(systemName: "diamond.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(needleColor.opacity(0.3))
+                    .blur(radius: 4)
+                Image(systemName: "diamond.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(needleColor)
+            }
+            .offset(y: -needleLength - 2)
+
+            // Kaaba icon at needle tip
+            Image(systemName: "building.columns.fill")
+                .font(.system(size: 8))
+                .foregroundStyle(needleColor.opacity(0.6))
+                .offset(y: -needleLength - 16)
         }
         .rotationEffect(.degrees(viewModel.qiblaDirection))
     }
@@ -282,19 +303,25 @@ struct QiblaView: View {
     // MARK: - Degree Readout
 
     private var degreeReadout: some View {
-        VStack(spacing: DS.Space.xs) {
-            Text("\(Int(viewModel.qiblaDirection))°")
-                .font(.system(size: 56, weight: .thin, design: .rounded))
-                .foregroundStyle(
-                    viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.textPrimary
-                )
-                .contentTransition(.numericText())
-                .animation(DS.Motion.countdown, value: Int(viewModel.qiblaDirection))
+        VStack(spacing: DS.Space.sm) {
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text("\(Int(viewModel.qiblaDirection))")
+                    .font(.system(size: 60, weight: .ultraLight, design: .rounded))
+                    .foregroundStyle(
+                        viewModel.isLockedOnQibla ? DS.Color.success : DS.Color.textPrimary
+                    )
+                    .contentTransition(.numericText())
+                    .animation(DS.Motion.countdown, value: Int(viewModel.qiblaDirection))
+
+                Text("°")
+                    .font(.system(size: 28, weight: .ultraLight, design: .rounded))
+                    .foregroundStyle(DS.Color.textSecondary.opacity(0.5))
+            }
 
             Text(L10n.Qibla.direction)
                 .font(DS.Typography.sectionHead)
                 .foregroundStyle(DS.Color.textSecondary)
-                .tracking(2)
+                .tracking(3)
                 .textCase(.uppercase)
         }
     }

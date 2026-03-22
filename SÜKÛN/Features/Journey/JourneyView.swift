@@ -59,22 +59,50 @@ struct JourneyView: View {
 
     private var heroStats: some View {
         VStack(spacing: DS.Space.x2) {
-            // Main counter — total pages
-            VStack(spacing: DS.Space.xs) {
-                Text(L10n.Journey.pagesReadTitle)
-                    .font(DS.Typography.sectionHead)
-                    .foregroundStyle(DS.Color.textSecondary)
-                    .tracking(2)
+            // Main counter — total pages with ambient glow
+            ZStack {
+                // Background accent glow
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                DS.Color.accent.opacity(0.08),
+                                DS.Color.accent.opacity(0.02),
+                                .clear
+                            ],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 120
+                        )
+                    )
+                    .frame(width: 200, height: 200)
+                    .opacity(countersAnimated ? 1 : 0)
+                    .animation(.easeOut(duration: 1.5), value: countersAnimated)
 
-                Text("\(countersAnimated ? viewModel.totalPagesRead : 0)")
-                    .font(.system(size: 72, weight: .black, design: .rounded))
-                    .foregroundStyle(DS.Color.textPrimary)
-                    .contentTransition(.numericText())
-                    .animation(.spring(response: 1.2, dampingFraction: 0.7), value: countersAnimated)
+                VStack(spacing: DS.Space.xs) {
+                    Text(L10n.Journey.pagesReadTitle)
+                        .font(DS.Typography.sectionHead)
+                        .foregroundStyle(DS.Color.textSecondary)
+                        .tracking(3)
 
-                Text(L10n.Journey.ofTotal(604))
-                    .font(DS.Typography.footnote)
-                    .foregroundStyle(DS.Color.textTertiary)
+                    Text("\(countersAnimated ? viewModel.totalPagesRead : 0)")
+                        .font(.system(size: 76, weight: .black, design: .rounded))
+                        .foregroundStyle(DS.Color.textPrimary)
+                        .contentTransition(.numericText())
+                        .animation(.spring(response: 1.2, dampingFraction: 0.7), value: countersAnimated)
+
+                    HStack(spacing: DS.Space.sm) {
+                        Rectangle()
+                            .fill(DS.Color.accent.opacity(0.3))
+                            .frame(width: 20, height: 0.5)
+                        Text(L10n.Journey.ofTotal(604))
+                            .font(DS.Typography.footnote)
+                            .foregroundStyle(DS.Color.textTertiary)
+                        Rectangle()
+                            .fill(DS.Color.accent.opacity(0.3))
+                            .frame(width: 20, height: 0.5)
+                    }
+                }
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, DS.Space.x2)
@@ -107,11 +135,7 @@ struct JourneyView: View {
             }
         }
         .padding(DS.Space.xl)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
-                .fill(DS.Color.cardElevated)
-                .shadow(color: .black.opacity(0.04), radius: 12, y: 4)
-        )
+        .dsPremiumCard(cornerRadius: DS.Radius.xl)
     }
 
     private func metricPill(icon: String, iconColor: Color, value: Int, label: String, unit: String?) -> some View {
@@ -196,6 +220,7 @@ struct JourneyView: View {
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
                 .fill(DS.Color.cardElevated)
+                .shadow(color: .black.opacity(0.03), radius: 1, y: 1)
                 .shadow(color: .black.opacity(0.04), radius: 12, y: 4)
         )
     }
@@ -241,6 +266,7 @@ struct JourneyView: View {
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
                 .fill(DS.Color.cardElevated)
+                .shadow(color: .black.opacity(0.03), radius: 1, y: 1)
                 .shadow(color: .black.opacity(0.04), radius: 12, y: 4)
         )
     }
@@ -304,6 +330,7 @@ struct JourneyView: View {
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
                 .fill(DS.Color.cardElevated)
+                .shadow(color: .black.opacity(0.03), radius: 1, y: 1)
                 .shadow(color: .black.opacity(0.04), radius: 12, y: 4)
         )
     }

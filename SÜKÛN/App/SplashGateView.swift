@@ -104,14 +104,38 @@ struct SplashGateView: View {
 
     private var concentricRings: some View {
         ZStack {
-            ForEach(0..<3, id: \.self) { i in
+            // Ornamental geometric pattern — 5 concentric rings with alternating styles
+            ForEach(0..<5, id: \.self) { i in
                 Circle()
                     .stroke(
-                        DS.Color.accent.opacity(ringOpacity * (1.0 - Double(i) * 0.3)),
-                        lineWidth: 0.5
+                        LinearGradient(
+                            colors: [
+                                DS.Color.accent.opacity(ringOpacity * (1.0 - Double(i) * 0.18)),
+                                DS.Color.accent.opacity(ringOpacity * (0.5 - Double(i) * 0.08))
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: i % 2 == 0
+                            ? StrokeStyle(lineWidth: 0.5)
+                            : StrokeStyle(lineWidth: 0.3, dash: [4, 6])
                     )
-                    .frame(width: CGFloat(120 + i * 60), height: CGFloat(120 + i * 60))
-                    .scaleEffect(ringScale + CGFloat(i) * 0.05)
+                    .frame(
+                        width: CGFloat(100 + i * 50),
+                        height: CGFloat(100 + i * 50)
+                    )
+                    .scaleEffect(ringScale + CGFloat(i) * 0.03)
+                    .rotationEffect(.degrees(Double(i) * 15))
+            }
+
+            // Small ornamental dots on the innermost ring
+            ForEach(0..<8, id: \.self) { i in
+                Circle()
+                    .fill(DS.Color.accent.opacity(ringOpacity * 0.5))
+                    .frame(width: 3, height: 3)
+                    .offset(y: -50)
+                    .rotationEffect(.degrees(Double(i) * 45))
+                    .scaleEffect(ringScale)
             }
         }
         .opacity(phase == .burst ? 0 : 1)
@@ -120,52 +144,53 @@ struct SplashGateView: View {
     // MARK: - Cinematic Sequence
 
     private func runCinematicSequence() {
-        // Phase 1: Glow — rings fade in, logo appears (0.0s)
         AnimationTimeline.run([
+            // Phase 1: Glow — rings materialize, logo emerges from darkness
             (0.3, {
                 phase = .glow
                 DS.Haptic.softTap()
-                withAnimation(.easeOut(duration: 1.0)) {
-                    ringOpacity = 0.4
+                withAnimation(.easeOut(duration: 1.2)) {
+                    ringOpacity = 0.5
                     ringScale = 1.0
                 }
-                withAnimation(.spring(response: 0.8, dampingFraction: 0.75)) {
+                withAnimation(.spring(response: 0.9, dampingFraction: 0.72)) {
                     logoScale = 1.0
                     logoOpacity = 1.0
                 }
             }),
 
-            // Phase 2: Breathe — text reveals, glow pulses (1.2s)
-            (1.2, {
+            // Phase 2: Breathe — brand name unfurls with dramatic tracking
+            (1.4, {
                 phase = .breathe
-                withAnimation(.easeOut(duration: 0.8)) {
+                DS.Haptic.heartbeat()
+                withAnimation(.easeOut(duration: 1.0)) {
                     textOpacity = 1.0
-                    textTracking = 12
-                    glowRadius = 40
+                    textTracking = 14
+                    glowRadius = 50
                 }
             }),
 
-            // Subtitle appears (1.8s)
-            (1.8, {
-                withAnimation(.easeOut(duration: 0.6)) {
+            // Subtitle materializes softly
+            (2.0, {
+                withAnimation(.easeOut(duration: 0.7)) {
                     subtitleOpacity = 1.0
                 }
             }),
 
-            // Phase 3: Burst — everything expands and fades (2.6s)
-            (2.6, {
+            // Phase 3: Burst — cinematic expand + dissolve
+            (3.0, {
                 phase = .burst
-                DS.Haptic.success()
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                    burstScale = 1.15
+                DS.Haptic.celebrationCascade()
+                withAnimation(.spring(response: 0.7, dampingFraction: 0.78)) {
+                    burstScale = 1.2
                     burstOpacity = 0
                     ringOpacity = 0
                 }
             }),
 
-            // Phase 4: Route (3.2s)
-            (3.2, {
-                withAnimation(.easeInOut(duration: 0.5)) {
+            // Phase 4: Route — seamless crossfade to app
+            (3.6, {
+                withAnimation(.easeInOut(duration: 0.6)) {
                     phase = .routed
                 }
             })

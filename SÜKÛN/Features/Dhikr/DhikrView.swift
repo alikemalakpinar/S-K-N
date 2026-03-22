@@ -200,23 +200,55 @@ struct DhikrView: View {
         let isMilestone = viewModel.currentCount > 0 && viewModel.currentCount % 33 == 0
 
         return ZStack {
-            // Track
+            // Outer decorative ring — faint tick marks
+            ForEach(0..<36, id: \.self) { i in
+                let angle = Double(i) * 10.0
+                let isMajorTick = i % 3 == 0
+                Rectangle()
+                    .fill(DS.Color.hairline.opacity(isMajorTick ? 0.5 : 0.2))
+                    .frame(width: isMajorTick ? 1.5 : 0.5, height: isMajorTick ? 8 : 4)
+                    .offset(y: -(ringSize / 2 + 12))
+                    .rotationEffect(.degrees(angle))
+            }
+
+            // Track ring — subtle gradient
             Circle()
-                .stroke(DS.Color.hairline, lineWidth: 4)
+                .stroke(
+                    LinearGradient(
+                        colors: [DS.Color.hairline.opacity(0.6), DS.Color.hairline.opacity(0.3)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 4
+                )
                 .frame(width: ringSize, height: ringSize)
 
             if let preset = viewModel.selectedPreset, preset.target > 0 {
                 let pct = min(1.0, Double(viewModel.currentCount) / Double(preset.target))
 
-                // Progress arc — gradient stroke from gold to warm amber
+                // Wide ambient glow trail
+                Circle()
+                    .trim(from: 0, to: pct)
+                    .stroke(
+                        DS.Color.accent.opacity(isMilestone ? 0.4 : 0.18),
+                        lineWidth: 20
+                    )
+                    .blur(radius: 12)
+                    .frame(width: ringSize, height: ringSize)
+                    .rotationEffect(.degrees(-90))
+                    .scaleEffect(ringPulse)
+                    .animation(.easeOut(duration: 0.3), value: viewModel.currentCount)
+
+                // Progress arc — rich angular gradient
                 Circle()
                     .trim(from: 0, to: pct)
                     .stroke(
                         AngularGradient(
                             gradient: Gradient(colors: [
-                                DS.Color.accent.opacity(0.6),
+                                DS.Color.accent.opacity(0.4),
+                                DS.Color.accent.opacity(0.8),
                                 DS.Color.accent,
-                                DS.Color.warning,
+                                DS.Color.warning.opacity(0.9),
                                 DS.Color.accent
                             ]),
                             center: .center,
@@ -230,32 +262,40 @@ struct DhikrView: View {
                     .scaleEffect(ringPulse)
                     .animation(.easeOut(duration: 0.3), value: viewModel.currentCount)
 
-                // Glow layer
-                Circle()
-                    .trim(from: 0, to: pct)
-                    .stroke(
-                        DS.Color.accent.opacity(isMilestone ? 0.5 : 0.25),
-                        lineWidth: 16
-                    )
-                    .blur(radius: 10)
-                    .frame(width: ringSize, height: ringSize)
-                    .rotationEffect(.degrees(-90))
-                    .scaleEffect(ringPulse)
-                    .animation(.easeOut(duration: 0.3), value: viewModel.currentCount)
+                // Endpoint dot
+                if pct > 0.01 {
+                    Circle()
+                        .fill(DS.Color.accent)
+                        .frame(width: 8, height: 8)
+                        .shadow(color: DS.Color.accent.opacity(0.6), radius: 6)
+                        .offset(y: -ringSize / 2)
+                        .rotationEffect(.degrees(360 * pct - 90))
+                        .animation(.easeOut(duration: 0.3), value: viewModel.currentCount)
+                }
             }
 
             // Milestone warm glow background
             if milestoneGlow > 0 {
                 Circle()
-                    .fill(DS.Color.accent.opacity(milestoneGlow * 0.12))
-                    .frame(width: ringSize + 40, height: ringSize + 40)
-                    .blur(radius: 20)
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                DS.Color.accent.opacity(milestoneGlow * 0.15),
+                                DS.Color.accent.opacity(milestoneGlow * 0.05),
+                                .clear
+                            ],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: ringSize / 2 + 30
+                        )
+                    )
+                    .frame(width: ringSize + 60, height: ringSize + 60)
             }
 
             // Number — organic scale animation
-            VStack(spacing: 2) {
+            VStack(spacing: 4) {
                 Text("\(viewModel.currentCount)")
-                    .font(.system(size: 64, weight: .thin, design: .rounded))
+                    .font(.system(size: 64, weight: .ultraLight, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(DS.Color.textPrimary)
                     .contentTransition(.numericText())
@@ -263,9 +303,17 @@ struct DhikrView: View {
                     .animation(.easeOut(duration: 0.12), value: viewModel.currentCount)
 
                 if let preset = viewModel.selectedPreset {
-                    Text("/ \(preset.target)")
-                        .font(.system(size: 13, weight: .regular, design: .monospaced))
-                        .foregroundStyle(DS.Color.textSecondary)
+                    HStack(spacing: 2) {
+                        Rectangle()
+                            .fill(DS.Color.accent.opacity(0.3))
+                            .frame(width: 12, height: 0.5)
+                        Text("\(preset.target)")
+                            .font(.system(size: 13, weight: .light, design: .monospaced))
+                            .foregroundStyle(DS.Color.textSecondary.opacity(0.6))
+                        Rectangle()
+                            .fill(DS.Color.accent.opacity(0.3))
+                            .frame(width: 12, height: 0.5)
+                    }
                 }
             }
             .offset(y: isDragging ? min(dragOffset * 0.08, 12) : 0)
@@ -358,38 +406,78 @@ struct DhikrView: View {
     private var tourCompleteOverlay: some View {
         VStack(spacing: DS.Space.lg) {
             ZStack {
+                // Expanding celebration rings
+                ForEach(0..<3, id: \.self) { i in
+                    Circle()
+                        .stroke(DS.Color.accent.opacity(0.08 - Double(i) * 0.02), lineWidth: 1)
+                        .frame(width: CGFloat(90 + i * 25), height: CGFloat(90 + i * 25))
+                }
+
                 Circle()
-                    .fill(DS.Color.accent.opacity(0.12))
-                    .frame(width: 80, height: 80)
-                Circle()
-                    .fill(DS.Color.accent.opacity(0.06))
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                DS.Color.accent.opacity(0.15),
+                                DS.Color.accent.opacity(0.05),
+                                .clear
+                            ],
+                            center: .center,
+                            startRadius: 10,
+                            endRadius: 50
+                        )
+                    )
                     .frame(width: 100, height: 100)
+
                 Image(systemName: "checkmark.circle.fill")
-                    .font(DS.Typography.alongSans(size: 48, weight: "Regular"))
-                    .foregroundStyle(DS.Color.accent)
+                    .font(.system(size: 48))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [DS.Color.accent, DS.Color.accent.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
                     .symbolEffect(.bounce, value: tourCount)
+                    .shadow(color: DS.Color.accent.opacity(0.4), radius: 12)
             }
 
-            VStack(spacing: DS.Space.xs) {
+            VStack(spacing: DS.Space.sm) {
                 Text(L10n.Dhikr.tourComplete)
                     .font(DS.Typography.displayBody)
                     .foregroundStyle(DS.Color.textPrimary)
-                Text("\(tourCount). tur")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundStyle(DS.Color.accent)
+
+                HStack(spacing: DS.Space.xs) {
+                    Image(systemName: "rosette")
+                        .font(.system(size: 12))
+                        .foregroundStyle(DS.Color.accent)
+                    Text("\(tourCount). tur")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(DS.Color.accent)
+                }
             }
         }
         .padding(DS.Space.x2)
-        .padding(.horizontal, DS.Space.lg)
+        .padding(.horizontal, DS.Space.xl)
         .background(
-            RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
-                .fill(DS.Color.cardElevated)
-                .shadow(color: DS.Color.accent.opacity(0.15), radius: 24, y: 8)
+            RoundedRectangle(cornerRadius: DS.Radius.x2, style: .continuous)
+                .fill(.ultraThinMaterial)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
-                .stroke(DS.Color.accent.opacity(0.15), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: DS.Radius.x2, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            DS.Color.accent.opacity(0.3),
+                            DS.Color.accent.opacity(0.05),
+                            DS.Color.accent.opacity(0.15)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.5
+                )
         )
+        .shadow(color: DS.Color.accent.opacity(0.2), radius: 30, y: 10)
     }
 
     // MARK: - Pull Gesture

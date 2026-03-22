@@ -260,34 +260,53 @@ struct PrayerTimesView: View {
 private struct UpcomingDayCard: View {
     let day: PrayerDay
 
+    private var isToday: Bool {
+        Calendar.current.isDateInToday(day.date)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Space.md) {
-            Text(day.date, format: .dateTime.weekday(.wide).month().day())
-                .font(DS.Typography.headline)
-                .foregroundStyle(DS.Color.textPrimary)
+            HStack {
+                Text(day.date, format: .dateTime.weekday(.wide).month().day())
+                    .font(DS.Typography.headline)
+                    .foregroundStyle(DS.Color.textPrimary)
+
+                Spacer()
+
+                if isToday {
+                    Text("Bugün")
+                        .font(DS.Typography.chipLabel)
+                        .foregroundStyle(DS.Color.accent)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule().fill(DS.Color.accentSoft)
+                        )
+                }
+            }
 
             HStack(spacing: 0) {
-                miniTime(L10n.Prayer.fajr.prefix(1), time: day.fajr)
+                miniTime(L10n.Prayer.fajr.prefix(1), time: day.fajr, color: DS.Color.accent)
                 Spacer()
-                miniTime(L10n.Prayer.dhuhr.prefix(1), time: day.dhuhr)
+                miniTime(L10n.Prayer.dhuhr.prefix(1), time: day.dhuhr, color: DS.Color.warning)
                 Spacer()
-                miniTime(L10n.Prayer.asr.prefix(1), time: day.asr)
+                miniTime(L10n.Prayer.asr.prefix(1), time: day.asr, color: DS.Color.warning)
                 Spacer()
-                miniTime(L10n.Prayer.maghrib.prefix(1), time: day.maghrib)
+                miniTime(L10n.Prayer.maghrib.prefix(1), time: day.maghrib, color: .orange)
                 Spacer()
-                miniTime(L10n.Prayer.isha.prefix(1), time: day.isha)
+                miniTime(L10n.Prayer.isha.prefix(1), time: day.isha, color: .indigo)
             }
         }
         .padding(DS.Space.lg)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(DS.Color.cardElevated)
-                .shadow(color: .black.opacity(0.03), radius: 6, y: 2)
-        )
+        .dsPremiumCard(cornerRadius: DS.Radius.lg)
     }
 
-    private func miniTime(_ label: Substring, time: Date) -> some View {
-        VStack(spacing: 2) {
+    private func miniTime(_ label: Substring, time: Date, color: Color) -> some View {
+        VStack(spacing: 3) {
+            Circle()
+                .fill(color.opacity(0.15))
+                .frame(width: 6, height: 6)
+
             Text(label)
                 .font(DS.Typography.micro)
                 .foregroundStyle(DS.Color.textSecondary)

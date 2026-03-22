@@ -49,22 +49,65 @@ struct ProfileView: View {
     private var avatarHeader: some View {
         VStack(spacing: DS.Space.lg) {
             ZStack {
+                // Outer decorative rings
+                ForEach(0..<3, id: \.self) { i in
+                    Circle()
+                        .stroke(
+                            DS.Color.accent.opacity(0.08 - Double(i) * 0.02),
+                            lineWidth: 0.5
+                        )
+                        .frame(
+                            width: CGFloat(96 + i * 16),
+                            height: CGFloat(96 + i * 16)
+                        )
+                }
+
+                // Ambient glow
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                DS.Color.accent.opacity(0.12),
+                                DS.Color.accent.opacity(0.04),
+                                .clear
+                            ],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 55
+                        )
+                    )
+                    .frame(width: 100, height: 100)
+
+                // Avatar circle
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [DS.Color.accent.opacity(0.15), DS.Color.accent.opacity(0.05)],
+                            colors: [
+                                DS.Color.accent.opacity(0.18),
+                                DS.Color.accent.opacity(0.08)
+                            ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 88, height: 88)
+                    .overlay(
+                        Circle()
+                            .stroke(DS.Color.accent.opacity(0.2), lineWidth: 1)
+                    )
 
                 Image(systemName: "person.fill")
-                    .font(DS.Typography.alongSans(size: 36, weight: "Regular"))
-                    .foregroundStyle(DS.Color.accent)
+                    .font(.system(size: 36))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [DS.Color.accent, DS.Color.accent.opacity(0.7)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
             }
 
-            VStack(spacing: DS.Space.xs) {
+            VStack(spacing: DS.Space.sm) {
                 Text(L10n.Profile.myJourney)
                     .font(DS.Typography.displayBody)
                     .foregroundStyle(DS.Color.textPrimary)
@@ -74,10 +117,17 @@ struct ProfileView: View {
                         Image(systemName: "flame.fill")
                             .font(.system(size: 12))
                             .foregroundStyle(DS.Color.warning)
+                            .shadow(color: DS.Color.warning.opacity(0.4), radius: 4)
                         Text("\(viewModel.readingStreak) \(L10n.Profile.days)")
                             .font(DS.Typography.caption)
                             .foregroundStyle(DS.Color.textSecondary)
                     }
+                    .padding(.horizontal, DS.Space.md)
+                    .padding(.vertical, DS.Space.xs)
+                    .background(
+                        Capsule()
+                            .fill(DS.Color.warning.opacity(0.08))
+                    )
                 }
             }
         }
