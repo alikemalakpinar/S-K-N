@@ -13,6 +13,8 @@ public final class AnalyticsEngine: ObservableObject {
         public let dhikrCount: Int
         public let quranPagesRead: Int
         public let focusScore: Double // 0 to 100
+        public let missedFajr: Bool
+        public let readKehf: Bool
     }
     
     public struct InsightResult {
@@ -33,6 +35,7 @@ public final class AnalyticsEngine: ObservableObject {
     @Published public private(set) var averagePrayersPerWeek: Double = 0
     @Published public private(set) var totalDhikrThisMonth: Int = 0
     @Published public private(set) var quranCompletionForecastDays: Int = 0
+    @Published public private(set) var currentArchetype: String = "Yolcu"
     
     public init() {
         generateSyntheticBigData()
@@ -55,13 +58,18 @@ public final class AnalyticsEngine: ObservableObject {
             let dhikrVol = Int.random(in: 0...500)
             let pages = Int.random(in: 2...10)
             let focus = Double.random(in: 40...95)
+            let isFriday = calendar.component(.weekday, from: date) == 6 // Friday is 6 in Gregorian if Sunday is 1
+            let kehf = isFriday && Double.random(in: 0...1) > 0.3
+            let missedFajrPattern = i < 3 && Double.random(in: 0...1) > 0.2 // High chance of missing fajr in the last 3 days for demo
             
             let record = DailyRecord(
                 date: date,
                 prayersCompleted: basePrayer,
                 dhikrCount: dhikrVol,
                 quranPagesRead: pages,
-                focusScore: focus
+                focusScore: focus,
+                missedFajr: missedFajrPattern,
+                readKehf: kehf
             )
             records.append(record)
         }
@@ -90,11 +98,11 @@ public final class AnalyticsEngine: ObservableObject {
             self.quranCompletionForecastDays = Int(Double(remainingPages) / pagesPerDay)
         }
         
-        // 3. AI Insights Generation
-        generateInsights()
+        // 3. AI Insights Generation via Pattern Recognition
+        self.topInsights = runAIPatternRecognition()
     }
     
-    private func generateInsights() {
+    private func runAIPatternRecognition() -> [InsightResult] {
         var insights: [InsightResult] = []
         
         // Split data into two 15-day chunks for momentum comparison
@@ -135,6 +143,48 @@ public final class AnalyticsEngine: ObservableObject {
             ))
         }
         
-        self.topInsights = insights
+        // Advanced AI: Fajr Pattern Analysis
+        let last3Days = Array(secondHalf.suffix(3))
+        let missedFajrCount = last3Days.filter { $0.missedFajr }.count
+        if missedFajrCount >= 2 {
+            insights.insert(InsightResult(
+                title: "Sabah Namazı Analizi",
+                description: "Son 3 gündür Sabah namazına kalkmakta zorlanıyorsun. Uyku döngünü 15 dakika geriye çekmeyi ve uyumadan önce kısa bir zikir (Ayetel Kürsi) eklemeyi deneyebilirsin.",
+                trend: .downward
+            ), at: 0) // High priority
+        }
+        
+        // Advanced AI: Friday Routine Pattern
+        let fridays = thirtyDayHistory.filter { Calendar.current.component(.weekday, from: $0.date) == 6 }
+        let kehfFridays = fridays.filter { $0.readKehf }.count
+        if fridays.count > 0 && Double(kehfFridays) / Double(fridays.count) >= 0.5 {
+            insights.append(InsightResult(
+                title: "Cuma Sünneti Ödülü",
+                description: "Cuma günleri Kehf suresi okuma alışkanlığınız harika ilerliyor (Son \(fridays.count) Cumanın \(kehfFridays)'inde okudunuz). Bu nurani rutini bozmayın!",
+                trend: .upward
+            ))
+        }
+        
+        // Deep AI: Archetype Classification
+        if secondHalfPrayers > 70 && latestDhikr > 4000 {
+            self.currentArchetype = "Muhafız (Guardian)"
+        } else if secondHalfPrayers > 50 {
+            self.currentArchetype = "İstikrarlı Yolcu"
+        } else {
+            self.currentArchetype = "Arayışta"
+        }
+        
+        // Deep AI: Burnout / Fatigue Detection (Focus Score Moving Average)
+        let firstHalfFocus = firstHalf.map(\.focusScore).reduce(0, +) / Double(max(1, firstHalf.count))
+        let secondHalfFocus = secondHalf.map(\.focusScore).reduce(0, +) / Double(max(1, secondHalf.count))
+        if firstHalfFocus - secondHalfFocus > 15.0 {
+            insights.insert(InsightResult(
+                title: "Manevi Yorgunluk Tespiti",
+                description: "İbadetlerinizdeki odaklanma (huşu) oranınızda son 15 günde %\(Int(firstHalfFocus - secondHalfFocus)) düşüş saptandı. Kısa bir doğa yürüyüşü veya teknoloji detoksu kalbinizi tazeleyebilir.",
+                trend: .downward
+            ), at: 0) // Extremely High Priority
+        }
+        
+        return insights
     }
 }

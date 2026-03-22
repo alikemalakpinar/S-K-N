@@ -253,13 +253,13 @@ extension DS {
 
         // ── Font Factories ──────────────────────────────────
 
-        /// Cormorant Garamond with system serif fallback.
+        /// Cormorant Garamond with New York (Apple Serif) fallback.
         static func cormorant(size: CGFloat, weight: String = "Regular") -> Font {
             let name = "CormorantGaramond-\(weight)"
             if UIFont(name: name, size: size) != nil {
                 return .custom(name, size: size)
             }
-            // Fallback to system serif
+            // Apple-made aesthetic: Fallback to New York (system serif)
             let w: Font.Weight = switch weight {
             case "Bold": .bold
             case "SemiBold": .semibold
@@ -269,14 +269,14 @@ extension DS {
             return .system(size: size, weight: w, design: .serif)
         }
 
-        /// AlongSanss2 geometric sans-serif with system fallback.
-        /// Used for all UI labels, buttons, navigation, and body text.
+        /// AlongSanss2 with SF Pro / SF Pro Rounded fallback.
+        /// Apple uses Rounded heavily for widgets and numbers (Health, Fitness).
         static func alongSans(size: CGFloat, weight: String = "Regular") -> Font {
             let name = "AlongSanss2-\(weight)"
             if UIFont(name: name, size: size) != nil {
                 return .custom(name, size: size, relativeTo: .body)
             }
-            // Fallback to system default
+            // Apple-made aesthetic: Fallback to SF Pro Rounded for premium UI feel
             let w: Font.Weight = switch weight {
             case "Black": .black
             case "ExtraBold": .heavy
@@ -285,7 +285,7 @@ extension DS {
             case "Medium": .medium
             default: .regular
             }
-            return .system(size: size, weight: w, design: .default)
+            return .system(size: size, weight: w, design: .rounded)
         }
 
         /// Amiri Arabic with system fallback.
@@ -374,14 +374,14 @@ extension DS {
             color: SwiftUI.Color(.dsAccent).opacity(0.25), radius: 12, y: 4
         )
         
-        // ── PREMIUM OVERHAUL SHADOWS ────────────────────────
-        /// Ultra-premium diffuse multi-layered shadow for main cards
+        // ── APPLE FLAGSHIP OVERHAUL SHADOWS ────────────────────────
+        /// Ultra-premium diffuse multi-layered shadow for widgets
         static let premiumCard = ShadowToken(
-            color: .black.opacity(0.06), radius: 20, y: 8
+            color: .black.opacity(0.04), radius: 30, y: 12
         )
         /// Deep ambient shadow for immersive modal depth
         static let deepAmbient = ShadowToken(
-            color: .black.opacity(0.12), radius: 32, y: 16
+            color: .black.opacity(0.15), radius: 40, y: 20
         )
     }
 }

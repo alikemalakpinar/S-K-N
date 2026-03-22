@@ -31,6 +31,10 @@ public final class QiblaEngineService: NSObject, ObservableObject, CLLocationMan
     private var filteredHeading: Double = 0
     private let filterFactor: Double = 0.2
     
+    // Haptic State
+    private var lastHapticAngle: Double?
+    private var isQiblaLockedState: Bool = false
+    
     // MARK: - Lifecycle
     
     public override init() {
@@ -143,6 +147,33 @@ public final class QiblaEngineService: NSObject, ObservableObject, CLLocationMan
             angle += 360
         }
         self.angleToQibla = angle
+        
+        // Haptic Feedback Integration
+        let shortestAngleToQibla = min(angle, 360 - angle)
+        
+        if isAccuracyOptimized {
+            if shortestAngleToQibla <= 2.0 {
+                // Fully Locked
+                if !isQiblaLockedState {
+                    isQiblaLockedState = true
+                    DS.Haptic.qiblaLocked()
+                }
+            } else {
+                isQiblaLockedState = false
+                
+                // Heartbeat as it gets closer (within 15 degrees)
+                if shortestAngleToQibla <= 15.0 {
+                    // Tap every 2 degrees of change
+                    let currentHapticAngle = round(shortestAngleToQibla / 2.0)
+                    if lastHapticAngle != currentHapticAngle {
+                        DS.Haptic.dhikrTap() // Very light, like a heartbeat
+                        lastHapticAngle = currentHapticAngle
+                    }
+                } else {
+                    lastHapticAngle = nil
+                }
+            }
+        }
     }
     
     deinit {

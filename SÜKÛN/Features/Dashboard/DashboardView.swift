@@ -234,12 +234,12 @@ struct DashboardView: View {
     private func countdownBand(value: String, label: String, opacity: Double) -> some View {
         ZStack {
             Text(value)
-                .font(.system(size: 260, weight: .black).width(.condensed))
-                .foregroundStyle(DS.Color.textPrimary.opacity(opacity))
+                .font(.system(size: 260, weight: .bold).width(.compressed)) // Peak Apple UI width
+                .foregroundStyle(.ultraThinMaterial) // Apple Vision Pro Glass Typography
+                .blendMode(.overlay) // Melts into the fluid background
                 .tracking(-12)
                 .lineLimit(1)
                 .fixedSize()
-                .shadow(color: DS.Color.textPrimary.opacity(opacity * 0.3), radius: 20, x: 0, y: 10) // Epic inner glow
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, DS.Space.sm)
 
@@ -618,10 +618,10 @@ private struct PrayerPill: View {
                 ZStack {
                     if isPrayed {
                         Circle()
-                            .fill(DS.Color.accent)
+                            .fill(LinearGradient(colors: [DS.Color.accent, DS.Color.accent.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
                             .frame(width: 48, height: 48)
                             // Premium glowing aura
-                            .shadow(color: DS.Color.accent.opacity(0.4), radius: 8, y: 4)
+                            .shadow(color: DS.Color.accent.opacity(0.5), radius: 10, y: 5)
                         
                         Image(systemName: "checkmark")
                             .font(.system(size: 18, weight: .bold))

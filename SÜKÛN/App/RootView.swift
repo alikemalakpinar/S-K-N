@@ -29,9 +29,9 @@ struct RootView: View {
                 case 2:
                     QuranView(container: container, selectedSegment: $quranSegment, resumePage: $resumePage, showRehber: $showRehber)
                 case 3:
-                    QiblaCompassView()
+                    QiblaSceneKitView()
                 case 4:
-                    TasbihPhysicsView()
+                    TasbihSpriteView()
                 case 5:
                     SpiritualJourneyView()
                 default:

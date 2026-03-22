@@ -61,9 +61,8 @@ public final class TasbihPhysicsEngine: ObservableObject {
     public func tap() {
         totalDhikrCount += 1
         
-        // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        // Haptic feedback via advanced manager
+        TasbihHapticsManager.shared.playCollisionFeedback(intensity: 1.0)
         
         let newBead = Bead(
             position: CGPoint(x: screenWidth / 2 + CGFloat.random(in: -20...20), y: -50),
@@ -121,8 +120,15 @@ public final class TasbihPhysicsEngine: ObservableObject {
                 beads[i].position.y = floorY - beads[i].radius
                 beads[i].velocity.dy *= -beads[i].restitution
                 
+                // Play floor hit sound if velocity is high enough
+                let speed = abs(beads[i].velocity.dy)
+                if speed > 50 {
+                    let intensity = Float(speed / 800.0)
+                    TasbihHapticsManager.shared.playCollisionFeedback(intensity: intensity, isWall: true)
+                }
+                
                 // Sleep if very slow
-                if abs(beads[i].velocity.dy) < 15.0 && abs(beads[i].velocity.dx) < 15.0 {
+                if speed < 15.0 && abs(beads[i].velocity.dx) < 15.0 {
                     beads[i].velocity = .zero
                     // Don't fully stop because other beads might hit it
                 }
@@ -185,10 +191,18 @@ public final class TasbihPhysicsEngine: ObservableObject {
                         let impulseX = nx * jImpulse
                         let impulseY = ny * jImpulse
                         
+                        
                         beads[i].velocity.dx -= impulseX / beads[i].mass
                         beads[i].velocity.dy -= impulseY / beads[i].mass
                         beads[j].velocity.dx += impulseX / beads[j].mass
                         beads[j].velocity.dy += impulseY / beads[j].mass
+                        
+                        // Bead to bead collision sound
+                        let collisionSpeed = sqrt(rvx*rvx + rvy*rvy)
+                        if collisionSpeed > 40 {
+                            let intensity = Float(collisionSpeed / 600.0)
+                            TasbihHapticsManager.shared.playCollisionFeedback(intensity: intensity, isWall: false)
+                        }
                     }
                 }
             }
